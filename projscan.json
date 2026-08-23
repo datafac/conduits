@@ -1,7 +1,5 @@
 {
+  "CompanyName": "DataFac",
   "ProductName": "Conduits",
-  "ExemptionCodes": [
-    "targetframework_notexists",
-    "targetframeworks_exists"
-  ]
+  "ExemptionCodes": []
 }

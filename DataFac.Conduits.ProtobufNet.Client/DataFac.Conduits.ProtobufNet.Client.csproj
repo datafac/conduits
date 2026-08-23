@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;net8.0;net10.0</TargetFrameworks>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Copyright>Copyright (c) 2020-2026 DataFac</Copyright>
+		<Company>DataFac</Company>
+		<Authors>DataFac Contributors</Authors>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<WarningsAsErrors>nullable</WarningsAsErrors>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<SignAssembly>true</SignAssembly>
+		<AssemblyOriginatorKeyFile>..\SigningKey.snk</AssemblyOriginatorKeyFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
+		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+		<RepositoryUrl>https://github.com/datafac/conduits</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/datafac/conduits</PackageProjectUrl>
+		<Description>Protobuf-net client</Description>
+		<Title>Package title</Title>
+		<Product>Conduits</Product>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+    <ProjectReference Include="..\DataFac.Conduits.ProtobufNet.Common\DataFac.Conduits.ProtobufNet.Common.csproj" />
+  </ItemGroup>
+
+</Project>
