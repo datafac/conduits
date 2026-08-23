@@ -40,4 +40,4 @@ jobs:
       run: dotnet test --configuration Release --no-build --verbosity normal
 
     - name: Push
-      run: dotnet nuget push **/MetaFac*.nupkg --api-key ${{ secrets.NUGET_APIKEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      run: dotnet nuget push **/DataFac*.nupkg --api-key ${{ secrets.NUGET_APIKEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
