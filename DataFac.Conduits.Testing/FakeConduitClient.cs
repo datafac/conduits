@@ -33,10 +33,10 @@ namespace DataFac.Conduits.Testing
             return _server.SimpleUnaryCall(request, context);
         }
 
-        public ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, CallContext context)
+        public ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
         {
             if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
-            return _server.ClientStream(requests, context);
+            return _server.ClientStream(requests, deadlineUtc, cancellation);
         }
 
         public IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)

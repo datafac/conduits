@@ -34,7 +34,7 @@ namespace DataFac.Conduits.GrpcServer
         public override async Task<GrpcPayload> StreamUp(IAsyncStreamReader<GrpcPayload> requestStream, ServerCallContext context)
         {
             IAsyncEnumerable<ReadOnlyMemory<byte>> requests = requestStream.ToAsyncEnumerable((i) => i.Data.Memory, context.CancellationToken);
-            var incoming = await _server.ClientStream(requests, new CallContext(context.CancellationToken, context.Deadline));
+            var incoming = await _server.ClientStream(requests, context.Deadline, context.CancellationToken);
             return incoming.ToGrpcPayload();
         }
 

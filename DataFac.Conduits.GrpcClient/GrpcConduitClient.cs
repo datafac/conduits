@@ -59,11 +59,11 @@ namespace DataFac.Conduits.GrpcClient
             }
         }
 
-        public async ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, CallContext context)
+        public async ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
         {
             CheckNotDisposed();
             var client = new GrpcService.GrpcServiceClient(_channel);
-            using var call = client.StreamUp(cancellationToken: context.Token, deadline: context.DeadlineUtc);
+            using var call = client.StreamUp(deadline: deadlineUtc, cancellationToken: cancellation);
             var pushTask = Task.Run(async () =>
             {
                 var requestStream = call.RequestStream;

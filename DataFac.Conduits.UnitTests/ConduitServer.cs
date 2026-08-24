@@ -67,7 +67,7 @@ namespace DataFac.Conduits.UnitTests
             }
         }
 
-        public async ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, CallContext context)
+        public async ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
         {
             var pushTask = Task.Run(async () =>
             {
@@ -78,7 +78,7 @@ namespace DataFac.Conduits.UnitTests
                     {
                         case WeatherTag.WeatherData:
                             {
-                                await _server.UpdateWeather(weatherRequest, context.Token);
+                                await _server.UpdateWeather(weatherRequest, cancellation);
                             }
                             break;
                         default:
