@@ -10,9 +10,5 @@ namespace DataFac.Conduits.GrpcServer
         {
             return new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(input) };
         }
-        public static ReadOnlyMemory<byte> ToPayload(this GrpcPayload input)
-        {
-            return input.Data.Memory;
-        }
     }
 }

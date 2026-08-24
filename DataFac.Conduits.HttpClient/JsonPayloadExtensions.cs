@@ -1,5 +1,4 @@
 ﻿using System;
-using DataFac.Conduits.HttpCommon;
 
 namespace DataFac.Conduits.HttpClient
 {
