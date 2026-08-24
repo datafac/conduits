@@ -9,12 +9,12 @@ using Testing.Calculator;
 
 namespace XGrpcServer;
 
-internal class ProtobufNetConduitServer : IProtobufNetConduit
+internal class ProtobufNetServer : IProtobufNetContract
 {
     private static readonly MessagePackSerializer serializer = new MessagePackSerializer();
     private readonly IRequestHandler _requestHandler;
 
-    public ProtobufNetConduitServer(IRequestHandler requestHandler)
+    public ProtobufNetServer(IRequestHandler requestHandler)
     {
         _requestHandler = requestHandler;
     }
@@ -62,9 +62,9 @@ internal class ProtobufNetConduitServer : IProtobufNetConduit
         }
         else
         {
-            await foreach (var result in _requestHandler.HandleServerStream(request, requestCts.Token))
+            await foreach (var result in _requestHandler.HandleServerStream(requestBlob.Blob, requestCts.Token))
             {
-                yield return new ResultBlob() { Blob = serializer.Serialize<ResultBase>(result) };
+                yield return new ResultBlob() { Blob = result.ToArray() }; // todo remove ToArray()
             }
         }
     }

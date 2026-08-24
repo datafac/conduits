@@ -15,12 +15,12 @@ public class CalculatorClient : IAsyncCalculator
     private readonly MessagePackSerializer _serializer = new MessagePackSerializer();
 
     private readonly Channel channel;
-    private readonly IProtobufNetConduit conduit;
+    private readonly IProtobufNetContract conduit;
 
     public CalculatorClient(string server, int port)
     {
         channel = new Channel(server, port, ChannelCredentials.Insecure);
-        conduit = channel.CreateGrpcService<IProtobufNetConduit>();
+        conduit = channel.CreateGrpcService<IProtobufNetContract>();
     }
 
     public async ValueTask DisposeAsync()

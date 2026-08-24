@@ -1,4 +1,5 @@
-﻿using Nerdbank.MessagePack;
+﻿using DataFac.Conduits.ProtobufNet.Common;
+using Nerdbank.MessagePack;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,18 +56,24 @@ internal class RequestHandler : IRequestHandler
         return serializer.Serialize<ResultBase>(result);
     }
 
-    public async IAsyncEnumerable<ResultBase> HandleServerStream(RequestBase request, [EnumeratorCancellation] CancellationToken cancellation)
+    public async IAsyncEnumerable<ReadOnlyMemory<byte>> HandleServerStream(ReadOnlyMemory<byte> requestBytes, [EnumeratorCancellation] CancellationToken cancellation)
     {
-        if (request is RangeRequest rr)
+        RequestBase? request = serializer.Deserialize<RequestBase>(requestBytes);
+        if (request is null)
+        {
+            yield return errorDeserializationFailure;
+        }
+        else
+            if (request is RangeRequest rr)
         {
             await foreach (int x in _calculator.GetRange(rr.Start, rr.Count, rr.Delay).WithCancellation(cancellation).ConfigureAwait(false))
             {
-                yield return new RangeResult() { X = x };
+                    yield return serializer.Serialize<ResultBase>(new RangeResult() { X = x });
             }
         }
         else
         {
-            yield return new ErrorResult { Code = ExcpCode.UnknownRequest, Message = $"Unknown request type: {request.GetType().Name}" };
+                yield return serializer.Serialize<ResultBase>(new ErrorResult { Code = ExcpCode.UnknownRequest, Message = $"Unknown request type: {request.GetType().Name}" });
         }
     }
 }

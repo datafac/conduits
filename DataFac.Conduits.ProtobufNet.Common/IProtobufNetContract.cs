@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace DataFac.Conduits.ProtobufNet.Common
 {
     [Service]
-    public interface IProtobufNetConduit
+    public interface IProtobufNetContract
     {
         [Operation]
         ValueTask<ResultBlob> UnaryRequest(RequestBlob request, CallContext context = default);
@@ -29,6 +29,7 @@ namespace DataFac.Conduits.ProtobufNet.Common
         [ProtoMember(1)]
         public byte[] Blob { get; set; } = Array.Empty<byte>();
     }
+
     [ProtoContract]
     public sealed class ResultBlob
     {

@@ -17,7 +17,7 @@ public sealed class CalculatorServer : IAsyncDisposable
     private CalculatorServer(ServerPort serverPort)
     {
         _server = new Server() { Ports = { serverPort } };
-        _server.Services.AddCodeFirst<IProtobufNetConduit>(new ProtobufNetConduitServer(new RequestHandler(new Calculator())));
+        _server.Services.AddCodeFirst<IProtobufNetContract>(new ProtobufNetServer(new RequestHandler(new Testing.Calculator.Server.Calculator())));
         _server.Start();
     }
 

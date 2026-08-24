@@ -6,6 +6,8 @@ using Testing.Calculator;
 
 namespace XGrpcServer;
 
+// this is suspiciously similar to IConduitBase
+// todo refactor and remove this
 internal interface IRequestHandler
 {
     /// <summary>
@@ -22,5 +24,5 @@ internal interface IRequestHandler
     /// <param name="request"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    IAsyncEnumerable<ResultBase> HandleServerStream(RequestBase request, CancellationToken cancellation);
+    IAsyncEnumerable<ReadOnlyMemory<byte>> HandleServerStream(ReadOnlyMemory<byte> request, CancellationToken cancellation);
 }
