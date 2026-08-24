@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace DataFac.Conduits.ProtobufNet.Common
+namespace DataFac.Conduits.ProtobufNetCommon
 {
     [Service]
     public interface IProtobufNetContract

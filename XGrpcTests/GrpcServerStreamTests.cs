@@ -3,10 +3,11 @@ using Grpc.Core;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using XGrpcClient;
-using XGrpcServer;
 using System.Collections.Generic;
 using Testing.Calculator.Server;
+using Testing.Calculator.Client;
+using DataFac.Conduits.ProtobufNetClient;
+using DataFac.Conduits.ProtobufNetServer;
 
 namespace XGrpcTests;
 
@@ -34,8 +35,8 @@ public class  GrpcServerStreamTests
     [Fact]
     public async Task GetStream()
     {
-        await using var server = new ProtobufGrpcServer(new RequestHandler(new Calculator()));
-        await using var client = new ProtobufGrpcClient(host, server.BoundPort);
+        await using var server = new ProtobufGrpcServer(new CalculatorConduitServer(new Calculator()));
+        await using var client = new ProtobufConduitClient(host, server.BoundPort);
         await using CalculatorClient calculator = new CalculatorClient(client);
 
         // duration should be ~1.0s
@@ -46,8 +47,8 @@ public class  GrpcServerStreamTests
     [Fact]
     public async Task GetStreamTimeout()
     {
-        await using var server = new ProtobufGrpcServer(new RequestHandler(new Calculator()));
-        await using var client = new ProtobufGrpcClient(host, server.BoundPort);
+        await using var server = new ProtobufGrpcServer(new CalculatorConduitServer(new Calculator()));
+        await using var client = new ProtobufConduitClient(host, server.BoundPort);
         await using CalculatorClient calculator = new CalculatorClient(client);
 
         // returning the entire stream would take ~10s, but we have a max call

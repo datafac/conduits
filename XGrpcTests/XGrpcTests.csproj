@@ -25,9 +25,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\DataFac.Conduits.ProtobufNet.Client\DataFac.Conduits.ProtobufNetClient.csproj" />
+		<ProjectReference Include="..\DataFac.Conduits.ProtobufNet.Server\DataFac.Conduits.ProtobufNetServer.csproj" />
+		<ProjectReference Include="..\Testing.Calculator.Client\Testing.Calculator.Client.csproj" />
 		<ProjectReference Include="..\Testing.Calculator.Server\Testing.Calculator.Server.csproj" />
-		<ProjectReference Include="..\XGrpcClient\XGrpcClient.csproj" />
-		<ProjectReference Include="..\XGrpcServer\XGrpcServer.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

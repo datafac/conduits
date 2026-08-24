@@ -28,21 +28,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataFac.Conduits.GrpcClient
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataFac.Conduits.GrpcServer", "DataFac.Conduits.GrpcServer\DataFac.Conduits.GrpcServer.csproj", "{4D2EBEF5-3065-AEB7-47F4-84536847E588}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataFac.Conduits.ProtobufNet.Common", "DataFac.Conduits.ProtobufNet.Common\DataFac.Conduits.ProtobufNet.Common.csproj", "{94725AFB-4683-405C-9433-99FE685CDB3F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataFac.Conduits.ProtobufNetCommon", "DataFac.Conduits.ProtobufNet.Common\DataFac.Conduits.ProtobufNetCommon.csproj", "{94725AFB-4683-405C-9433-99FE685CDB3F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataFac.Conduits.ProtobufNet.Client", "DataFac.Conduits.ProtobufNet.Client\DataFac.Conduits.ProtobufNet.Client.csproj", "{4600844A-8CAA-4108-A968-8E183F0FD5EC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataFac.Conduits.ProtobufNetClient", "DataFac.Conduits.ProtobufNet.Client\DataFac.Conduits.ProtobufNetClient.csproj", "{4600844A-8CAA-4108-A968-8E183F0FD5EC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataFac.Conduits.ProtobufNet.Server", "DataFac.Conduits.ProtobufNet.Server\DataFac.Conduits.ProtobufNet.Server.csproj", "{E3B5662C-E11F-4C58-98D0-F7CFE247C343}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataFac.Conduits.ProtobufNetServer", "DataFac.Conduits.ProtobufNet.Server\DataFac.Conduits.ProtobufNetServer.csproj", "{E3B5662C-E11F-4C58-98D0-F7CFE247C343}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XGrpcTests", "XGrpcTests\XGrpcTests.csproj", "{C6E56931-EBDD-1154-4F50-413712555092}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XGrpcServer", "XGrpcServer\XGrpcServer.csproj", "{6AD08D5E-120A-7C9F-BCE4-FBEFC01AB1AC}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XGrpcClient", "XGrpcClient\XGrpcClient.csproj", "{207769FE-49CA-9589-80C1-4C2B136C904C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testing.Calculator", "Testing.Calculator\Testing.Calculator.csproj", "{E845E699-3935-49A7-818F-03D4FC274B8E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testing.Calculator.Server", "Testing.Calculator.Server\Testing.Calculator.Server.csproj", "{F027CAAE-22F8-49AE-80A2-CCC2C23FC087}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testing.Calculator.Client", "Testing.Calculator.Client\Testing.Calculator.Client.csproj", "{6587E8C2-64A1-4A68-B540-7D61B35E234F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -98,14 +96,6 @@ Global
 		{C6E56931-EBDD-1154-4F50-413712555092}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6E56931-EBDD-1154-4F50-413712555092}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6E56931-EBDD-1154-4F50-413712555092}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6AD08D5E-120A-7C9F-BCE4-FBEFC01AB1AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6AD08D5E-120A-7C9F-BCE4-FBEFC01AB1AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6AD08D5E-120A-7C9F-BCE4-FBEFC01AB1AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6AD08D5E-120A-7C9F-BCE4-FBEFC01AB1AC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{207769FE-49CA-9589-80C1-4C2B136C904C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{207769FE-49CA-9589-80C1-4C2B136C904C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{207769FE-49CA-9589-80C1-4C2B136C904C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{207769FE-49CA-9589-80C1-4C2B136C904C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E845E699-3935-49A7-818F-03D4FC274B8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E845E699-3935-49A7-818F-03D4FC274B8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E845E699-3935-49A7-818F-03D4FC274B8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -114,6 +104,10 @@ Global
 		{F027CAAE-22F8-49AE-80A2-CCC2C23FC087}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F027CAAE-22F8-49AE-80A2-CCC2C23FC087}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F027CAAE-22F8-49AE-80A2-CCC2C23FC087}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6587E8C2-64A1-4A68-B540-7D61B35E234F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6587E8C2-64A1-4A68-B540-7D61B35E234F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6587E8C2-64A1-4A68-B540-7D61B35E234F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6587E8C2-64A1-4A68-B540-7D61B35E234F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -18,7 +18,7 @@
 		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 		<RepositoryUrl>https://github.com/datafac/conduits</RepositoryUrl>
 		<PackageProjectUrl>https://github.com/datafac/conduits</PackageProjectUrl>
-		<Description>Protobuf-net client</Description>
+		<Description>Protobuf-net server</Description>
 		<Title>Package title</Title>
 		<Product>Conduits</Product>
 	</PropertyGroup>
@@ -31,7 +31,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-    <ProjectReference Include="..\DataFac.Conduits.ProtobufNet.Common\DataFac.Conduits.ProtobufNet.Common.csproj" />
-  </ItemGroup>
+		<PackageReference Include="protobuf-net.Grpc.Native" Version="1.3.14" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\DataFac.Conduits.ProtobufNet.Common\DataFac.Conduits.ProtobufNetCommon.csproj" />
+		<ProjectReference Include="..\DataFac.Conduits\DataFac.Conduits.csproj" />
+	</ItemGroup>
 
 </Project>

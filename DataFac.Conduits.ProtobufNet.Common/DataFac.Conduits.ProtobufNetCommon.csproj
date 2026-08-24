@@ -18,7 +18,7 @@
 	  <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 	  <RepositoryUrl>https://github.com/datafac/conduits</RepositoryUrl>
 	  <PackageProjectUrl>https://github.com/datafac/conduits</PackageProjectUrl>
-	  <Description>Protobuf-net contracts</Description>
+	  <Description>Protobuf-net service contract</Description>
 	  <Title>Package title</Title>
 	  <Product>Conduits</Product>
   </PropertyGroup>

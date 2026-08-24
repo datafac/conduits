@@ -1,10 +1,11 @@
-﻿using Shouldly;
+﻿using DataFac.Conduits.ProtobufNetClient;
+using DataFac.Conduits.ProtobufNetServer;
+using Shouldly;
 using System;
 using System.Threading.Tasks;
 using Testing.Calculator;
+using Testing.Calculator.Client;
 using Testing.Calculator.Server;
-using XGrpcClient;
-using XGrpcServer;
 
 namespace XGrpcTests;
 
@@ -17,8 +18,8 @@ public class GrpcUnaryRequestTests
     [Fact]
     public async Task Multiply()
     {
-        await using var server = new ProtobufGrpcServer(new RequestHandler(new Calculator()));
-        await using var client = new ProtobufGrpcClient(host, server.BoundPort);
+        await using var server = new ProtobufGrpcServer(new CalculatorConduitServer(new Calculator()));
+        await using var client = new ProtobufConduitClient(host, server.BoundPort);
         await using CalculatorClient calculator = new CalculatorClient(client);
 
         var result = await calculator.DoBinOp(3, BinOp.Multiply, 4);
@@ -28,8 +29,8 @@ public class GrpcUnaryRequestTests
     [Fact]
     public async Task Divide()
     {
-        await using var server = new ProtobufGrpcServer(new RequestHandler(new Calculator()));
-        await using var client = new ProtobufGrpcClient(host, server.BoundPort);
+        await using var server = new ProtobufGrpcServer(new CalculatorConduitServer(new Calculator()));
+        await using var client = new ProtobufConduitClient(host, server.BoundPort);
         await using CalculatorClient calculator = new CalculatorClient(client);
 
         var result = await calculator.DoBinOp(12, BinOp.Divide, 4);
@@ -39,8 +40,8 @@ public class GrpcUnaryRequestTests
     [Fact]
     public async Task DivideByZero()
     {
-        await using var server = new ProtobufGrpcServer(new RequestHandler(new Calculator()));
-        await using var client = new ProtobufGrpcClient(host, server.BoundPort);
+        await using var server = new ProtobufGrpcServer(new CalculatorConduitServer(new Calculator()));
+        await using var client = new ProtobufConduitClient(host, server.BoundPort);
         await using CalculatorClient calculator = new CalculatorClient(client);
 
         var result = await calculator.DoBinOp(12, BinOp.Divide, 0);
@@ -50,8 +51,8 @@ public class GrpcUnaryRequestTests
     [Fact]
     public async Task DivideByZero2()
     {
-        await using var server = new ProtobufGrpcServer(new RequestHandler(new Calculator()));
-        await using var client = new ProtobufGrpcClient(host, server.BoundPort);
+        await using var server = new ProtobufGrpcServer(new CalculatorConduitServer(new Calculator()));
+        await using var client = new ProtobufConduitClient(host, server.BoundPort);
         await using CalculatorClient calculator = new CalculatorClient(client);
 
         var result = await calculator.DoBinOp(0, BinOp.Divide, 0);
@@ -61,8 +62,8 @@ public class GrpcUnaryRequestTests
     [Fact]
     public async Task Add()
     {
-        await using var server = new ProtobufGrpcServer(new RequestHandler(new Calculator()));
-        await using var client = new ProtobufGrpcClient(host, server.BoundPort);
+        await using var server = new ProtobufGrpcServer(new CalculatorConduitServer(new Calculator()));
+        await using var client = new ProtobufConduitClient(host, server.BoundPort);
         await using CalculatorClient calculator = new CalculatorClient(client);
 
         var result = await calculator.DoBinOp(4, BinOp.Add, 3);
@@ -72,8 +73,8 @@ public class GrpcUnaryRequestTests
     [Fact]
     public async Task Subtract()
     {
-        await using var server = new ProtobufGrpcServer(new RequestHandler(new Calculator()));
-        await using var client = new ProtobufGrpcClient(host, server.BoundPort);
+        await using var server = new ProtobufGrpcServer(new CalculatorConduitServer(new Calculator()));
+        await using var client = new ProtobufConduitClient(host, server.BoundPort);
         await using CalculatorClient calculator = new CalculatorClient(client);
 
         var result = await calculator.DoBinOp(4, BinOp.Subtract, 3);
