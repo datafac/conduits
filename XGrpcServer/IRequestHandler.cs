@@ -16,7 +16,7 @@ internal interface IRequestHandler
     /// <param name="request"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<ReadOnlyMemory<byte>> HandleUnaryRequest(ReadOnlyMemory<byte> request, CancellationToken cancellation);
+    ValueTask<ReadOnlyMemory<byte>> HandleUnaryRequest(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default);
 
     /// <summary>
     /// Handles a single request and returns a stream of results.
@@ -24,5 +24,5 @@ internal interface IRequestHandler
     /// <param name="request"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    IAsyncEnumerable<ReadOnlyMemory<byte>> HandleServerStream(ReadOnlyMemory<byte> request, CancellationToken cancellation);
+    IAsyncEnumerable<ReadOnlyMemory<byte>> HandleServerStream(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default);
 }

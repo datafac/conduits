@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DataFac.Conduits.Testing
@@ -38,10 +39,10 @@ namespace DataFac.Conduits.Testing
             return _server.ClientStream(requests, context);
         }
 
-        public IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, CallContext context)
+        public IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
         {
             if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
-            return _server.DuplexStream(requests, context);
+            return _server.DuplexStream(requests, deadlineUtc, cancellation);
         }
     }
 }

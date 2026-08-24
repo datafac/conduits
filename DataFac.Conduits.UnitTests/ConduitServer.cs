@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -89,7 +90,7 @@ namespace DataFac.Conduits.UnitTests
             return WeatherData.Empty.ToMemory();
         }
 
-        public async IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, CallContext context)
+        public async IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
         {
             var pushTask = Task.Run(async () =>
             {
@@ -100,7 +101,7 @@ namespace DataFac.Conduits.UnitTests
                     {
                         case WeatherTag.WeatherData:
                             {
-                                await _server.UpdateWeather(weatherRequest, context.Token);
+                                await _server.UpdateWeather(weatherRequest, cancellation);
                             }
                             break;
                         default:
@@ -109,7 +110,7 @@ namespace DataFac.Conduits.UnitTests
                 }
             });
             var location = string.Empty; // all
-            await foreach (WeatherData response in _server.GetWeatherStream(location, context.Token))
+            await foreach (WeatherData response in _server.GetWeatherStream(location, cancellation))
             {
                 yield return response.ToMemory();
             }

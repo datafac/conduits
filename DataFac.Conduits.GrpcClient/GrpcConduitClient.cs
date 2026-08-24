@@ -4,6 +4,7 @@ using Grpc.Net.Client;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DataFac.Conduits.GrpcClient
@@ -78,11 +79,11 @@ namespace DataFac.Conduits.GrpcClient
             return incoming.Data.Memory;
         }
 
-        public async IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, CallContext context)
+        public async IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
         {
             CheckNotDisposed();
             var client = new GrpcService.GrpcServiceClient(_channel);
-            using var call = client.BiStream(cancellationToken: context.Token, deadline: context.DeadlineUtc);
+            using var call = client.BiStream(cancellationToken: cancellation, deadline: deadlineUtc);
 
             var pushTask = Task.Run(async () =>
             {
@@ -96,7 +97,7 @@ namespace DataFac.Conduits.GrpcClient
             });
 
             var responseStream = call.ResponseStream;
-            while (await responseStream.MoveNext(context.Token) && !context.Token.IsCancellationRequested)
+            while (await responseStream.MoveNext(cancellation) && !cancellation.IsCancellationRequested)
             {
                 yield return responseStream.Current.Data.Memory;
             }

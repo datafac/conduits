@@ -28,7 +28,7 @@ internal class RequestHandler : IRequestHandler
         _calculator = calculator;
     }
 
-    public async ValueTask<ReadOnlyMemory<byte>> HandleUnaryRequest(ReadOnlyMemory<byte> requestBytes, CancellationToken cancellation)
+    public async ValueTask<ReadOnlyMemory<byte>> HandleUnaryRequest(ReadOnlyMemory<byte> requestBytes, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         RequestBase? request = serializer.Deserialize<RequestBase>(requestBytes);
         if (request is null) return errorDeserializationFailure;
@@ -56,7 +56,7 @@ internal class RequestHandler : IRequestHandler
         return serializer.Serialize<ResultBase>(result);
     }
 
-    public async IAsyncEnumerable<ReadOnlyMemory<byte>> HandleServerStream(ReadOnlyMemory<byte> requestBytes, [EnumeratorCancellation] CancellationToken cancellation)
+    public async IAsyncEnumerable<ReadOnlyMemory<byte>> HandleServerStream(ReadOnlyMemory<byte> requestBytes, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         RequestBase? request = serializer.Deserialize<RequestBase>(requestBytes);
         if (request is null)

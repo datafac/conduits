@@ -46,7 +46,7 @@ internal class ProtobufNetServer : IProtobufNetContract
         TimeSpan timeout = GetMaxCallDuration(context);
         using var deadlineCts = new CancellationTokenSource(timeout);
         using var requestCts = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken, deadlineCts.Token);
-        var result = await _requestHandler.HandleUnaryRequest(requestBlob.Blob, requestCts.Token);
+        var result = await _requestHandler.HandleUnaryRequest(requestBlob.Blob, context.Deadline, requestCts.Token);
         return new ResultBlob() { Blob = result.ToArray() }; // todo remove ToArray()
     }
 
@@ -62,7 +62,7 @@ internal class ProtobufNetServer : IProtobufNetContract
         }
         else
         {
-            await foreach (var result in _requestHandler.HandleServerStream(requestBlob.Blob, requestCts.Token))
+            await foreach (var result in _requestHandler.HandleServerStream(requestBlob.Blob, context.Deadline, requestCts.Token))
             {
                 yield return new ResultBlob() { Blob = result.ToArray() }; // todo remove ToArray()
             }

@@ -41,7 +41,7 @@ namespace DataFac.Conduits.GrpcServer
         public override async Task BiStream(IAsyncStreamReader<GrpcPayload> requestStream, IServerStreamWriter<GrpcPayload> responseStream, ServerCallContext context)
         {
             var requests = requestStream.ToAsyncEnumerable((i) => i.Data.Memory, context.CancellationToken);
-            await foreach (var response in _server.DuplexStream(requests, new CallContext(context.CancellationToken, context.Deadline)))
+            await foreach (var response in _server.DuplexStream(requests, context.Deadline, context.CancellationToken))
             {
                 await responseStream.WriteAsync(response.ToGrpcPayload());
             }
