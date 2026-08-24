@@ -14,6 +14,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\DataFac.Conduits.ProtobufNet.Common\DataFac.Conduits.ProtobufNet.Common.csproj" />
+		<ProjectReference Include="..\DataFac.Conduits\DataFac.Conduits.csproj" />
 		<ProjectReference Include="..\Testing.Calculator\Testing.Calculator.csproj" />
 	</ItemGroup>
 

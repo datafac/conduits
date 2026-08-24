@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using DataFac.Conduits;
 using DataFac.Conduits.ProtobufNet.Common;
 using Nerdbank.MessagePack;
 using ProtoBuf.Grpc;
@@ -12,9 +13,9 @@ namespace XGrpcServer;
 internal class ProtobufNetServer : IProtobufNetContract
 {
     private static readonly MessagePackSerializer serializer = new MessagePackSerializer();
-    private readonly IRequestHandler _requestHandler;
+    private readonly IConduitServer _requestHandler;
 
-    public ProtobufNetServer(IRequestHandler requestHandler)
+    public ProtobufNetServer(IConduitServer requestHandler)
     {
         _requestHandler = requestHandler;
     }

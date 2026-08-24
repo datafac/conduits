@@ -25,6 +25,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\Testing.Calculator.Server\Testing.Calculator.Server.csproj" />
 		<ProjectReference Include="..\XGrpcClient\XGrpcClient.csproj" />
 		<ProjectReference Include="..\XGrpcServer\XGrpcServer.csproj" />
 	</ItemGroup>

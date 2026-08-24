@@ -8,6 +8,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\DataFac.Conduits\DataFac.Conduits.csproj" />
 	  <ProjectReference Include="..\Testing.Calculator\Testing.Calculator.csproj" />
 	</ItemGroup>
 
