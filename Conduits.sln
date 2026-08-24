@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E62C16AE-6A19-43A9-964C-58F7AA027936}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
+		global.json = global.json
 		projscan.json = projscan.json
 		README.md = README.md
 		SigningKey.snk = SigningKey.snk
