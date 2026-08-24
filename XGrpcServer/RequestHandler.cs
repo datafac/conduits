@@ -28,7 +28,7 @@ internal class RequestHandler : IRequestHandler
         _calculator = calculator;
     }
 
-    public async ValueTask<ReadOnlyMemory<byte>> HandleUnaryRequest(ReadOnlyMemory<byte> requestBytes, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> requestBytes, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         RequestBase? request = serializer.Deserialize<RequestBase>(requestBytes);
         if (request is null) return errorDeserializationFailure;
@@ -63,17 +63,16 @@ internal class RequestHandler : IRequestHandler
         {
             yield return errorDeserializationFailure;
         }
-        else
-            if (request is RangeRequest rr)
+        else if (request is RangeRequest rr)
         {
             await foreach (int x in _calculator.GetRange(rr.Start, rr.Count, rr.Delay).WithCancellation(cancellation).ConfigureAwait(false))
             {
-                    yield return serializer.Serialize<ResultBase>(new RangeResult() { X = x });
+                yield return serializer.Serialize<ResultBase>(new RangeResult() { X = x });
             }
         }
         else
         {
-                yield return serializer.Serialize<ResultBase>(new ErrorResult { Code = ExcpCode.UnknownRequest, Message = $"Unknown request type: {request.GetType().Name}" });
+            yield return serializer.Serialize<ResultBase>(new ErrorResult { Code = ExcpCode.UnknownRequest, Message = $"Unknown request type: {request.GetType().Name}" });
         }
     }
 }
