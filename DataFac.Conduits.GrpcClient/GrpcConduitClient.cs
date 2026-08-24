@@ -7,102 +7,101 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DataFac.Conduits.GrpcClient
+namespace DataFac.Conduits.GrpcClient;
+
+public class GrpcConduitClient : IDisposable, IConduitClient
 {
-    public class GrpcConduitClient : IDisposable, IConduitClient
+    private readonly GrpcChannel _channel;
+
+    public GrpcConduitClient(Uri address)
     {
-        private readonly GrpcChannel _channel;
+        _channel = GrpcChannel.ForAddress(address);
+    }
 
-        public GrpcConduitClient(Uri address)
+    private volatile bool _disposed = false;
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        _channel?.Dispose();
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void ThrowDisposed()
+    {
+        throw new ObjectDisposedException(nameof(GrpcConduitClient));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void CheckNotDisposed()
+    {
+        if (_disposed) ThrowDisposed();
+    }
+
+    public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    {
+        CheckNotDisposed();
+        var client = new GrpcService.GrpcServiceClient(_channel);
+        var incoming = await client.NoStreamAsync(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request) }, null, deadlineUtc, cancellation);
+        return incoming.Data.Memory;
+    }
+
+    public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
+    {
+        CheckNotDisposed();
+        var client = new GrpcService.GrpcServiceClient(_channel);
+        var call = client.StreamDn(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request) }, null, deadlineUtc, cancellation);
+
+        var responseStream = call.ResponseStream;
+        while (await responseStream.MoveNext(cancellation) && !cancellation.IsCancellationRequested)
         {
-            _channel = GrpcChannel.ForAddress(address);
+            yield return responseStream.Current.Data.Memory;
         }
+    }
 
-        private volatile bool _disposed = false;
-        public void Dispose()
+    public async ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    {
+        CheckNotDisposed();
+        var client = new GrpcService.GrpcServiceClient(_channel);
+        using var call = client.StreamUp(deadline: deadlineUtc, cancellationToken: cancellation);
+        var pushTask = Task.Run(async () =>
         {
-            if (_disposed) return;
-            _disposed = true;
-            _channel?.Dispose();
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private void ThrowDisposed()
-        {
-            throw new ObjectDisposedException(nameof(GrpcConduitClient));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void CheckNotDisposed()
-        {
-            if (_disposed) ThrowDisposed();
-        }
-
-        public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
-        {
-            CheckNotDisposed();
-            var client = new GrpcService.GrpcServiceClient(_channel);
-            var incoming = await client.NoStreamAsync(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request) }, null, deadlineUtc, cancellation);
-            return incoming.Data.Memory;
-        }
-
-        public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
-        {
-            CheckNotDisposed();
-            var client = new GrpcService.GrpcServiceClient(_channel);
-            var call = client.StreamDn(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request) }, null, deadlineUtc, cancellation);
-
-            var responseStream = call.ResponseStream;
-            while (await responseStream.MoveNext(cancellation) && !cancellation.IsCancellationRequested)
+            var requestStream = call.RequestStream;
+            await foreach (var request in requests)
             {
-                yield return responseStream.Current.Data.Memory;
-            }
-        }
-
-        public async ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
-        {
-            CheckNotDisposed();
-            var client = new GrpcService.GrpcServiceClient(_channel);
-            using var call = client.StreamUp(deadline: deadlineUtc, cancellationToken: cancellation);
-            var pushTask = Task.Run(async () =>
-            {
-                var requestStream = call.RequestStream;
-                await foreach (var request in requests)
-                {
-                    await requestStream.WriteAsync(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request) });
-                }
-
-                await requestStream.CompleteAsync();
-            });
-            await Task.WhenAll(pushTask);
-            var incoming = await call.ResponseAsync;
-            return incoming.Data.Memory;
-        }
-
-        public async IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
-        {
-            CheckNotDisposed();
-            var client = new GrpcService.GrpcServiceClient(_channel);
-            using var call = client.BiStream(cancellationToken: cancellation, deadline: deadlineUtc);
-
-            var pushTask = Task.Run(async () =>
-            {
-                var requestStream = call.RequestStream;
-                await foreach (var request in requests)
-                {
-                    await requestStream.WriteAsync(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request) });
-                }
-
-                await requestStream.CompleteAsync();
-            });
-
-            var responseStream = call.ResponseStream;
-            while (await responseStream.MoveNext(cancellation) && !cancellation.IsCancellationRequested)
-            {
-                yield return responseStream.Current.Data.Memory;
+                await requestStream.WriteAsync(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request) });
             }
 
-            await Task.WhenAll(pushTask);
+            await requestStream.CompleteAsync();
+        });
+        await Task.WhenAll(pushTask);
+        var incoming = await call.ResponseAsync;
+        return incoming.Data.Memory;
+    }
+
+    public async IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    {
+        CheckNotDisposed();
+        var client = new GrpcService.GrpcServiceClient(_channel);
+        using var call = client.BiStream(cancellationToken: cancellation, deadline: deadlineUtc);
+
+        var pushTask = Task.Run(async () =>
+        {
+            var requestStream = call.RequestStream;
+            await foreach (var request in requests)
+            {
+                await requestStream.WriteAsync(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request) });
+            }
+
+            await requestStream.CompleteAsync();
+        });
+
+        var responseStream = call.ResponseStream;
+        while (await responseStream.MoveNext(cancellation) && !cancellation.IsCancellationRequested)
+        {
+            yield return responseStream.Current.Data.Memory;
         }
+
+        await Task.WhenAll(pushTask);
     }
 }

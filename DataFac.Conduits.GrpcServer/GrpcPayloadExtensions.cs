@@ -2,13 +2,12 @@
 using DataFac.Conduits.GrpcCommon;
 using System;
 
-namespace DataFac.Conduits.GrpcServer
+namespace DataFac.Conduits.GrpcServer;
+
+internal static class GrpcPayloadExtensions
 {
-    internal static class GrpcPayloadExtensions
+    public static GrpcPayload ToGrpcPayload(this ReadOnlyMemory<byte> input)
     {
-        public static GrpcPayload ToGrpcPayload(this ReadOnlyMemory<byte> input)
-        {
-            return new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(input) };
-        }
+        return new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(input) };
     }
 }

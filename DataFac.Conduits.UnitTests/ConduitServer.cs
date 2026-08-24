@@ -4,118 +4,117 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DataFac.Conduits.UnitTests
+namespace DataFac.Conduits.UnitTests;
+
+internal sealed class ConduitServer : IConduitServer, IDisposable
 {
-    internal sealed class ConduitServer : IConduitServer, IDisposable
+    private readonly IWeatherService _server;
+
+    public string ServerName => ThisAssembly.AssemblyName;
+    public string ServerVersion => ThisAssembly.AssemblyFileVersion;
+
+    public ConduitServer(IWeatherService server)
     {
-        private readonly IWeatherService _server;
+        _server = server ?? throw new ArgumentNullException(nameof(server));
+    }
 
-        public string ServerName => ThisAssembly.AssemblyName;
-        public string ServerVersion => ThisAssembly.AssemblyFileVersion;
+    public void Dispose()
+    {
+        // nothing to dispose yet
+    }
 
-        public ConduitServer(IWeatherService server)
+    public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    {
+        return await ProcessRequest(request, cancellation);
+    }
+
+    private async ValueTask<ReadOnlyMemory<byte>> ProcessRequest(ReadOnlyMemory<byte> request, CancellationToken token)
+    {
+        var weatherRequest = WeatherData.FromSpan(request.Span);
+        switch (weatherRequest.Tag)
         {
-            _server = server ?? throw new ArgumentNullException(nameof(server));
+            case WeatherTag.GetWeatherData:
+                {
+                    WeatherData weatherResponse = await _server.GetWeather(weatherRequest.Location, token);
+                    return weatherResponse.ToMemory();
+                }
+            case WeatherTag.WeatherData:
+                {
+                    await _server.UpdateWeather(weatherRequest, token);
+                    return new WeatherData(WeatherTag.OK, weatherRequest.Location).ToMemory();
+                }
+            default:
+                return WeatherData.Empty.ToMemory();
         }
+    }
 
-        public void Dispose()
+    public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
+    {
+        var weatherRequest = WeatherData.FromSpan(request.Span);
+        switch (weatherRequest.Tag)
         {
-            // nothing to dispose yet
-        }
-
-        public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
-        {
-            return await ProcessRequest(request, cancellation);
-        }
-
-        private async ValueTask<ReadOnlyMemory<byte>> ProcessRequest(ReadOnlyMemory<byte> request, CancellationToken token)
-        {
-            var weatherRequest = WeatherData.FromSpan(request.Span);
-            switch (weatherRequest.Tag)
-            {
-                case WeatherTag.GetWeatherData:
+            case WeatherTag.StreamDn_WeatherFeed:
+                {
+                    await foreach (WeatherData response in _server.GetWeatherStream(weatherRequest.Location, cancellation))
                     {
-                        WeatherData weatherResponse = await _server.GetWeather(weatherRequest.Location, token);
-                        return weatherResponse.ToMemory();
+                        ReadOnlyMemory<byte> payload = response.ToMemory();
+                        yield return payload;
                     }
-                case WeatherTag.WeatherData:
-                    {
-                        await _server.UpdateWeather(weatherRequest, token);
-                        return new WeatherData(WeatherTag.OK, weatherRequest.Location).ToMemory();
-                    }
-                default:
-                    return WeatherData.Empty.ToMemory();
-            }
+                }
+                break;
+            default:
+                break;
         }
+    }
 
-        public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public async ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    {
+        var pushTask = Task.Run(async () =>
         {
-            var weatherRequest = WeatherData.FromSpan(request.Span);
-            switch (weatherRequest.Tag)
+            await foreach (var request in requests)
             {
-                case WeatherTag.StreamDn_WeatherFeed:
-                    {
-                        await foreach (WeatherData response in _server.GetWeatherStream(weatherRequest.Location, cancellation))
+                var weatherRequest = WeatherData.FromSpan(request.Span);
+                switch (weatherRequest.Tag)
+                {
+                    case WeatherTag.WeatherData:
                         {
-                            ReadOnlyMemory<byte> payload = response.ToMemory();
-                            yield return payload;
+                            await _server.UpdateWeather(weatherRequest, cancellation);
                         }
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        public async ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
-        {
-            var pushTask = Task.Run(async () =>
-            {
-                await foreach (var request in requests)
-                {
-                    var weatherRequest = WeatherData.FromSpan(request.Span);
-                    switch (weatherRequest.Tag)
-                    {
-                        case WeatherTag.WeatherData:
-                            {
-                                await _server.UpdateWeather(weatherRequest, cancellation);
-                            }
-                            break;
-                        default:
-                            break;
-                    }
+                        break;
+                    default:
+                        break;
                 }
-            });
-            await Task.WhenAll(pushTask);
-            return WeatherData.Empty.ToMemory();
-        }
-
-        public async IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
-        {
-            var pushTask = Task.Run(async () =>
-            {
-                await foreach (var request in requests)
-                {
-                    var weatherRequest = WeatherData.FromSpan(request.Span);
-                    switch (weatherRequest.Tag)
-                    {
-                        case WeatherTag.WeatherData:
-                            {
-                                await _server.UpdateWeather(weatherRequest, cancellation);
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            });
-            var location = string.Empty; // all
-            await foreach (WeatherData response in _server.GetWeatherStream(location, cancellation))
-            {
-                yield return response.ToMemory();
             }
-            await Task.WhenAll(pushTask);
+        });
+        await Task.WhenAll(pushTask);
+        return WeatherData.Empty.ToMemory();
+    }
+
+    public async IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
+    {
+        var pushTask = Task.Run(async () =>
+        {
+            await foreach (var request in requests)
+            {
+                var weatherRequest = WeatherData.FromSpan(request.Span);
+                switch (weatherRequest.Tag)
+                {
+                    case WeatherTag.WeatherData:
+                        {
+                            await _server.UpdateWeather(weatherRequest, cancellation);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+        var location = string.Empty; // all
+        await foreach (WeatherData response in _server.GetWeatherStream(location, cancellation))
+        {
+            yield return response.ToMemory();
         }
+        await Task.WhenAll(pushTask);
     }
 }
 
