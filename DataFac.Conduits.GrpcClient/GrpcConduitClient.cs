@@ -1,5 +1,6 @@
-﻿using Grpc.Net.Client;
-using DataFac.Conduits.GrpcCommon;
+﻿using DataFac.Conduits.GrpcCommon;
+using Google.Protobuf;
+using Grpc.Net.Client;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -40,20 +41,20 @@ namespace DataFac.Conduits.GrpcClient
         {
             CheckNotDisposed();
             var client = new GrpcService.GrpcServiceClient(_channel);
-            var incoming = await client.NoStreamAsync(request.ToGrpcPayload(), cancellationToken: context.Token, deadline: context.DeadlineUtc);
-            return incoming.ToPayload();
+            var incoming = await client.NoStreamAsync(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request) }, cancellationToken: context.Token, deadline: context.DeadlineUtc);
+            return incoming.Data.Memory;
         }
 
         public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> request, CallContext context)
         {
             CheckNotDisposed();
             var client = new GrpcService.GrpcServiceClient(_channel);
-            var call = client.StreamDn(request.ToGrpcPayload(), cancellationToken: context.Token, deadline: context.DeadlineUtc);
+            var call = client.StreamDn(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request) }, cancellationToken: context.Token, deadline: context.DeadlineUtc);
 
             var responseStream = call.ResponseStream;
             while (await responseStream.MoveNext(context.Token) && !context.Token.IsCancellationRequested)
             {
-                yield return responseStream.Current.ToPayload();
+                yield return responseStream.Current.Data.Memory;
             }
         }
 
@@ -67,14 +68,14 @@ namespace DataFac.Conduits.GrpcClient
                 var requestStream = call.RequestStream;
                 await foreach (var request in requests)
                 {
-                    await requestStream.WriteAsync(request.ToGrpcPayload());
+                    await requestStream.WriteAsync(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request) });
                 }
 
                 await requestStream.CompleteAsync();
             });
             await Task.WhenAll(pushTask);
             var incoming = await call.ResponseAsync;
-            return incoming.ToPayload();
+            return incoming.Data.Memory;
         }
 
         public async IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, CallContext context)
@@ -88,7 +89,7 @@ namespace DataFac.Conduits.GrpcClient
                 var requestStream = call.RequestStream;
                 await foreach (var request in requests)
                 {
-                    await requestStream.WriteAsync(request.ToGrpcPayload());
+                    await requestStream.WriteAsync(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request) });
                 }
 
                 await requestStream.CompleteAsync();
@@ -97,7 +98,7 @@ namespace DataFac.Conduits.GrpcClient
             var responseStream = call.ResponseStream;
             while (await responseStream.MoveNext(context.Token) && !context.Token.IsCancellationRequested)
             {
-                yield return responseStream.Current.ToPayload();
+                yield return responseStream.Current.Data.Memory;
             }
 
             await Task.WhenAll(pushTask);

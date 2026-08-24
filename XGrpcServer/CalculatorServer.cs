@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using DataFac.Conduits.ProtobufNet.Common;
 using Grpc.Core;
 using ProtoBuf.Grpc.Server;
-using XGrpcShared;
 
 namespace XGrpcServer;
 
@@ -17,7 +17,7 @@ public sealed class CalculatorServer : IAsyncDisposable
     private CalculatorServer(ServerPort serverPort)
     {
         _server = new Server() { Ports = { serverPort } };
-        _server.Services.AddCodeFirst<IConduit>(new ConduitServer(new RequestHandler(new Calculator())));
+        _server.Services.AddCodeFirst<IProtobufNetConduit>(new ProtobufNetConduitServer(new RequestHandler(new Calculator())));
         _server.Start();
     }
 

@@ -1,4 +1,5 @@
-﻿using Grpc.Core;
+﻿using DataFac.Conduits.ProtobufNet.Common;
+using Grpc.Core;
 using Nerdbank.MessagePack;
 using ProtoBuf.Grpc;
 using ProtoBuf.Grpc.Client;
@@ -6,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Testing.Calculator;
-using XGrpcShared;
 
 namespace XGrpcClient;
 
@@ -15,12 +15,12 @@ public class CalculatorClient : IAsyncCalculator
     private readonly MessagePackSerializer _serializer = new MessagePackSerializer();
 
     private readonly Channel channel;
-    private readonly IConduit conduit;
+    private readonly IProtobufNetConduit conduit;
 
     public CalculatorClient(string server, int port)
     {
         channel = new Channel(server, port, ChannelCredentials.Insecure);
-        conduit = channel.CreateGrpcService<IConduit>();
+        conduit = channel.CreateGrpcService<IProtobufNetConduit>();
     }
 
     public async ValueTask DisposeAsync()

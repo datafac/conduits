@@ -6,7 +6,6 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Testing.Calculator;
-using XGrpcShared;
 
 namespace XGrpcServer;
 
