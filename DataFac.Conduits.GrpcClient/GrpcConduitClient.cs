@@ -38,22 +38,22 @@ namespace DataFac.Conduits.GrpcClient
             if (_disposed) ThrowDisposed();
         }
 
-        public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> request, CallContext context)
+        public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
         {
             CheckNotDisposed();
             var client = new GrpcService.GrpcServiceClient(_channel);
-            var incoming = await client.NoStreamAsync(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request) }, cancellationToken: context.Token, deadline: context.DeadlineUtc);
+            var incoming = await client.NoStreamAsync(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request) }, null, deadlineUtc, cancellation);
             return incoming.Data.Memory;
         }
 
-        public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> request, CallContext context)
+        public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
         {
             CheckNotDisposed();
             var client = new GrpcService.GrpcServiceClient(_channel);
-            var call = client.StreamDn(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request) }, cancellationToken: context.Token, deadline: context.DeadlineUtc);
+            var call = client.StreamDn(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request) }, null, deadlineUtc, cancellation);
 
             var responseStream = call.ResponseStream;
-            while (await responseStream.MoveNext(context.Token) && !context.Token.IsCancellationRequested)
+            while (await responseStream.MoveNext(cancellation) && !cancellation.IsCancellationRequested)
             {
                 yield return responseStream.Current.Data.Memory;
             }

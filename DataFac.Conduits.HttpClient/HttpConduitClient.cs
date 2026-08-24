@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -36,20 +37,20 @@ namespace DataFac.Conduits.HttpClient
             }
         }
 
-        public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> request, CallContext context)
+        public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
         {
-            var outgoing = request.ToUserData(context.GetDeadlineTicks());
-            var incoming = await _swagClient.NoStreamAsync(outgoing, context.Token);
+            var outgoing = request.ToUserData(deadlineUtc.HasValue ? deadlineUtc.Value.Ticks : null);
+            var incoming = await _swagClient.NoStreamAsync(outgoing, cancellation);
             return incoming.ToPayload();
         }
 
-        public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> request, CallContext context)
+        public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
         {
-            var outgoing = request.ToUserData(context.GetDeadlineTicks());
-            foreach (var incoming in await _swagClient.StreamDnAsync(outgoing, context.Token))
+            var outgoing = request.ToUserData(deadlineUtc.HasValue ? deadlineUtc.Value.Ticks : null);
+            foreach (var incoming in await _swagClient.StreamDnAsync(outgoing, cancellation))
             {
                 yield return incoming.ToPayload();
-                if (!context.Token.IsCancellationRequested)
+                if (!cancellation.IsCancellationRequested)
                 {
                     throw new OperationCanceledException("Deadline exceeded");
                 }

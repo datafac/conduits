@@ -23,9 +23,9 @@ namespace DataFac.Conduits.UnitTests
             // nothing to dispose yet
         }
 
-        public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> request, CallContext context)
+        public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
         {
-            return await ProcessRequest(request, context.Token);
+            return await ProcessRequest(request, cancellation);
         }
 
         private async ValueTask<ReadOnlyMemory<byte>> ProcessRequest(ReadOnlyMemory<byte> request, CancellationToken token)
@@ -48,14 +48,14 @@ namespace DataFac.Conduits.UnitTests
             }
         }
 
-        public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> request, CallContext context)
+        public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
         {
             var weatherRequest = WeatherData.FromSpan(request.Span);
             switch (weatherRequest.Tag)
             {
                 case WeatherTag.StreamDn_WeatherFeed:
                     {
-                        await foreach (WeatherData response in _server.GetWeatherStream(weatherRequest.Location, context.Token))
+                        await foreach (WeatherData response in _server.GetWeatherStream(weatherRequest.Location, cancellation))
                         {
                             ReadOnlyMemory<byte> payload = response.ToMemory();
                             yield return payload;

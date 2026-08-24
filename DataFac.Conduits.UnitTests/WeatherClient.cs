@@ -29,7 +29,7 @@ namespace DataFac.Conduits.UnitTests
         {
             var request = new WeatherData(WeatherTag.GetWeatherData, location);
             var payload = request.ToMemory();
-            var reply = await _client.SimpleUnaryCall(payload, new CallContext(token, DateTime.UtcNow.AddSeconds(30)));
+            var reply = await _client.SimpleUnaryCall(payload, DateTime.UtcNow.AddSeconds(30), token);
             return WeatherData.FromSpan(reply.Span);
         }
 
@@ -37,7 +37,7 @@ namespace DataFac.Conduits.UnitTests
         {
             var request = new WeatherData(WeatherTag.StreamDn_WeatherFeed, location);
             var payload = request.ToMemory();
-            await foreach (var response in _client.ServerStream(payload, new CallContext(token, DateTime.UtcNow.AddSeconds(30))))
+            await foreach (var response in _client.ServerStream(payload, DateTime.UtcNow.AddSeconds(30), token))
             {
                 var result = WeatherData.FromSpan(response.Span);
                 if (result is not null)
@@ -48,7 +48,7 @@ namespace DataFac.Conduits.UnitTests
         public async ValueTask UpdateWeather(WeatherData request, CancellationToken token)
         {
             var payload = request.ToMemory();
-            var _ = await _client.SimpleUnaryCall(payload, new CallContext(token, DateTime.UtcNow.AddSeconds(30)));
+            var _ = await _client.SimpleUnaryCall(payload, DateTime.UtcNow.AddSeconds(30), token);
         }
 
     }

@@ -21,16 +21,16 @@ namespace DataFac.Conduits.Testing
             _disposed = true;
         }
 
-        public IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> request, CallContext context)
+        public IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
         {
             if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
-            return _server.ServerStream(request, context);
+            return _server.ServerStream(request, deadlineUtc, cancellation);
         }
 
-        public ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> request, CallContext context)
+        public ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
         {
             if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
-            return _server.SimpleUnaryCall(request, context);
+            return _server.SimpleUnaryCall(request, deadlineUtc, cancellation);
         }
 
         public ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)

@@ -19,13 +19,13 @@ namespace DataFac.Conduits.GrpcServer
 
         public override async Task<GrpcPayload> NoStream(GrpcPayload request, ServerCallContext context)
         {
-            ReadOnlyMemory<byte> result = await _server.SimpleUnaryCall(request.Data.Memory, new CallContext(context.CancellationToken, context.Deadline));
+            ReadOnlyMemory<byte> result = await _server.SimpleUnaryCall(request.Data.Memory, context.Deadline, context.CancellationToken);
             return result.ToGrpcPayload();
         }
 
         public override async Task StreamDn(GrpcPayload request, IServerStreamWriter<GrpcPayload> responseStream, ServerCallContext context)
         {
-            await foreach (var response in _server.ServerStream(request.Data.Memory, new CallContext(context.CancellationToken, context.Deadline)))
+            await foreach (var response in _server.ServerStream(request.Data.Memory, context.Deadline, context.CancellationToken))
             {
                 await responseStream.WriteAsync(response.ToGrpcPayload());
             }
