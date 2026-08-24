@@ -62,7 +62,7 @@ internal class ProtobufNetServer : IProtobufNetContract
         }
         else
         {
-            await foreach (var result in _requestHandler.HandleServerStream(requestBlob.Blob, context.Deadline, requestCts.Token))
+            await foreach (var result in _requestHandler.ServerStream(requestBlob.Blob, context.Deadline, requestCts.Token))
             {
                 yield return new ResultBlob() { Blob = result.ToArray() }; // todo remove ToArray()
             }

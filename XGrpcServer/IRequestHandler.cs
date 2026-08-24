@@ -24,5 +24,5 @@ internal interface IRequestHandler
     /// <param name="request"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    IAsyncEnumerable<ReadOnlyMemory<byte>> HandleServerStream(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default);
+    IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default);
 }
