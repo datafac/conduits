@@ -1,6 +1,7 @@
 ﻿using Shouldly;
 using System;
 using System.Threading.Tasks;
+using Testing.Calculator;
 using XGrpcClient;
 using XGrpcServer;
 using XGrpcShared;

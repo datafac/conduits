@@ -5,6 +5,7 @@ using ProtoBuf.Grpc.Client;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Testing.Calculator;
 using XGrpcShared;
 
 namespace XGrpcClient;

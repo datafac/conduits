@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nerdbank.MessagePack;
 using ProtoBuf.Grpc;
+using Testing.Calculator;
 using XGrpcShared;
 
 namespace XGrpcServer;
