@@ -1,7 +1,6 @@
 ﻿using DataFac.Conduits.ProtobufNetClient;
 using DataFac.Conduits.ProtobufNetServer;
 using Shouldly;
-using System;
 using System.Threading.Tasks;
 using Testing.Calculator;
 using Testing.Calculator.Client;

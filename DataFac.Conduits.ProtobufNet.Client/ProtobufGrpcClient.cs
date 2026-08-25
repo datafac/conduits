@@ -1,6 +1,5 @@
 ﻿using DataFac.Conduits.ProtobufNetCommon;
 using Grpc.Core;
-using ProtoBuf;
 using ProtoBuf.Grpc;
 using ProtoBuf.Grpc.Client;
 using System;
