@@ -11,12 +11,12 @@ using System.Threading.Tasks;
 
 namespace DataFac.Conduits.ProtobufNetClient;
 
-public class ProtobufConduitClient : IConduitClient
+public class ProtobufGrpcClient : IConduitClient
 {
     private readonly Channel _channel;
     private readonly IProtobufNetContract _contract;
 
-    public ProtobufConduitClient(string server, int port)
+    public ProtobufGrpcClient(string server, int port)
     {
         _channel = new Channel(server, port, ChannelCredentials.Insecure);
         _contract = _channel.CreateGrpcService<IProtobufNetContract>();

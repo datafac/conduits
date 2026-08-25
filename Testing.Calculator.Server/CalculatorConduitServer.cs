@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Testing.Calculator.Server;
 
-public class CalculatorConduitServer : IConduitServer
+public class CalculatorServer : IConduitServer
 {
     private static readonly MessagePackSerializer serializer = new MessagePackSerializer();
     private static readonly ReadOnlyMemory<byte> errorDeserializationFailure
@@ -26,7 +26,7 @@ public class CalculatorConduitServer : IConduitServer
 
     public string ServerVersion => throw new NotImplementedException();
 
-    public CalculatorConduitServer(IAsyncCalculator calculator)
+    public CalculatorServer(IAsyncCalculator calculator)
     {
         _calculator = calculator;
     }

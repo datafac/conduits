@@ -19,6 +19,10 @@ public class CalculatorClient : IAsyncCalculator
 
     public async ValueTask DisposeAsync()
     {
+        if (_conduitClient is IAsyncDisposable disposable)
+        {
+            await disposable.DisposeAsync();
+        }
         GC.SuppressFinalize(this);
     }
 
