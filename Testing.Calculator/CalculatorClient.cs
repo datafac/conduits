@@ -3,6 +3,7 @@ using Nerdbank.MessagePack;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Testing.Calculator;
@@ -48,13 +49,14 @@ public class CalculatorClient : IAsyncCalculator
     {
         return result switch
         {
-            null => throw new Exception("Failed to deserialise result"),
+            null => throw new InvalidDataException("Failed to deserialise result"),
             ErrorResult errorResult => errorResult.Code switch
             {
                 ExcpCode.DeserializationError => throw new InvalidDataException(errorResult.Message),
-                ExcpCode.DeadlineExceeded => throw new TimeoutException(errorResult.Message),
-                ExcpCode.UnsupportedRequestType => throw new Exception(errorResult.Message),
-                ExcpCode.UnsupportedResponseType => throw new Exception(errorResult.Message),
+                ExcpCode.DeadlineExceededqqq => throw new TimeoutException(errorResult.Message),
+                ExcpCode.OperationCancelled => throw new OperationCanceledException(errorResult.Message),
+                ExcpCode.UnsupportedRequestType => throw new NotSupportedException(errorResult.Message),
+                ExcpCode.UnsupportedResponseType => throw new NotSupportedException(errorResult.Message),
                 ExcpCode.OtherException => throw new Exception(errorResult.Message),
                 ExcpCode.DivideByZero => throw new DivideByZeroException(errorResult.Message),
                 ExcpCode.Overflow => throw new OverflowException(errorResult.Message),
@@ -86,21 +88,21 @@ public class CalculatorClient : IAsyncCalculator
         }
     }
 
-    private async IAsyncEnumerable<ResultBase> ServerStream(RequestBase request)
+    private async IAsyncEnumerable<ResultBase> ServerStream(RequestBase request, CancellationToken cancellation)
     {
         DateTime? deadline = _maxCallDuration.HasValue ? DateTime.UtcNow + _maxCallDuration.Value : null; // todo use time provider
         var requestBytes = _serializer.Serialize<RequestBase>(request);
-        await foreach (var resultBytes in _conduitClient.ServerStream(requestBytes, deadline).ConfigureAwait(false))
+        await foreach (var resultBytes in _conduitClient.ServerStream(requestBytes, deadline, cancellation).ConfigureAwait(false))
         {
             var result = _serializer.Deserialize<ResultBase>(resultBytes);
             yield return HandleResult(result);
         }
     }
 
-    public async IAsyncEnumerable<int> GetRange(int start, int count, TimeSpan delay)
+    public async IAsyncEnumerable<int> GetRange(int start, int count, TimeSpan delay, CancellationToken cancellation = default)
     {
         RequestBase req = new RangeRequest() { Start = start, Count = count, Delay = delay };
-        await foreach (var result in ServerStream(req).ConfigureAwait(false))
+        await foreach (var result in ServerStream(req, cancellation).ConfigureAwait(false))
         {
             yield return result switch
             {

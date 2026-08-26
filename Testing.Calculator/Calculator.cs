@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Testing.Calculator;
@@ -21,12 +22,15 @@ public class Calculator : IAsyncCalculator
         };
     }
 
-    public async IAsyncEnumerable<int> GetRange(int start, int count, TimeSpan delay)
+    public async IAsyncEnumerable<int> GetRange(int start, int count, TimeSpan delay, CancellationToken cancellation)
     {
         foreach (var i in Enumerable.Range(start, count))
         {
-            yield return i;
+            if (cancellation.IsCancellationRequested) 
+                throw new OperationCanceledException("Cancelled by caller", cancellation);
+
             await Task.Delay(delay).ConfigureAwait(false);
+            yield return i;
         }
     }
 }

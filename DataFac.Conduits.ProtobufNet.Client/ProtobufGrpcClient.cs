@@ -40,7 +40,7 @@ public class ProtobufGrpcClient : IConduitClient
     public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         var callOptions = new CallOptions(null, deadlineUtc, cancellation);
-        RequestBlob requestBlob = new RequestBlob() { Blob = request.ToArray() }; // todo alloc
+        RequestBlob requestBlob = new RequestBlob() { Blob = request.ToArray() }; // todo alloc!
         await foreach (var resultBlob in _contract.ServerStream(requestBlob, new CallContext(callOptions)))
         {
             yield return resultBlob.Blob;
@@ -50,7 +50,7 @@ public class ProtobufGrpcClient : IConduitClient
     public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         var callOptions = new CallOptions(null, deadlineUtc, cancellation);
-        RequestBlob requestBlob = new RequestBlob() { Blob = request.ToArray() }; // todo alloc
+        RequestBlob requestBlob = new RequestBlob() { Blob = request.ToArray() }; // todo alloc!
         var resultBlob = await _contract.UnaryRequest(requestBlob, new CallContext(callOptions));
         return resultBlob.Blob;
     }

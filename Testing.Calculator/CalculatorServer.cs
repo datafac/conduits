@@ -15,7 +15,7 @@ public class CalculatorServer : IConduitServer
         = serializer.Serialize<ResultBase>(
             new ErrorResult
             {
-                Code = ExcpCode.DeadlineExceeded,
+                Code = ExcpCode.DeadlineExceededqqq,
                 Message = "Completion deadline exceeded"
             });
     private static readonly ReadOnlyMemory<byte> errorDeserializationFailure
@@ -84,7 +84,7 @@ public class CalculatorServer : IConduitServer
         }
         else if (request is RangeRequest rr)
         {
-            await foreach (int x in _calculator.GetRange(rr.Start, rr.Count, rr.Delay).WithCancellation(cancellation).ConfigureAwait(false))
+            await foreach (int x in _calculator.GetRange(rr.Start, rr.Count, rr.Delay, cancellation).ConfigureAwait(false))
             {
                 if (deadlineUtc.HasValue && deadlineUtc.Value < DateTime.UtcNow) // todo use TimeProvider
                 {

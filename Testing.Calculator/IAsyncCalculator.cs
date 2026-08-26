@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Testing.Calculator;
@@ -23,5 +24,5 @@ public interface IAsyncCalculator : IAsyncDisposable
     /// <param name="count"></param>
     /// <param name="delay"></param>
     /// <returns></returns>
-    IAsyncEnumerable<int> GetRange(int start, int count, TimeSpan delay);
+    IAsyncEnumerable<int> GetRange(int start, int count, TimeSpan delay, CancellationToken cancellation = default);
 }

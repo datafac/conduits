@@ -5,11 +5,12 @@ public enum ExcpCode
     Undefined = 0,
     // general errors
     DeserializationError = 1,
-    DeadlineExceeded = 2,
-    UnsupportedRequestType = 3,
-    UnsupportedResponseType = 4,
-    OtherException = 5,
+    DeadlineExceededqqq = 2,
+    OperationCancelled = 3,
+    UnsupportedRequestType = 4,
+    UnsupportedResponseType = 5,
+    OtherException = 6,
     // calculator errors
-    DivideByZero = 6,
-    Overflow = 7,
+    DivideByZero = 7,
+    Overflow = 8,
 }

@@ -33,7 +33,7 @@ internal class ProtobufNetServer : IProtobufNetContract
         using var deadlineCts = new CancellationTokenSource(timeout);
         using var requestCts = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken, deadlineCts.Token);
         var result = await _requestHandler.SimpleUnaryCall(requestBlob.Blob, context.Deadline, requestCts.Token);
-        return new ResultBlob() { Blob = result.ToArray() }; // todo remove ToArray()
+        return new ResultBlob() { Blob = result.ToArray() }; // todo alloc!
     }
 
     public async IAsyncEnumerable<ResultBlob> ServerStream(RequestBlob requestBlob, CallContext context)
@@ -43,7 +43,7 @@ internal class ProtobufNetServer : IProtobufNetContract
         using var requestCts = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken, deadlineCts.Token);
         await foreach (var result in _requestHandler.ServerStream(requestBlob.Blob, context.Deadline, requestCts.Token))
         {
-            yield return new ResultBlob() { Blob = result.ToArray() }; // todo remove ToArray()
+            yield return new ResultBlob() { Blob = result.ToArray() }; // todo alloc!
         }
     }
 
