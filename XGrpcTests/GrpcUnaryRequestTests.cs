@@ -3,8 +3,6 @@ using DataFac.Conduits.ProtobufNetServer;
 using Shouldly;
 using System.Threading.Tasks;
 using Testing.Calculator;
-using Testing.Calculator.Client;
-using Testing.Calculator.Server;
 
 namespace XGrpcTests;
 

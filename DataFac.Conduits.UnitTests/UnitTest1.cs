@@ -19,15 +19,17 @@ public class UnitTest1
         using var server = new ConduitServer(new WeatherService());
         using (conduitServer = new FakeConduitServer(server))
         {
-            using var conduitClient = new FakeConduitClient(conduitServer);
+            await using var conduitClient = new FakeConduitClient(conduitServer);
             using var client = new WeatherClient(conduitClient, true);
             var weather = await client.GetWeather("Brisbane", cts.Token);
             weather.ShouldNotBeNull();
             weather.Tag.ShouldBe(WeatherTag.NotFound);
         }
+        // note: conduitServer is disposed
         // repeat
         {
-            using var client = new WeatherClient(new FakeConduitClient(conduitServer));
+            await using var conduitClient = new FakeConduitClient(conduitServer);
+            using var client = new WeatherClient(conduitClient, false);
             var ex = await Assert.ThrowsAsync<ObjectDisposedException>(
                          async () =>
                          {
@@ -44,7 +46,7 @@ public class UnitTest1
         using var server = new ConduitServer(new WeatherService());
         using var conduitServer = new FakeConduitServer(server);
         {
-            using var conduitClient = new FakeConduitClient(conduitServer);
+            await using var conduitClient = new FakeConduitClient(conduitServer);
             using var client = new WeatherClient(conduitClient);
             await client.UpdateWeather(new WeatherData(WeatherTag.WeatherData, "Brisbane", 31, DateTime.UtcNow), cts.Token);
             var weather = await client.GetWeather("Brisbane", cts.Token);

@@ -5,17 +5,17 @@ using System.Threading.Tasks;
 
 namespace DataFac.Conduits.Testing;
 
-public class FakeConduitClient : IConduitClient, IDisposable
+public class FakeConduitClient : IConduitClient, IAsyncDisposable
 {
     private readonly FakeConduitServer _server;
-    private volatile bool _disposed = false;
 
     public FakeConduitClient(FakeConduitServer server)
     {
         _server = server ?? throw new ArgumentNullException(nameof(server));
     }
 
-    public void Dispose()
+    private volatile bool _disposed = false;
+    public async ValueTask DisposeAsync()
     {
         if (_disposed) return;
         _disposed = true;

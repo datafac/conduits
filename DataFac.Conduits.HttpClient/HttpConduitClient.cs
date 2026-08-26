@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace DataFac.Conduits.HttpClient;
 
-public class HttpConduitClient : IDisposable, IConduitClient
+public class HttpConduitClient : IConduitClient
 {
     private readonly System.Net.Http.HttpClient _httpClient;
     private readonly bool _httpClientOwned = false;
@@ -27,7 +28,7 @@ public class HttpConduitClient : IDisposable, IConduitClient
     }
 
     private volatile bool _disposed = false;
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         if (_disposed) return;
         _disposed = true;

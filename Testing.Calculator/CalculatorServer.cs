@@ -2,21 +2,29 @@
 using Nerdbank.MessagePack;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Testing.Calculator.Server;
+namespace Testing.Calculator;
 
 public class CalculatorServer : IConduitServer
 {
     private static readonly MessagePackSerializer serializer = new MessagePackSerializer();
+    private static readonly ReadOnlyMemory<byte> errorDeadlineExceeded
+        = serializer.Serialize<ResultBase>(
+            new ErrorResult
+            {
+                Code = ExcpCode.DeadlineExceeded,
+                Message = "Completion deadline exceeded"
+            });
     private static readonly ReadOnlyMemory<byte> errorDeserializationFailure
         = serializer.Serialize<ResultBase>(
             new ErrorResult
             {
-                Code = ExcpCode.UnknownOther,
+                Code = ExcpCode.DeserializationError,
                 Message = "Failed to deserialize request"
             });
 
@@ -33,6 +41,7 @@ public class CalculatorServer : IConduitServer
 
     public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> requestBytes, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
+        if (deadlineUtc.HasValue && deadlineUtc.Value < DateTime.UtcNow) return errorDeadlineExceeded; // todo use TimeProvider
         RequestBase? request = serializer.Deserialize<RequestBase>(requestBytes);
         if (request is null) return errorDeserializationFailure;
         ResultBase result;
@@ -41,7 +50,7 @@ public class CalculatorServer : IConduitServer
             result = request switch
             {
                 BinOpRequest br => new UnaryResult() { X = await _calculator.DoBinOp(br.A, br.Op, br.B) },
-                _ => new ErrorResult { Code = ExcpCode.UnknownRequest, Message = $"Unknown request type: {request.GetType().Name}" }
+                _ => new ErrorResult { Code = ExcpCode.UnsupportedRequestType, Message = $"Unknown request type: {request.GetType().Name}" }
             };
         }
         catch (DivideByZeroException e)
@@ -54,13 +63,18 @@ public class CalculatorServer : IConduitServer
         }
         catch (Exception e)
         {
-            result = new ErrorResult { Code = ExcpCode.UnknownOther, Message = e.Message };
+            result = new ErrorResult { Code = ExcpCode.OtherException, Message = e.Message };
         }
         return serializer.Serialize<ResultBase>(result);
     }
 
     public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> requestBytes, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
+        if (deadlineUtc.HasValue && deadlineUtc.Value < DateTime.UtcNow) // todo use TimeProvider
+        {
+            yield return errorDeadlineExceeded;
+            yield break;
+        }
         RequestBase? request = serializer.Deserialize<RequestBase>(requestBytes);
         if (request is null)
         {
@@ -70,12 +84,17 @@ public class CalculatorServer : IConduitServer
         {
             await foreach (int x in _calculator.GetRange(rr.Start, rr.Count, rr.Delay).WithCancellation(cancellation).ConfigureAwait(false))
             {
+                if (deadlineUtc.HasValue && deadlineUtc.Value < DateTime.UtcNow) // todo use TimeProvider
+                {
+                    yield return errorDeadlineExceeded;
+                    yield break;
+                }
                 yield return serializer.Serialize<ResultBase>(new RangeResult() { X = x });
             }
         }
         else
         {
-            yield return serializer.Serialize<ResultBase>(new ErrorResult { Code = ExcpCode.UnknownRequest, Message = $"Unknown request type: {request.GetType().Name}" });
+            yield return serializer.Serialize<ResultBase>(new ErrorResult { Code = ExcpCode.UnsupportedRequestType, Message = $"Unknown request type: {request.GetType().Name}" });
         }
     }
 

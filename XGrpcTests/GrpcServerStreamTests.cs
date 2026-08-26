@@ -4,10 +4,10 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using Testing.Calculator.Server;
-using Testing.Calculator.Client;
 using DataFac.Conduits.ProtobufNetClient;
 using DataFac.Conduits.ProtobufNetServer;
+using DataFac.Conduits.Testing;
+using Testing.Calculator;
 
 namespace XGrpcTests;
 
@@ -29,9 +29,10 @@ internal static class AsyncEnumerableHelpers
     }
 }
 
-public class  GrpcServerStreamTests
+public class ProtobufNetServerStreamTests
 {
     private const string host = "localhost";
+
     [Fact]
     public async Task GetStream()
     {
@@ -54,5 +55,31 @@ public class  GrpcServerStreamTests
         client.MaxCallDuration = TimeSpan.FromSeconds(5);
         var ex = await Assert.ThrowsAsync<RpcException>(async () => { await client.GetRange(0, 10, TimeSpan.FromSeconds(1)).ToListAsyncInternal(); });
         ex.Message.ShouldContain("DeadlineExceeded");
+    }
+}
+public class FakeServerStreamTests
+{
+    [Fact]
+    public async Task GetStream()
+    {
+        using var server = new FakeConduitServer(new CalculatorServer(new Calculator()));
+        await using var client = new CalculatorClient(new FakeConduitClient(server));
+
+        // duration should be ~1.0s
+        var result = await client.GetRange(0, 10, TimeSpan.FromSeconds(0.1)).ToListAsyncInternal();
+        result.ShouldBeEquivalentTo(Enumerable.Range(0, 10).ToList());
+    }
+
+    [Fact]
+    public async Task GetStreamTimeout()
+    {
+        using var server = new FakeConduitServer(new CalculatorServer(new Calculator()));
+        await using var client = new CalculatorClient(new FakeConduitClient(server));
+
+        // returning the entire stream would take ~10s, but we have a max call
+        // duration of 5s, so this call should timeout after ~5s
+        client.MaxCallDuration = TimeSpan.FromSeconds(5);
+        var ex = await Assert.ThrowsAsync<TimeoutException>(async () => { await client.GetRange(0, 10, TimeSpan.FromSeconds(1)).ToListAsyncInternal(); });
+        ex.Message.ShouldBe("Completion deadline exceeded");
     }
 }

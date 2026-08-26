@@ -2,9 +2,10 @@
 using Nerdbank.MessagePack;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
-namespace Testing.Calculator.Client;
+namespace Testing.Calculator;
 
 public class CalculatorClient : IAsyncCalculator
 {
@@ -26,18 +27,18 @@ public class CalculatorClient : IAsyncCalculator
         GC.SuppressFinalize(this);
     }
 
-    public TimeSpan MaxCallDuration
+    private TimeSpan? _maxCallDuration;
+    public TimeSpan? MaxCallDuration
     {
-        get;
+        get { return _maxCallDuration; }
         set
         {
-            field = value < TimeSpan.FromSeconds(5)
-                ? TimeSpan.FromSeconds(5)
-                : value > TimeSpan.FromSeconds(300)
-                    ? TimeSpan.FromSeconds(300)
-                    : value;
+            if (value is null) _maxCallDuration = null;
+            else if (value < TimeSpan.Zero) _maxCallDuration = TimeSpan.Zero;
+            else if (value > TimeSpan.FromSeconds(300)) _maxCallDuration = TimeSpan.FromSeconds(300);
+            else _maxCallDuration = value;
         }
-    } = TimeSpan.FromSeconds(30);
+    }
 
     private static ResultBase HandleResult(ResultBase? result)
     {
@@ -46,10 +47,13 @@ public class CalculatorClient : IAsyncCalculator
             null => throw new Exception("Failed to deserialise result"),
             ErrorResult errorResult => errorResult.Code switch
             {
+                ExcpCode.DeserializationError => throw new InvalidDataException(errorResult.Message),
+                ExcpCode.DeadlineExceeded => throw new TimeoutException(errorResult.Message),
+                ExcpCode.UnsupportedRequestType => throw new Exception(errorResult.Message),
+                ExcpCode.UnsupportedResponseType => throw new Exception(errorResult.Message),
+                ExcpCode.OtherException => throw new Exception(errorResult.Message),
                 ExcpCode.DivideByZero => throw new DivideByZeroException(errorResult.Message),
                 ExcpCode.Overflow => throw new OverflowException(errorResult.Message),
-                ExcpCode.UnknownOther => throw new Exception(errorResult.Message),
-                ExcpCode.UnknownRequest => throw new Exception(errorResult.Message),
                 _ => throw new Exception($"Unknown error code: {errorResult.Code}")
             },
             _ => result
@@ -58,7 +62,7 @@ public class CalculatorClient : IAsyncCalculator
 
     private async ValueTask<ResultBase?> UnaryCall(RequestBase request)
     {
-        var deadline = DateTime.UtcNow + MaxCallDuration; // todo use time provider
+        DateTime? deadline = _maxCallDuration.HasValue ? DateTime.UtcNow + _maxCallDuration.Value : null; // todo use time provider
         var requestBytes = _serializer.Serialize<RequestBase>(request);
         var resultBytes = await _conduitClient.SimpleUnaryCall(requestBytes, deadline).ConfigureAwait(false);
         return _serializer.Deserialize<ResultBase>(resultBytes);
@@ -80,7 +84,7 @@ public class CalculatorClient : IAsyncCalculator
 
     private async IAsyncEnumerable<ResultBase> ServerStream(RequestBase request)
     {
-        var deadline = DateTime.UtcNow + MaxCallDuration; // todo use time provider
+        DateTime? deadline = _maxCallDuration.HasValue ? DateTime.UtcNow + _maxCallDuration.Value : null; // todo use time provider
         var requestBytes = _serializer.Serialize<RequestBase>(request);
         await foreach (var resultBytes in _conduitClient.ServerStream(requestBytes, deadline).ConfigureAwait(false))
         {

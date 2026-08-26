@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Testing.Calculator.Server;
+namespace Testing.Calculator;
 
 public class Calculator : IAsyncCalculator
 {
@@ -30,3 +30,4 @@ public class Calculator : IAsyncCalculator
         }
     }
 }
+

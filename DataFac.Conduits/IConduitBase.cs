@@ -48,7 +48,7 @@ public interface IConduitServer : IConduitBase
     string ServerVersion { get; }
 }
 
-public interface IConduitClient : IConduitBase
+public interface IConduitClient : IConduitBase, IAsyncDisposable
 {
 
 }

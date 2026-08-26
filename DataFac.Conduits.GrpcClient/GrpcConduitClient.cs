@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DataFac.Conduits.GrpcClient;
 
-public class GrpcConduitClient : IDisposable, IConduitClient
+public class GrpcConduitClient : IConduitClient
 {
     private readonly GrpcChannel _channel;
 
@@ -19,7 +19,7 @@ public class GrpcConduitClient : IDisposable, IConduitClient
     }
 
     private volatile bool _disposed = false;
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         if (_disposed) return;
         _disposed = true;
