@@ -39,6 +39,10 @@ public class CalculatorServer : IConduitServer
         _calculator = calculator;
     }
 
+    public async ValueTask DisposeAsync()
+    {
+    }
+
     public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> requestBytes, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         if (deadlineUtc.HasValue && deadlineUtc.Value < DateTime.UtcNow) return errorDeadlineExceeded; // todo use TimeProvider

@@ -16,11 +16,11 @@ public class UnitTest1
     {
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         FakeConduitServer conduitServer;
-        using var server = new ConduitServer(new WeatherService());
-        using (conduitServer = new FakeConduitServer(server))
+        await using var server = new ConduitServer(new WeatherService());
+        await using (conduitServer = new FakeConduitServer(server))
         {
             await using var conduitClient = new FakeConduitClient(conduitServer);
-            using var client = new WeatherClient(conduitClient, true);
+            await using var client = new WeatherClient(conduitClient, true);
             var weather = await client.GetWeather("Brisbane", cts.Token);
             weather.ShouldNotBeNull();
             weather.Tag.ShouldBe(WeatherTag.NotFound);
@@ -29,7 +29,7 @@ public class UnitTest1
         // repeat
         {
             await using var conduitClient = new FakeConduitClient(conduitServer);
-            using var client = new WeatherClient(conduitClient, false);
+            await using var client = new WeatherClient(conduitClient, false);
             var ex = await Assert.ThrowsAsync<ObjectDisposedException>(
                          async () =>
                          {
@@ -43,18 +43,18 @@ public class UnitTest1
     public async Task ServiceCallsAreRepeatable()
     {
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        using var server = new ConduitServer(new WeatherService());
-        using var conduitServer = new FakeConduitServer(server);
+        await using var server = new ConduitServer(new WeatherService());
+        await using var conduitServer = new FakeConduitServer(server);
         {
             await using var conduitClient = new FakeConduitClient(conduitServer);
-            using var client = new WeatherClient(conduitClient);
+            await using var client = new WeatherClient(conduitClient);
             await client.UpdateWeather(new WeatherData(WeatherTag.WeatherData, "Brisbane", 31, DateTime.UtcNow), cts.Token);
             var weather = await client.GetWeather("Brisbane", cts.Token);
             weather.TemperatureC.ShouldBe(31.0D);
         }
         // repeat
         {
-            using var client = new WeatherClient(new FakeConduitClient(conduitServer));
+            await using var client = new WeatherClient(new FakeConduitClient(conduitServer));
             var weather = await client.GetWeather("Brisbane", cts.Token);
             weather.TemperatureC.ShouldBe(31.0D);
         }
@@ -67,10 +67,10 @@ public class UnitTest1
             ? new CancellationTokenSource(TimeSpan.FromSeconds(30))
             : new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
-        using var server = new ConduitServer(new WeatherService());
-        using var conduitServer = new FakeConduitServer(server);
+        await using var server = new ConduitServer(new WeatherService());
+        await using var conduitServer = new FakeConduitServer(server);
         {
-            using var client = new WeatherClient(new FakeConduitClient(conduitServer));
+            await using var client = new WeatherClient(new FakeConduitClient(conduitServer));
             List<WeatherData> responses = new List<WeatherData>();
             Exception? fault = null;
             var subscriber = Task.Run(async () =>
@@ -115,7 +115,7 @@ public class UnitTest1
                 ? new CancellationTokenSource(TimeSpan.FromSeconds(30))
                 : new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
-            using var client = new WeatherClient(new FakeConduitClient(conduitServer));
+            await using var client = new WeatherClient(new FakeConduitClient(conduitServer));
             List<WeatherData> responses = new List<WeatherData>();
             Exception? fault = null;
             try

@@ -10,13 +10,12 @@ using System.Threading.Tasks;
 
 namespace DataFac.Conduits.UnitTests;
 
-public class WeatherService : IWeatherService, IDisposable
+public class WeatherService : IWeatherService, IAsyncDisposable
 {
     private readonly ConcurrentDictionary<string, WeatherData> _weatherDb = new ConcurrentDictionary<string, WeatherData>();
     private readonly ConcurrentDictionary<string, Subject<WeatherData>> _weatherHub = new ConcurrentDictionary<string, Subject<WeatherData>>();
 
-
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         var subjects = _weatherHub.Values.ToArray();
         foreach (var subject in subjects)
@@ -24,7 +23,6 @@ public class WeatherService : IWeatherService, IDisposable
             subject.Dispose();
         }
     }
-
 
     public ValueTask<WeatherData> GetWeather(string location, CancellationToken token)
     {

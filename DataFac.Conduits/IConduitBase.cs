@@ -41,14 +41,3 @@ public interface IConduitBase
     /// <returns></returns>
     IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default);
 }
-
-public interface IConduitServer : IConduitBase
-{
-    string ServerName { get; }
-    string ServerVersion { get; }
-}
-
-public interface IConduitClient : IConduitBase, IAsyncDisposable
-{
-
-}

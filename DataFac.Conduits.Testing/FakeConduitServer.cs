@@ -5,10 +5,9 @@ using System.Threading.Tasks;
 
 namespace DataFac.Conduits.Testing;
 
-public sealed class FakeConduitServer : IConduitServer, IDisposable
+public sealed class FakeConduitServer : IConduitServer
 {
     private readonly IConduitServer _server;
-    private volatile bool _disposed = false;
 
     public string ServerName => ThisAssembly.AssemblyName;
     public string ServerVersion => ThisAssembly.AssemblyVersion;
@@ -22,10 +21,12 @@ public sealed class FakeConduitServer : IConduitServer, IDisposable
         _server = server ?? throw new ArgumentNullException(nameof(server));
     }
 
-    public void Dispose()
+    private volatile bool _disposed = false;
+    public async ValueTask DisposeAsync()
     {
         if (_disposed) return;
         _disposed = true;
+        // nothing to dispose yet
     }
 
     public IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)

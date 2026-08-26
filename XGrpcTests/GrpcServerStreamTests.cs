@@ -62,7 +62,7 @@ public class FakeServerStreamTests
     [Fact]
     public async Task GetStream()
     {
-        using var server = new FakeConduitServer(new CalculatorServer(new Calculator()));
+        await using var server = new FakeConduitServer(new CalculatorServer(new Calculator()));
         await using var client = new CalculatorClient(new FakeConduitClient(server));
 
         // duration should be ~1.0s
@@ -73,7 +73,7 @@ public class FakeServerStreamTests
     [Fact]
     public async Task GetStreamTimeout()
     {
-        using var server = new FakeConduitServer(new CalculatorServer(new Calculator()));
+        await using var server = new FakeConduitServer(new CalculatorServer(new Calculator()));
         await using var client = new CalculatorClient(new FakeConduitClient(server));
 
         // returning the entire stream would take ~10s, but we have a max call

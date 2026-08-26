@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DataFac.Conduits.UnitTests;
 
-public class WeatherClient : IWeatherService, IDisposable
+public class WeatherClient : IWeatherService, IAsyncDisposable
 {
     private readonly IConduitClient _client;
     private readonly bool Owned;
@@ -17,11 +17,11 @@ public class WeatherClient : IWeatherService, IDisposable
         Owned = owned;
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        if (Owned && _client is IDisposable disposable)
+        if (Owned)
         {
-            disposable.Dispose();
+            await _client.DisposeAsync();
         }
     }
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DataFac.Conduits.UnitTests;
 
-internal sealed class ConduitServer : IConduitServer, IDisposable
+internal sealed class ConduitServer : IConduitServer
 {
     private readonly IWeatherService _server;
 
@@ -18,7 +18,7 @@ internal sealed class ConduitServer : IConduitServer, IDisposable
         _server = server ?? throw new ArgumentNullException(nameof(server));
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         // nothing to dispose yet
     }
