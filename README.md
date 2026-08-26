@@ -10,8 +10,8 @@ Communication patterns abstractions and implementations.
 ## Implementations
 - HTTP/S
 - gRPC
+- protobuf-net
 
 ## Coming later
 - Publish/subscribe pattern
-- AMQP 1.0
-- Azure WebPubSub
+- Mesh/gossip
