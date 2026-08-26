@@ -28,6 +28,10 @@ public class CalculatorClient : IAsyncCalculator
     }
 
     private TimeSpan? _maxCallDuration;
+    /// <summary>
+    /// A duration between 0 and 5 minutes, or null. If not null, this is used to calculate 
+    /// a deadline for each call.
+    /// </summary>
     public TimeSpan? MaxCallDuration
     {
         get { return _maxCallDuration; }

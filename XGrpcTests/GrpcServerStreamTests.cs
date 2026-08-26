@@ -40,6 +40,7 @@ public class ProtobufNetServerStreamTests
         await using var client = new CalculatorClient(new ProtobufGrpcClient(host, server.BoundPort));
 
         // duration should be ~1.0s
+        client.MaxCallDuration = null;
         var result = await client.GetRange(0, 10, TimeSpan.FromSeconds(0.1)).ToListAsyncInternal();
         result.ShouldBeEquivalentTo(Enumerable.Range(0, 10).ToList());
     }
