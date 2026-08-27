@@ -33,7 +33,7 @@ public class GrpcService : DataFac.Conduits.GrpcCommon.GrpcService.GrpcServiceBa
 
     public override async Task<GrpcPayload> StreamUp(IAsyncStreamReader<GrpcPayload> requestStream, ServerCallContext context)
     {
-        IAsyncEnumerable<ReadOnlyMemory<byte>> requests = requestStream.ToAsyncEnumerable((i) => i.Data.Memory, context.CancellationToken);
+        IAsyncEnumerable<ConduitRequest> requests = requestStream.ToAsyncEnumerable((i) => new ConduitRequest(i.Data.Memory), context.CancellationToken);
         var incoming = await _server.ClientStream(requests, context.Deadline, context.CancellationToken);
         return incoming.ToGrpcPayload();
     }

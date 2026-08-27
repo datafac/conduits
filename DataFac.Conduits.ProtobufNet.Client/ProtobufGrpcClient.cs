@@ -29,7 +29,7 @@ public class ProtobufGrpcClient : IConduitClient
         GC.SuppressFinalize(this);
     }
 
-    public ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         throw new NotImplementedException();
     }

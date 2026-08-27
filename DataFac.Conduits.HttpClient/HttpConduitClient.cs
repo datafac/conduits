@@ -59,7 +59,7 @@ public class HttpConduitClient : IConduitClient
         }
     }
 
-    public ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         throw new NotSupportedException();
     }

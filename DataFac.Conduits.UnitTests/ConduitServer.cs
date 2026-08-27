@@ -71,13 +71,13 @@ internal sealed class ConduitServer : IConduitServer
         }
     }
 
-    public async ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public async ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         var pushTask = Task.Run(async () =>
         {
             await foreach (var request in requests)
             {
-                var weatherRequest = WeatherData.FromSpan(request.Span);
+                var weatherRequest = WeatherData.FromSpan(request.Payload.Span);
                 switch (weatherRequest.Tag)
                 {
                     case WeatherTag.WeatherData:

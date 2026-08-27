@@ -62,7 +62,7 @@ public class GrpcConduitClient : IConduitClient
         }
     }
 
-    public async ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public async ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         CheckNotDisposed();
         var client = new GrpcService.GrpcServiceClient(_channel);
@@ -72,7 +72,7 @@ public class GrpcConduitClient : IConduitClient
             var requestStream = call.RequestStream;
             await foreach (var request in requests)
             {
-                await requestStream.WriteAsync(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request) });
+                await requestStream.WriteAsync(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request.Payload) });
             }
 
             await requestStream.CompleteAsync();

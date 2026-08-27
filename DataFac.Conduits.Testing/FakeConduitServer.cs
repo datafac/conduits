@@ -44,7 +44,7 @@ public sealed class FakeConduitServer : IConduitServer
         return _server.SimpleUnaryCall(request, deadlineUtc, cancellation);
     }
 
-    public ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
         return _server.ClientStream(requests, deadlineUtc, cancellation);

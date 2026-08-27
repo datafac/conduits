@@ -7,12 +7,38 @@ namespace DataFac.Conduits;
 
 public readonly struct ConduitRequest
 {
+    public readonly ReadOnlyMemory<byte> Control;
     public readonly ReadOnlyMemory<byte> Payload;
 
     public ConduitRequest(ReadOnlyMemory<byte> payload)
     {
+        Control = ReadOnlyMemory<byte>.Empty; // todo
         Payload = payload;
     }
+
+    //public ConduitRequest(ReadOnlyMemory<byte> control, ReadOnlyMemory<byte> payload)
+    //{
+    //    Control = control;
+    //    Payload = payload;
+    //}
+}
+
+public readonly struct ConduitResponse
+{
+    public readonly ReadOnlyMemory<byte> Control;
+    public readonly ReadOnlyMemory<byte> Payload;
+
+    public ConduitResponse(ReadOnlyMemory<byte> payload)
+    {
+        Control = ReadOnlyMemory<byte>.Empty; // todo
+        Payload = payload;
+    }
+
+    //public ConduitRequest(ReadOnlyMemory<byte> control, ReadOnlyMemory<byte> payload)
+    //{
+    //    Control = control;
+    //    Payload = payload;
+    //}
 }
 
 public interface IConduitBase
@@ -40,7 +66,7 @@ public interface IConduitBase
     /// <param name="deadlineUtc"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default);
+    ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default);
 
     /// <summary>
     /// Simultaneously handles a stream of requests and a stream of results. These may be interleaved.
