@@ -19,15 +19,15 @@ public class GrpcService : DataFac.Conduits.GrpcCommon.GrpcService.GrpcServiceBa
 
     public override async Task<GrpcPayload> NoStream(GrpcPayload request, ServerCallContext context)
     {
-        ReadOnlyMemory<byte> result = await _server.SimpleUnaryCall(new ConduitRequest(request.Data.Memory), context.Deadline, context.CancellationToken);
-        return result.ToGrpcPayload();
+        var result = await _server.SimpleUnaryCall(new ConduitRequest(request.Data.Memory), context.Deadline, context.CancellationToken);
+        return result.Payload.ToGrpcPayload();
     }
 
     public override async Task StreamDn(GrpcPayload request, IServerStreamWriter<GrpcPayload> responseStream, ServerCallContext context)
     {
         await foreach (var response in _server.ServerStream(new ConduitRequest(request.Data.Memory), context.Deadline, context.CancellationToken))
         {
-            await responseStream.WriteAsync(response.ToGrpcPayload());
+            await responseStream.WriteAsync(response.Payload.ToGrpcPayload());
         }
     }
 
@@ -40,7 +40,7 @@ public class GrpcService : DataFac.Conduits.GrpcCommon.GrpcService.GrpcServiceBa
 
     public override async Task BiStream(IAsyncStreamReader<GrpcPayload> requestStream, IServerStreamWriter<GrpcPayload> responseStream, ServerCallContext context)
     {
-        var requests = requestStream.ToAsyncEnumerable((i) => i.Data.Memory, context.CancellationToken);
+        var requests = requestStream.ToAsyncEnumerable((i) => new ConduitRequest(i.Data.Memory), context.CancellationToken);
         await foreach (var response in _server.DuplexStream(requests, context.Deadline, context.CancellationToken))
         {
             await responseStream.WriteAsync(response.ToGrpcPayload());

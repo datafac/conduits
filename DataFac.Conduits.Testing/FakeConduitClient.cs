@@ -24,13 +24,13 @@ public class FakeConduitClient : IConduitClient, IAsyncDisposable
         _disposed = true;
     }
 
-    public IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public IAsyncEnumerable<ConduitResponse> ServerStream(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
         return _server.ServerStream(request, deadlineUtc, cancellation);
     }
 
-    public ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public ValueTask<ConduitResponse> SimpleUnaryCall(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
         return _server.SimpleUnaryCall(request, deadlineUtc, cancellation);
@@ -42,7 +42,7 @@ public class FakeConduitClient : IConduitClient, IAsyncDisposable
         return _server.ClientStream(requests, deadlineUtc, cancellation);
     }
 
-    public IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
         return _server.DuplexStream(requests, deadlineUtc, cancellation);

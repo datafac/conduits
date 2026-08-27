@@ -34,26 +34,26 @@ public class ProtobufGrpcClient : IConduitClient
         throw new NotImplementedException();
     }
 
-    public IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         throw new NotImplementedException();
     }
 
-    public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ConduitRequest request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public async IAsyncEnumerable<ConduitResponse> ServerStream(ConduitRequest request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         var callOptions = new CallOptions(null, deadlineUtc, cancellation);
         RequestBlob requestBlob = new RequestBlob() { Blob = request.Payload.ToArray() }; // todo alloc!
         await foreach (var resultBlob in _contract.ServerStream(requestBlob, new CallContext(callOptions)))
         {
-            yield return resultBlob.Blob;
+            yield return new ConduitResponse(resultBlob.Blob);
         }
     }
 
-    public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public async ValueTask<ConduitResponse> SimpleUnaryCall(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         var callOptions = new CallOptions(null, deadlineUtc, cancellation);
         RequestBlob requestBlob = new RequestBlob() { Blob = request.Payload.ToArray() }; // todo alloc!
         var resultBlob = await _contract.UnaryRequest(requestBlob, new CallContext(callOptions));
-        return resultBlob.Blob;
+        return new ConduitResponse(resultBlob.Blob);
     }
 }

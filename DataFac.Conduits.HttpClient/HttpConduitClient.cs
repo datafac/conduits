@@ -39,19 +39,19 @@ public class HttpConduitClient : IConduitClient
         }
     }
 
-    public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public async ValueTask<ConduitResponse> SimpleUnaryCall(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         var outgoing = request.Payload.ToUserData(deadlineUtc.HasValue ? deadlineUtc.Value.Ticks : null);
         var incoming = await _swagClient.NoStreamAsync(outgoing, cancellation);
-        return incoming.ToPayload();
+        return new ConduitResponse(incoming.ToPayload());
     }
 
-    public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ConduitRequest request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public async IAsyncEnumerable<ConduitResponse> ServerStream(ConduitRequest request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         var outgoing = request.Payload.ToUserData(deadlineUtc.HasValue ? deadlineUtc.Value.Ticks : null);
         foreach (var incoming in await _swagClient.StreamDnAsync(outgoing, cancellation))
         {
-            yield return incoming.ToPayload();
+            yield return new ConduitResponse(incoming.ToPayload());
             if (!cancellation.IsCancellationRequested)
             {
                 throw new OperationCanceledException("Deadline exceeded");
@@ -64,7 +64,7 @@ public class HttpConduitClient : IConduitClient
         throw new NotSupportedException();
     }
 
-    public IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         throw new NotSupportedException();
     }

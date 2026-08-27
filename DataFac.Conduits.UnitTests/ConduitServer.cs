@@ -27,12 +27,12 @@ internal sealed class ConduitServer : IConduitServer
         // nothing to dispose yet
     }
 
-    public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public async ValueTask<ConduitResponse> SimpleUnaryCall(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         return await ProcessRequest(request, cancellation);
     }
 
-    private async ValueTask<ReadOnlyMemory<byte>> ProcessRequest(ConduitRequest request, CancellationToken token)
+    private async ValueTask<ConduitResponse> ProcessRequest(ConduitRequest request, CancellationToken token)
     {
         var weatherRequest = WeatherData.FromSpan(request.Payload.Span);
         switch (weatherRequest.Tag)
@@ -40,19 +40,19 @@ internal sealed class ConduitServer : IConduitServer
             case WeatherTag.GetWeatherData:
                 {
                     WeatherData weatherResponse = await _server.GetWeather(weatherRequest.Location, token);
-                    return weatherResponse.ToMemory();
+                    return new ConduitResponse(weatherResponse.ToMemory());
                 }
             case WeatherTag.WeatherData:
                 {
                     await _server.UpdateWeather(weatherRequest, token);
-                    return new WeatherData(WeatherTag.OK, weatherRequest.Location).ToMemory();
+                    return new ConduitResponse(new WeatherData(WeatherTag.OK, weatherRequest.Location).ToMemory());
                 }
             default:
-                return WeatherData.Empty.ToMemory();
+                return new ConduitResponse(WeatherData.Empty.ToMemory());
         }
     }
 
-    public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ConduitRequest request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public async IAsyncEnumerable<ConduitResponse> ServerStream(ConduitRequest request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         var weatherRequest = WeatherData.FromSpan(request.Payload.Span);
         switch (weatherRequest.Tag)
@@ -62,7 +62,7 @@ internal sealed class ConduitServer : IConduitServer
                     await foreach (WeatherData response in _server.GetWeatherStream(weatherRequest.Location, cancellation))
                     {
                         ReadOnlyMemory<byte> payload = response.ToMemory();
-                        yield return payload;
+                        yield return new ConduitResponse(payload);
                     }
                 }
                 break;
@@ -94,13 +94,13 @@ internal sealed class ConduitServer : IConduitServer
         return WeatherData.Empty.ToMemory();
     }
 
-    public async IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ReadOnlyMemory<byte>> requests, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public async IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         var pushTask = Task.Run(async () =>
         {
             await foreach (var request in requests)
             {
-                var weatherRequest = WeatherData.FromSpan(request.Span);
+                var weatherRequest = WeatherData.FromSpan(request.Payload.Span);
                 switch (weatherRequest.Tag)
                 {
                     case WeatherTag.WeatherData:

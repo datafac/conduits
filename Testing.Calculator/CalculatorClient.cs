@@ -78,7 +78,7 @@ public class CalculatorClient : IAsyncCalculator
         DateTime? deadline = calculateDeadline();
         var requestBytes = _serializer.Serialize<RequestBase>(request);
         var resultBytes = await _conduitClient.SimpleUnaryCall(new ConduitRequest(requestBytes), deadline).ConfigureAwait(false);
-        return _serializer.Deserialize<ResultBase>(resultBytes);
+        return _serializer.Deserialize<ResultBase>(resultBytes.Payload);
     }
 
     public async ValueTask<double> DoBinOp(double a, BinOp op, double b)
@@ -101,7 +101,7 @@ public class CalculatorClient : IAsyncCalculator
         var requestBytes = _serializer.Serialize<RequestBase>(request);
         await foreach (var resultBytes in _conduitClient.ServerStream(new ConduitRequest(requestBytes), deadline, cancellation).ConfigureAwait(false))
         {
-            var result = _serializer.Deserialize<ResultBase>(resultBytes);
+            var result = _serializer.Deserialize<ResultBase>(resultBytes.Payload);
             yield return HandleResult(result);
         }
     }
