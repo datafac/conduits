@@ -23,7 +23,7 @@ public interface IConduitBase
     /// <param name="request"></param>
     /// <param name="deadlineUtc"></param>
     /// <param name="cancellation"></param>
-    ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default);
+    ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default);
 
     /// <summary>
     /// Handles a single request and returns a stream of results.

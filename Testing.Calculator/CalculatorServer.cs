@@ -45,10 +45,10 @@ public class CalculatorServer : IConduitServer
     {
     }
 
-    public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> requestBytes, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ConduitRequest requestBytes, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         if (deadlineUtc.HasValue && deadlineUtc.Value < _timeProvider.GetUtcNow().UtcDateTime) return errorDeadlineExceeded; // todo use TimeProvider
-        RequestBase? request = serializer.Deserialize<RequestBase>(requestBytes);
+        RequestBase? request = serializer.Deserialize<RequestBase>(requestBytes.Payload);
         if (request is null) return errorDeserializationFailure;
         ResultBase result;
         try

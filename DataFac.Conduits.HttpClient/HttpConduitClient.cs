@@ -39,9 +39,9 @@ public class HttpConduitClient : IConduitClient
         }
     }
 
-    public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
-        var outgoing = request.ToUserData(deadlineUtc.HasValue ? deadlineUtc.Value.Ticks : null);
+        var outgoing = request.Payload.ToUserData(deadlineUtc.HasValue ? deadlineUtc.Value.Ticks : null);
         var incoming = await _swagClient.NoStreamAsync(outgoing, cancellation);
         return incoming.ToPayload();
     }

@@ -77,7 +77,7 @@ public class CalculatorClient : IAsyncCalculator
     {
         DateTime? deadline = calculateDeadline();
         var requestBytes = _serializer.Serialize<RequestBase>(request);
-        var resultBytes = await _conduitClient.SimpleUnaryCall(requestBytes, deadline).ConfigureAwait(false);
+        var resultBytes = await _conduitClient.SimpleUnaryCall(new ConduitRequest(requestBytes), deadline).ConfigureAwait(false);
         return _serializer.Deserialize<ResultBase>(resultBytes);
     }
 

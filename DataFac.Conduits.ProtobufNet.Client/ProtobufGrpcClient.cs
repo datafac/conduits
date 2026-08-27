@@ -49,10 +49,10 @@ public class ProtobufGrpcClient : IConduitClient
         }
     }
 
-    public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         var callOptions = new CallOptions(null, deadlineUtc, cancellation);
-        RequestBlob requestBlob = new RequestBlob() { Blob = request.ToArray() }; // todo alloc!
+        RequestBlob requestBlob = new RequestBlob() { Blob = request.Payload.ToArray() }; // todo alloc!
         var resultBlob = await _contract.UnaryRequest(requestBlob, new CallContext(callOptions));
         return resultBlob.Blob;
     }

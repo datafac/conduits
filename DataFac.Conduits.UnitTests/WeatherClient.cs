@@ -29,7 +29,7 @@ public class WeatherClient : IWeatherService, IAsyncDisposable
     {
         var request = new WeatherData(WeatherTag.GetWeatherData, location);
         var payload = request.ToMemory();
-        var reply = await _client.SimpleUnaryCall(payload, _client.TimeProvider.GetUtcNow().UtcDateTime.AddSeconds(30), token);
+        var reply = await _client.SimpleUnaryCall(new ConduitRequest(payload), _client.TimeProvider.GetUtcNow().UtcDateTime.AddSeconds(30), token);
         return WeatherData.FromSpan(reply.Span);
     }
 
@@ -48,7 +48,7 @@ public class WeatherClient : IWeatherService, IAsyncDisposable
     public async ValueTask UpdateWeather(WeatherData request, CancellationToken token)
     {
         var payload = request.ToMemory();
-        var _ = await _client.SimpleUnaryCall(payload, _client.TimeProvider.GetUtcNow().UtcDateTime.AddSeconds(30), token);
+        var _ = await _client.SimpleUnaryCall(new ConduitRequest(payload), _client.TimeProvider.GetUtcNow().UtcDateTime.AddSeconds(30), token);
     }
 
 }

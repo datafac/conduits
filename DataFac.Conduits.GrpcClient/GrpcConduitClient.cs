@@ -41,11 +41,11 @@ public class GrpcConduitClient : IConduitClient
         if (_disposed) ThrowDisposed();
     }
 
-    public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         CheckNotDisposed();
         var client = new GrpcService.GrpcServiceClient(_channel);
-        var incoming = await client.NoStreamAsync(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request) }, null, deadlineUtc, cancellation);
+        var incoming = await client.NoStreamAsync(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request.Payload) }, null, deadlineUtc, cancellation);
         return incoming.Data.Memory;
     }
 

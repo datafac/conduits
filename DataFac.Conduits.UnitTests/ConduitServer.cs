@@ -27,14 +27,14 @@ internal sealed class ConduitServer : IConduitServer
         // nothing to dispose yet
     }
 
-    public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         return await ProcessRequest(request, cancellation);
     }
 
-    private async ValueTask<ReadOnlyMemory<byte>> ProcessRequest(ReadOnlyMemory<byte> request, CancellationToken token)
+    private async ValueTask<ReadOnlyMemory<byte>> ProcessRequest(ConduitRequest request, CancellationToken token)
     {
-        var weatherRequest = WeatherData.FromSpan(request.Span);
+        var weatherRequest = WeatherData.FromSpan(request.Payload.Span);
         switch (weatherRequest.Tag)
         {
             case WeatherTag.GetWeatherData:

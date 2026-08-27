@@ -19,7 +19,7 @@ public class GrpcService : DataFac.Conduits.GrpcCommon.GrpcService.GrpcServiceBa
 
     public override async Task<GrpcPayload> NoStream(GrpcPayload request, ServerCallContext context)
     {
-        ReadOnlyMemory<byte> result = await _server.SimpleUnaryCall(request.Data.Memory, context.Deadline, context.CancellationToken);
+        ReadOnlyMemory<byte> result = await _server.SimpleUnaryCall(new ConduitRequest(request.Data.Memory), context.Deadline, context.CancellationToken);
         return result.ToGrpcPayload();
     }
 

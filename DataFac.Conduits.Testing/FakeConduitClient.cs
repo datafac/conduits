@@ -30,7 +30,7 @@ public class FakeConduitClient : IConduitClient, IAsyncDisposable
         return _server.ServerStream(request, deadlineUtc, cancellation);
     }
 
-    public ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
         return _server.SimpleUnaryCall(request, deadlineUtc, cancellation);
