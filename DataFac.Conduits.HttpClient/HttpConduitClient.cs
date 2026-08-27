@@ -46,9 +46,9 @@ public class HttpConduitClient : IConduitClient
         return incoming.ToPayload();
     }
 
-    public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ConduitRequest request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
-        var outgoing = request.ToUserData(deadlineUtc.HasValue ? deadlineUtc.Value.Ticks : null);
+        var outgoing = request.Payload.ToUserData(deadlineUtc.HasValue ? deadlineUtc.Value.Ticks : null);
         foreach (var incoming in await _swagClient.StreamDnAsync(outgoing, cancellation))
         {
             yield return incoming.ToPayload();

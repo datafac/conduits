@@ -39,10 +39,10 @@ public class ProtobufGrpcClient : IConduitClient
         throw new NotImplementedException();
     }
 
-    public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ConduitRequest request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         var callOptions = new CallOptions(null, deadlineUtc, cancellation);
-        RequestBlob requestBlob = new RequestBlob() { Blob = request.ToArray() }; // todo alloc!
+        RequestBlob requestBlob = new RequestBlob() { Blob = request.Payload.ToArray() }; // todo alloc!
         await foreach (var resultBlob in _contract.ServerStream(requestBlob, new CallContext(callOptions)))
         {
             yield return resultBlob.Blob;

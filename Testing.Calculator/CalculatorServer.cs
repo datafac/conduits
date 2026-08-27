@@ -74,14 +74,14 @@ public class CalculatorServer : IConduitServer
         return serializer.Serialize<ResultBase>(result);
     }
 
-    public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> requestBytes, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ConduitRequest requestBytes, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         if (deadlineUtc.HasValue && deadlineUtc.Value < _timeProvider.GetUtcNow().UtcDateTime) // todo use TimeProvider
         {
             yield return errorDeadlineExceeded;
             yield break;
         }
-        RequestBase? request = serializer.Deserialize<RequestBase>(requestBytes);
+        RequestBase? request = serializer.Deserialize<RequestBase>(requestBytes.Payload);
         if (request is null)
         {
             yield return errorDeserializationFailure;

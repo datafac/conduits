@@ -25,7 +25,7 @@ public class GrpcService : DataFac.Conduits.GrpcCommon.GrpcService.GrpcServiceBa
 
     public override async Task StreamDn(GrpcPayload request, IServerStreamWriter<GrpcPayload> responseStream, ServerCallContext context)
     {
-        await foreach (var response in _server.ServerStream(request.Data.Memory, context.Deadline, context.CancellationToken))
+        await foreach (var response in _server.ServerStream(new ConduitRequest(request.Data.Memory), context.Deadline, context.CancellationToken))
         {
             await responseStream.WriteAsync(response.ToGrpcPayload());
         }

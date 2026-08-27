@@ -31,7 +31,7 @@ public interface IConduitBase
     /// <param name="request"></param>
     /// <param name="deadlineUtc"></param>
     /// <param name="cancellation"></param>
-    IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default);
+    IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default);
 
     /// <summary>
     /// Handles a stream of requests then returns a single result.

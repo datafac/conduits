@@ -41,7 +41,7 @@ internal class ProtobufNetServer : IProtobufNetContract
         TimeSpan timeout = GetMaxCallDuration(context);
         using var deadlineCts = new CancellationTokenSource(timeout);
         using var requestCts = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken, deadlineCts.Token);
-        await foreach (var result in _requestHandler.ServerStream(requestBlob.Blob, context.Deadline, requestCts.Token))
+        await foreach (var result in _requestHandler.ServerStream(new ConduitRequest(requestBlob.Blob), context.Deadline, requestCts.Token))
         {
             yield return new ResultBlob() { Blob = result.ToArray() }; // todo alloc!
         }

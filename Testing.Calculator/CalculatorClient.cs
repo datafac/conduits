@@ -99,7 +99,7 @@ public class CalculatorClient : IAsyncCalculator
     {
         DateTime? deadline = calculateDeadline();
         var requestBytes = _serializer.Serialize<RequestBase>(request);
-        await foreach (var resultBytes in _conduitClient.ServerStream(requestBytes, deadline, cancellation).ConfigureAwait(false))
+        await foreach (var resultBytes in _conduitClient.ServerStream(new ConduitRequest(requestBytes), deadline, cancellation).ConfigureAwait(false))
         {
             var result = _serializer.Deserialize<ResultBase>(resultBytes);
             yield return HandleResult(result);

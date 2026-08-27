@@ -37,7 +37,7 @@ public class WeatherClient : IWeatherService, IAsyncDisposable
     {
         var request = new WeatherData(WeatherTag.StreamDn_WeatherFeed, location);
         var payload = request.ToMemory();
-        await foreach (var response in _client.ServerStream(payload, _client.TimeProvider.GetUtcNow().UtcDateTime.AddSeconds(30), token))
+        await foreach (var response in _client.ServerStream(new ConduitRequest(payload), _client.TimeProvider.GetUtcNow().UtcDateTime.AddSeconds(30), token))
         {
             var result = WeatherData.FromSpan(response.Span);
             if (result is not null)
@@ -50,5 +50,4 @@ public class WeatherClient : IWeatherService, IAsyncDisposable
         var payload = request.ToMemory();
         var _ = await _client.SimpleUnaryCall(new ConduitRequest(payload), _client.TimeProvider.GetUtcNow().UtcDateTime.AddSeconds(30), token);
     }
-
 }

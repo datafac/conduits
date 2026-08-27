@@ -32,7 +32,7 @@ public sealed class FakeConduitServer : IConduitServer
         // nothing to dispose yet
     }
 
-    public IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
         return _server.ServerStream(request, deadlineUtc, cancellation);

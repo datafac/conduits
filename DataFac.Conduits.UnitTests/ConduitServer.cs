@@ -52,9 +52,9 @@ internal sealed class ConduitServer : IConduitServer
         }
     }
 
-    public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ConduitRequest request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
-        var weatherRequest = WeatherData.FromSpan(request.Span);
+        var weatherRequest = WeatherData.FromSpan(request.Payload.Span);
         switch (weatherRequest.Tag)
         {
             case WeatherTag.StreamDn_WeatherFeed:
@@ -121,4 +121,3 @@ internal sealed class ConduitServer : IConduitServer
         await Task.WhenAll(pushTask);
     }
 }
-

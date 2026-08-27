@@ -49,11 +49,11 @@ public class GrpcConduitClient : IConduitClient
         return incoming.Data.Memory;
     }
 
-    public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ConduitRequest request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         CheckNotDisposed();
         var client = new GrpcService.GrpcServiceClient(_channel);
-        var call = client.StreamDn(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request) }, null, deadlineUtc, cancellation);
+        var call = client.StreamDn(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request.Payload) }, null, deadlineUtc, cancellation);
 
         var responseStream = call.ResponseStream;
         while (await responseStream.MoveNext(cancellation) && !cancellation.IsCancellationRequested)
