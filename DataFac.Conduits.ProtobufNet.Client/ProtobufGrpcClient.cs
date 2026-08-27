@@ -15,6 +15,8 @@ public class ProtobufGrpcClient : IConduitClient
     private readonly Channel _channel;
     private readonly IProtobufNetContract _contract;
 
+    public TimeProvider TimeProvider => TimeProvider.System;
+
     public ProtobufGrpcClient(string server, int port)
     {
         _channel = new Channel(server, port, ChannelCredentials.Insecure);

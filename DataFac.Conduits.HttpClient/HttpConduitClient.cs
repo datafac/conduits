@@ -12,6 +12,8 @@ public class HttpConduitClient : IConduitClient
     private readonly bool _httpClientOwned = false;
     private readonly SwaggerClient _swagClient;
 
+    public TimeProvider TimeProvider => TimeProvider.System;
+
     public HttpConduitClient(System.Net.Http.HttpClient httpClient, string baseUrl)
     {
         _httpClient = httpClient;

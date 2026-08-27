@@ -8,10 +8,13 @@ namespace DataFac.Conduits.Testing;
 public class FakeConduitClient : IConduitClient, IAsyncDisposable
 {
     private readonly FakeConduitServer _server;
+    private readonly TimeProvider _timeProvider;
+    public TimeProvider TimeProvider => _timeProvider;
 
-    public FakeConduitClient(FakeConduitServer server)
+    public FakeConduitClient(FakeConduitServer server, TimeProvider? timeProvider)
     {
         _server = server ?? throw new ArgumentNullException(nameof(server));
+        _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
     private volatile bool _disposed = false;

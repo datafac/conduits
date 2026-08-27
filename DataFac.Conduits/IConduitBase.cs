@@ -5,6 +5,16 @@ using System.Threading.Tasks;
 
 namespace DataFac.Conduits;
 
+public readonly struct ConduitRequest
+{
+    public readonly ReadOnlyMemory<byte> Payload;
+
+    public ConduitRequest(ReadOnlyMemory<byte> payload)
+    {
+        Payload = payload;
+    }
+}
+
 public interface IConduitBase
 {
     /// <summary>

@@ -1,5 +1,6 @@
 ﻿using DataFac.Conduits.ProtobufNetClient;
 using DataFac.Conduits.ProtobufNetServer;
+using DataFac.Conduits.Testing;
 using Shouldly;
 using System.Threading.Tasks;
 using Testing.Calculator;
@@ -15,7 +16,8 @@ public class GrpcUnaryRequestTests
     [Fact]
     public async Task Multiply()
     {
-        await using var server = new ProtobufGrpcServer(new CalculatorServer(new Calculator()));
+        var timeProvider = new FakeTimeProvider();
+        await using var server = new ProtobufGrpcServer(new CalculatorServer(new Calculator(), timeProvider));
         await using var client = new CalculatorClient(new ProtobufGrpcClient(host, server.BoundPort));
 
         var result = await client.DoBinOp(3, BinOp.Multiply, 4);
@@ -25,7 +27,8 @@ public class GrpcUnaryRequestTests
     [Fact]
     public async Task Divide()
     {
-        await using var server = new ProtobufGrpcServer(new CalculatorServer(new Calculator()));
+        var timeProvider = new FakeTimeProvider();
+        await using var server = new ProtobufGrpcServer(new CalculatorServer(new Calculator(), timeProvider));
         await using var client = new CalculatorClient(new ProtobufGrpcClient(host, server.BoundPort));
 
         var result = await client.DoBinOp(12, BinOp.Divide, 4);
@@ -35,7 +38,8 @@ public class GrpcUnaryRequestTests
     [Fact]
     public async Task DivideByZero()
     {
-        await using var server = new ProtobufGrpcServer(new CalculatorServer(new Calculator()));
+        var timeProvider = new FakeTimeProvider();
+        await using var server = new ProtobufGrpcServer(new CalculatorServer(new Calculator(), timeProvider));
         await using var client = new CalculatorClient(new ProtobufGrpcClient(host, server.BoundPort));
 
         var result = await client.DoBinOp(12, BinOp.Divide, 0);
@@ -45,7 +49,8 @@ public class GrpcUnaryRequestTests
     [Fact]
     public async Task DivideByZero2()
     {
-        await using var server = new ProtobufGrpcServer(new CalculatorServer(new Calculator()));
+        var timeProvider = new FakeTimeProvider();
+        await using var server = new ProtobufGrpcServer(new CalculatorServer(new Calculator(), timeProvider));
         await using var client = new CalculatorClient(new ProtobufGrpcClient(host, server.BoundPort));
 
         var result = await client.DoBinOp(0, BinOp.Divide, 0);
@@ -55,7 +60,8 @@ public class GrpcUnaryRequestTests
     [Fact]
     public async Task Add()
     {
-        await using var server = new ProtobufGrpcServer(new CalculatorServer(new Calculator()));
+        var timeProvider = new FakeTimeProvider();
+        await using var server = new ProtobufGrpcServer(new CalculatorServer(new Calculator(), timeProvider));
         await using var client = new CalculatorClient(new ProtobufGrpcClient(host, server.BoundPort));
 
         var result = await client.DoBinOp(4, BinOp.Add, 3);
@@ -65,7 +71,8 @@ public class GrpcUnaryRequestTests
     [Fact]
     public async Task Subtract()
     {
-        await using var server = new ProtobufGrpcServer(new CalculatorServer(new Calculator()));
+        var timeProvider = new FakeTimeProvider();
+        await using var server = new ProtobufGrpcServer(new CalculatorServer(new Calculator(), timeProvider));
         await using var client = new CalculatorClient(new ProtobufGrpcClient(host, server.BoundPort));
 
         var result = await client.DoBinOp(4, BinOp.Subtract, 3);

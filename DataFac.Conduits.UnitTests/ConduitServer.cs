@@ -8,14 +8,18 @@ namespace DataFac.Conduits.UnitTests;
 
 internal sealed class ConduitServer : IConduitServer
 {
+    private readonly TimeProvider _timeProvider;
+    public TimeProvider TimeProvider => _timeProvider;
+
     private readonly IWeatherService _server;
 
     public string ServerName => ThisAssembly.AssemblyName;
     public string ServerVersion => ThisAssembly.AssemblyFileVersion;
 
-    public ConduitServer(IWeatherService server)
+    public ConduitServer(IWeatherService server, TimeProvider? timeProvider)
     {
         _server = server ?? throw new ArgumentNullException(nameof(server));
+        _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
     public async ValueTask DisposeAsync()

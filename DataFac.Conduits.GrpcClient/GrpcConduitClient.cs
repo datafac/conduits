@@ -13,12 +13,15 @@ public class GrpcConduitClient : IConduitClient
 {
     private readonly GrpcChannel _channel;
 
+    public TimeProvider TimeProvider => TimeProvider.System;
+
     public GrpcConduitClient(Uri address)
     {
         _channel = GrpcChannel.ForAddress(address);
     }
 
     private volatile bool _disposed = false;
+
     public async ValueTask DisposeAsync()
     {
         if (_disposed) return;

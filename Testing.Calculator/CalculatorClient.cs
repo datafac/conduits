@@ -45,6 +45,13 @@ public class CalculatorClient : IAsyncCalculator
         }
     }
 
+    private DateTime? calculateDeadline()
+    {
+        return _maxCallDuration.HasValue
+            ? _conduitClient.TimeProvider.GetUtcNow().UtcDateTime + _maxCallDuration.Value
+            : null;
+    }
+
     private static ResultBase HandleResult(ResultBase? result)
     {
         return result switch
@@ -68,7 +75,7 @@ public class CalculatorClient : IAsyncCalculator
 
     private async ValueTask<ResultBase?> UnaryCall(RequestBase request)
     {
-        DateTime? deadline = _maxCallDuration.HasValue ? DateTime.UtcNow + _maxCallDuration.Value : null; // todo use time provider
+        DateTime? deadline = calculateDeadline();
         var requestBytes = _serializer.Serialize<RequestBase>(request);
         var resultBytes = await _conduitClient.SimpleUnaryCall(requestBytes, deadline).ConfigureAwait(false);
         return _serializer.Deserialize<ResultBase>(resultBytes);
@@ -90,7 +97,7 @@ public class CalculatorClient : IAsyncCalculator
 
     private async IAsyncEnumerable<ResultBase> ServerStream(RequestBase request, CancellationToken cancellation)
     {
-        DateTime? deadline = _maxCallDuration.HasValue ? DateTime.UtcNow + _maxCallDuration.Value : null; // todo use time provider
+        DateTime? deadline = calculateDeadline();
         var requestBytes = _serializer.Serialize<RequestBase>(request);
         await foreach (var resultBytes in _conduitClient.ServerStream(requestBytes, deadline, cancellation).ConfigureAwait(false))
         {

@@ -26,15 +26,19 @@ public class CalculatorServer : IConduitServer
                 Message = "Failed to deserialize request"
             });
 
+    private readonly TimeProvider _timeProvider;
+    public TimeProvider TimeProvider => _timeProvider;
+
     private readonly IAsyncCalculator _calculator;
 
     public string ServerName => throw new NotImplementedException();
 
     public string ServerVersion => throw new NotImplementedException();
 
-    public CalculatorServer(IAsyncCalculator calculator)
+    public CalculatorServer(IAsyncCalculator calculator, TimeProvider? timeProvider)
     {
         _calculator = calculator;
+        _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
     public async ValueTask DisposeAsync()
@@ -43,7 +47,7 @@ public class CalculatorServer : IConduitServer
 
     public async ValueTask<ReadOnlyMemory<byte>> SimpleUnaryCall(ReadOnlyMemory<byte> requestBytes, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
-        if (deadlineUtc.HasValue && deadlineUtc.Value < DateTime.UtcNow) return errorDeadlineExceeded; // todo use TimeProvider
+        if (deadlineUtc.HasValue && deadlineUtc.Value < _timeProvider.GetUtcNow().UtcDateTime) return errorDeadlineExceeded; // todo use TimeProvider
         RequestBase? request = serializer.Deserialize<RequestBase>(requestBytes);
         if (request is null) return errorDeserializationFailure;
         ResultBase result;
@@ -72,7 +76,7 @@ public class CalculatorServer : IConduitServer
 
     public async IAsyncEnumerable<ReadOnlyMemory<byte>> ServerStream(ReadOnlyMemory<byte> requestBytes, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
-        if (deadlineUtc.HasValue && deadlineUtc.Value < DateTime.UtcNow) // todo use TimeProvider
+        if (deadlineUtc.HasValue && deadlineUtc.Value < _timeProvider.GetUtcNow().UtcDateTime) // todo use TimeProvider
         {
             yield return errorDeadlineExceeded;
             yield break;
@@ -86,7 +90,7 @@ public class CalculatorServer : IConduitServer
         {
             await foreach (int x in _calculator.GetRange(rr.Start, rr.Count, rr.Delay, cancellation).ConfigureAwait(false))
             {
-                if (deadlineUtc.HasValue && deadlineUtc.Value < DateTime.UtcNow) // todo use TimeProvider
+                if (deadlineUtc.HasValue && deadlineUtc.Value < _timeProvider.GetUtcNow().UtcDateTime) // todo use TimeProvider
                 {
                     yield return errorDeadlineExceeded;
                     yield break;
