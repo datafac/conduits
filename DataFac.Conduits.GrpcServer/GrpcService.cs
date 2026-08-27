@@ -35,7 +35,7 @@ public class GrpcService : DataFac.Conduits.GrpcCommon.GrpcService.GrpcServiceBa
     {
         IAsyncEnumerable<ConduitRequest> requests = requestStream.ToAsyncEnumerable((i) => new ConduitRequest(i.Data.Memory), context.CancellationToken);
         var incoming = await _server.ClientStream(requests, context.Deadline, context.CancellationToken);
-        return incoming.ToGrpcPayload();
+        return incoming.Payload.ToGrpcPayload();
     }
 
     public override async Task BiStream(IAsyncStreamReader<GrpcPayload> requestStream, IServerStreamWriter<GrpcPayload> responseStream, ServerCallContext context)
@@ -43,7 +43,7 @@ public class GrpcService : DataFac.Conduits.GrpcCommon.GrpcService.GrpcServiceBa
         var requests = requestStream.ToAsyncEnumerable((i) => new ConduitRequest(i.Data.Memory), context.CancellationToken);
         await foreach (var response in _server.DuplexStream(requests, context.Deadline, context.CancellationToken))
         {
-            await responseStream.WriteAsync(response.ToGrpcPayload());
+            await responseStream.WriteAsync(response.Payload.ToGrpcPayload());
         }
     }
 }

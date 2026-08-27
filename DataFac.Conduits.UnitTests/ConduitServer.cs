@@ -71,7 +71,7 @@ internal sealed class ConduitServer : IConduitServer
         }
     }
 
-    public async ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public async ValueTask<ConduitResponse> ClientStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         var pushTask = Task.Run(async () =>
         {
@@ -91,10 +91,10 @@ internal sealed class ConduitServer : IConduitServer
             }
         });
         await Task.WhenAll(pushTask);
-        return WeatherData.Empty.ToMemory();
+        return new ConduitResponse(WeatherData.Empty.ToMemory());
     }
 
-    public async IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public async IAsyncEnumerable<ConduitResponse> DuplexStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         var pushTask = Task.Run(async () =>
         {
@@ -116,7 +116,7 @@ internal sealed class ConduitServer : IConduitServer
         var location = string.Empty; // all
         await foreach (WeatherData response in _server.GetWeatherStream(location, cancellation))
         {
-            yield return response.ToMemory();
+            yield return new ConduitResponse(response.ToMemory());
         }
         await Task.WhenAll(pushTask);
     }

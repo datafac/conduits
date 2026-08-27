@@ -66,7 +66,7 @@ public interface IConduitBase
     /// <param name="deadlineUtc"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default);
+    ValueTask<ConduitResponse> ClientStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default);
 
     /// <summary>
     /// Simultaneously handles a stream of requests and a stream of results. These may be interleaved.
@@ -75,5 +75,5 @@ public interface IConduitBase
     /// <param name="deadlineUtc"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default);
+    IAsyncEnumerable<ConduitResponse> DuplexStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default);
 }

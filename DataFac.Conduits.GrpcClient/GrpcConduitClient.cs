@@ -62,7 +62,7 @@ public class GrpcConduitClient : IConduitClient
         }
     }
 
-    public async ValueTask<ReadOnlyMemory<byte>> ClientStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public async ValueTask<ConduitResponse> ClientStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         CheckNotDisposed();
         var client = new GrpcService.GrpcServiceClient(_channel);
@@ -79,10 +79,10 @@ public class GrpcConduitClient : IConduitClient
         });
         await Task.WhenAll(pushTask);
         var incoming = await call.ResponseAsync;
-        return incoming.Data.Memory;
+        return new ConduitResponse(incoming.Data.Memory);
     }
 
-    public async IAsyncEnumerable<ReadOnlyMemory<byte>> DuplexStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public async IAsyncEnumerable<ConduitResponse> DuplexStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         CheckNotDisposed();
         var client = new GrpcService.GrpcServiceClient(_channel);
@@ -102,7 +102,7 @@ public class GrpcConduitClient : IConduitClient
         var responseStream = call.ResponseStream;
         while (await responseStream.MoveNext(cancellation) && !cancellation.IsCancellationRequested)
         {
-            yield return responseStream.Current.Data.Memory;
+            yield return new ConduitResponse(responseStream.Current.Data.Memory);
         }
 
         await Task.WhenAll(pushTask);
