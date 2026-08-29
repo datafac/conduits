@@ -19,10 +19,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataFac.Conduits.Testing", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataFac.Conduits", "DataFac.Conduits\DataFac.Conduits.csproj", "{9C15D933-ECF6-F647-3674-A8D10E913206}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataFac.Conduits.HttpCommon", "DataFac.Conduits.HttpCommon\DataFac.Conduits.HttpCommon.csproj", "{B8DADAED-C4DA-DC1A-D3C9-F47F64C4F23F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataFac.Conduits.HttpClient", "DataFac.Conduits.HttpClient\DataFac.Conduits.HttpClient.csproj", "{6E6A6ACA-E153-3F41-B43F-A1C7F5B8F40F}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataFac.Conduits.GrpcCommon", "DataFac.Conduits.GrpcCommon\DataFac.Conduits.GrpcCommon.csproj", "{0382773A-42B6-8B23-AAA4-75B4DE4CA975}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataFac.Conduits.GrpcClient", "DataFac.Conduits.GrpcClient\DataFac.Conduits.GrpcClient.csproj", "{73E80A30-73D2-74F8-F244-E6A6D005A72F}"
@@ -57,14 +53,6 @@ Global
 		{9C15D933-ECF6-F647-3674-A8D10E913206}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9C15D933-ECF6-F647-3674-A8D10E913206}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9C15D933-ECF6-F647-3674-A8D10E913206}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B8DADAED-C4DA-DC1A-D3C9-F47F64C4F23F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B8DADAED-C4DA-DC1A-D3C9-F47F64C4F23F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B8DADAED-C4DA-DC1A-D3C9-F47F64C4F23F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B8DADAED-C4DA-DC1A-D3C9-F47F64C4F23F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6E6A6ACA-E153-3F41-B43F-A1C7F5B8F40F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6E6A6ACA-E153-3F41-B43F-A1C7F5B8F40F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6E6A6ACA-E153-3F41-B43F-A1C7F5B8F40F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6E6A6ACA-E153-3F41-B43F-A1C7F5B8F40F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0382773A-42B6-8B23-AAA4-75B4DE4CA975}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0382773A-42B6-8B23-AAA4-75B4DE4CA975}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0382773A-42B6-8B23-AAA4-75B4DE4CA975}.Release|Any CPU.ActiveCfg = Release|Any CPU

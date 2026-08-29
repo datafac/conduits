@@ -17,8 +17,7 @@ public class UnitTest1
         var timeProvider = new FakeTimeProvider();
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         FakeConduitServer conduitServer;
-        await using var server = new ConduitServer(new WeatherService(), timeProvider);
-        await using (conduitServer = new FakeConduitServer(server, timeProvider))
+        await using (conduitServer = new FakeConduitServer(new ConduitServer(timeProvider, new WeatherServer(new WeatherService(), timeProvider)), timeProvider))
         {
             await using var conduitClient = new FakeConduitClient(conduitServer, timeProvider);
             await using var client = new WeatherClient(conduitClient, true);
@@ -45,8 +44,7 @@ public class UnitTest1
     {
         var timeProvider = new FakeTimeProvider();
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        await using var server = new ConduitServer(new WeatherService(), timeProvider);
-        await using var conduitServer = new FakeConduitServer(server, timeProvider);
+        await using var conduitServer = new FakeConduitServer(new ConduitServer(timeProvider, new WeatherServer(new WeatherService(), timeProvider)), timeProvider);
         {
             await using var conduitClient = new FakeConduitClient(conduitServer, timeProvider);
             await using var client = new WeatherClient(conduitClient);
@@ -65,13 +63,13 @@ public class UnitTest1
     [Fact]
     public async Task StreamingServiceCalls()
     {
+        var ct = TestContext.Current.CancellationToken;
         var timeProvider = new FakeTimeProvider();
         var cts1 = Debugger.IsAttached
             ? new CancellationTokenSource(TimeSpan.FromSeconds(30))
             : new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
-        await using var server = new ConduitServer(new WeatherService(), timeProvider);
-        await using var conduitServer = new FakeConduitServer(server, timeProvider);
+        await using var conduitServer = new FakeConduitServer(new ConduitServer(timeProvider, new WeatherServer(new WeatherService(), timeProvider)), timeProvider);
         {
             await using var client = new WeatherClient(new FakeConduitClient(conduitServer, timeProvider));
             List<WeatherData> responses = new List<WeatherData>();
@@ -99,13 +97,13 @@ public class UnitTest1
                 {
                     fault = ex;
                 }
-            });
+            }, ct);
             var publisher = Task.Run(async () =>
             {
                 await Task.Delay(TimeSpan.FromSeconds(1));
                 await client.UpdateWeather(new WeatherData(WeatherTag.WeatherData, "Brisbane", 31, timeProvider.GetUtcNow().UtcDateTime), cts1.Token);
                 await client.UpdateWeather(new WeatherData(WeatherTag.WeatherData, "Brisbane", 32, timeProvider.GetUtcNow().UtcDateTime), cts1.Token);
-            });
+            }, ct);
             await Task.WhenAll(subscriber, publisher);
             fault.ShouldBeNull();
             responses.Count.ShouldBe(2);

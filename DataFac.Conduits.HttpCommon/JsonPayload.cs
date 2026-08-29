@@ -4,8 +4,9 @@ namespace DataFac.Conduits.HttpCommon;
 
 public class JsonPayload
 {
+    public int Control { get; set; }
     public long? Deadline { get; set; }
-    public byte[]? Body { get; set; }
+    public byte[]? Payload { get; set; }
 
     public DateTime? GetDeadlineUtc()
     {

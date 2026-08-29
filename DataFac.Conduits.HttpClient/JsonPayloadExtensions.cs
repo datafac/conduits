@@ -10,12 +10,13 @@ internal static class JsonPayloadExtensions
         return new ReadOnlyMemory<byte>(request.Body);
     }
 
-    public static JsonPayload ToUserData(this ReadOnlyMemory<byte> response, long? deadline)
+    public static JsonPayload ToJsonPayload(this ConduitRequest request, DateTime? deadlineUtc)
     {
         return new JsonPayload()
         {
-            Deadline = deadline,
-            Body = response.ToArray(),
+            Control = (int)request.Control,
+            Deadline = deadlineUtc.HasValue ? deadlineUtc.Value.Ticks : null,
+            Payload = request.Payloadqqq.ToArray(), // todo alloc
         };
     }
 }

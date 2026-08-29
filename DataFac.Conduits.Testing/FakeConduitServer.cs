@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -29,7 +30,13 @@ public sealed class FakeConduitServer : IConduitServer
     {
         if (_disposed) return;
         _disposed = true;
-        // nothing to dispose yet
+        await _server.DisposeAsync();
+    }
+
+    public ValueTask<ConduitResponse> UnaryRequest(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    {
+        if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
+        return _server.UnaryRequest(request, deadlineUtc, cancellation);
     }
 
     public IAsyncEnumerable<ConduitResponse> ServerStream(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
@@ -38,19 +45,13 @@ public sealed class FakeConduitServer : IConduitServer
         return _server.ServerStream(request, deadlineUtc, cancellation);
     }
 
-    public ValueTask<ConduitResponse> SimpleUnaryCall(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
-    {
-        if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
-        return _server.SimpleUnaryCall(request, deadlineUtc, cancellation);
-    }
-
     public ValueTask<ConduitResponse> ClientStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
         return _server.ClientStream(requests, deadlineUtc, cancellation);
     }
 
-    public IAsyncEnumerable<ConduitResponse> DuplexStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public IAsyncEnumerable<ConduitResponse> DuplexStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
         return _server.DuplexStream(requests, deadlineUtc, cancellation);

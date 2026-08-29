@@ -8,26 +8,16 @@ using System.Threading.Tasks;
 
 namespace Testing.Calculator;
 
-public class CalculatorServer : IConduitServer
+public class CalculatorServer : IResponder
 {
     private static readonly MessagePackSerializer serializer = new MessagePackSerializer();
-    private static readonly ConduitResponse errorDeadlineExceeded
-        = new ConduitResponse(serializer.Serialize<ResultBase>(
-            new ErrorResult
-            {
-                Code = ExcpCode.DeadlineExceededqqq,
-                Message = "Completion deadline exceeded"
-            }));
-    private static readonly ConduitResponse errorDeserializationFailure
-        = new ConduitResponse(serializer.Serialize<ResultBase>(
+    private static readonly UserResponse errorDeserializationFailure
+        = new UserResponse(serializer.Serialize<ResultBase>(
             new ErrorResult
             {
                 Code = ExcpCode.DeserializationError,
                 Message = "Failed to deserialize request"
             }));
-
-    private readonly TimeProvider _timeProvider;
-    public TimeProvider TimeProvider => _timeProvider;
 
     private readonly IAsyncCalculator _calculator;
 
@@ -35,19 +25,17 @@ public class CalculatorServer : IConduitServer
 
     public string ServerVersion => throw new NotImplementedException();
 
-    public CalculatorServer(IAsyncCalculator calculator, TimeProvider? timeProvider)
+    public CalculatorServer(IAsyncCalculator calculator)
     {
         _calculator = calculator;
-        _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
     public async ValueTask DisposeAsync()
     {
     }
 
-    public async ValueTask<ConduitResponse> SimpleUnaryCall(ConduitRequest requestBytes, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public async ValueTask<UserResponse> UnaryRequest(UserRequest requestBytes, CancellationToken cancellation = default)
     {
-        if (deadlineUtc.HasValue && deadlineUtc.Value < _timeProvider.GetUtcNow().UtcDateTime) return errorDeadlineExceeded;
         RequestBase? request = serializer.Deserialize<RequestBase>(requestBytes.Payload);
         if (request is null) return errorDeserializationFailure;
         ResultBase result;
@@ -71,16 +59,11 @@ public class CalculatorServer : IConduitServer
         {
             result = new ErrorResult { Code = ExcpCode.OtherException, Message = e.Message };
         }
-        return new ConduitResponse(serializer.Serialize<ResultBase>(result));
+        return new UserResponse(serializer.Serialize<ResultBase>(result));
     }
 
-    public async IAsyncEnumerable<ConduitResponse> ServerStream(ConduitRequest requestBytes, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public async IAsyncEnumerable<UserResponse> ServerStream(UserRequest requestBytes, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
-        if (deadlineUtc.HasValue && deadlineUtc.Value < _timeProvider.GetUtcNow().UtcDateTime)
-        {
-            yield return errorDeadlineExceeded;
-            yield break;
-        }
         RequestBase? request = serializer.Deserialize<RequestBase>(requestBytes.Payload);
         if (request is null)
         {
@@ -91,26 +74,21 @@ public class CalculatorServer : IConduitServer
         {
             await foreach (int x in _calculator.GetRange(rr.Start, rr.Count, rr.Delay, cancellation).ConfigureAwait(false))
             {
-                if (deadlineUtc.HasValue && deadlineUtc.Value < _timeProvider.GetUtcNow().UtcDateTime)
-                {
-                    yield return errorDeadlineExceeded;
-                    yield break;
-                }
-                yield return new ConduitResponse(serializer.Serialize<ResultBase>(new RangeResult() { X = x }));
+                yield return new UserResponse(serializer.Serialize<ResultBase>(new RangeResult() { X = x }));
             }
         }
         else
         {
-            yield return new ConduitResponse(serializer.Serialize<ResultBase>(new ErrorResult { Code = ExcpCode.UnsupportedRequestType, Message = $"Unknown request type: {request.GetType().Name}" }));
+            yield return new UserResponse(serializer.Serialize<ResultBase>(new ErrorResult { Code = ExcpCode.UnsupportedRequestType, Message = $"Unknown request type: {request.GetType().Name}" }));
         }
     }
 
-    public ValueTask<ConduitResponse> ClientStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public ValueTask<UserResponse> ClientStream(IAsyncEnumerable<UserRequest> requests, CancellationToken cancellation = default)
     {
         throw new NotImplementedException();
     }
 
-    public IAsyncEnumerable<ConduitResponse> DuplexStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public IAsyncEnumerable<UserResponse> DuplexStream(IAsyncEnumerable<UserRequest> requests, CancellationToken cancellation = default)
     {
         throw new NotImplementedException();
     }

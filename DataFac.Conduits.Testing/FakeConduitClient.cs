@@ -30,10 +30,10 @@ public class FakeConduitClient : IConduitClient, IAsyncDisposable
         return _server.ServerStream(request, deadlineUtc, cancellation);
     }
 
-    public ValueTask<ConduitResponse> SimpleUnaryCall(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public ValueTask<ConduitResponse> UnaryRequest(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
-        return _server.SimpleUnaryCall(request, deadlineUtc, cancellation);
+        return _server.UnaryRequest(request, deadlineUtc, cancellation);
     }
 
     public ValueTask<ConduitResponse> ClientStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)

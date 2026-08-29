@@ -9,6 +9,39 @@ using System.Threading.Tasks;
 
 namespace DataFac.Conduits.GrpcClient;
 
+internal static class GrpcPayloadExtensions
+{
+    // todo remove
+    public static GrpcPayload ToGrpcPayload(this ConduitResponse response)
+    {
+        return new GrpcPayload()
+        {
+            Code = (int)response.Control,
+            Dataqqq = UnsafeByteOperations.UnsafeWrap(response.Payloadqqq)
+        };
+    }
+
+    public static GrpcPayload ToGrpcPayload(this ConduitRequest request)
+    {
+        return new GrpcPayload()
+        {
+            Code = (int)request.Control,
+            Dataqqq = UnsafeByteOperations.UnsafeWrap(request.Payloadqqq)
+        };
+    }
+
+    // todo remove
+    public static ConduitRequest ToConduitRequest(this GrpcPayload request)
+    {
+        return new ConduitRequest((ControlCode)request.Code, request.Dataqqq.Memory);
+    }
+
+    public static ConduitResponse ToConduitResponse(this GrpcPayload request)
+    {
+        return new ConduitResponse((ControlCode)request.Code, request.Dataqqq.Memory);
+    }
+}
+
 public class GrpcConduitClient : IConduitClient
 {
     private readonly GrpcChannel _channel;
@@ -41,24 +74,24 @@ public class GrpcConduitClient : IConduitClient
         if (_disposed) ThrowDisposed();
     }
 
-    public async ValueTask<ConduitResponse> SimpleUnaryCall(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public async ValueTask<ConduitResponse> UnaryRequest(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         CheckNotDisposed();
         var client = new GrpcService.GrpcServiceClient(_channel);
-        var incoming = await client.NoStreamAsync(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request.Payload) }, null, deadlineUtc, cancellation);
-        return new ConduitResponse(incoming.Data.Memory);
+        var incoming = await client.NoStreamAsync(request.ToGrpcPayload(), null, deadlineUtc, cancellation);
+        return incoming.ToConduitResponse();
     }
 
     public async IAsyncEnumerable<ConduitResponse> ServerStream(ConduitRequest request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         CheckNotDisposed();
         var client = new GrpcService.GrpcServiceClient(_channel);
-        var call = client.StreamDn(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request.Payload) }, null, deadlineUtc, cancellation);
+        var call = client.StreamDn(request.ToGrpcPayload(), null, deadlineUtc, cancellation);
 
         var responseStream = call.ResponseStream;
         while (await responseStream.MoveNext(cancellation) && !cancellation.IsCancellationRequested)
         {
-            yield return new ConduitResponse(responseStream.Current.Data.Memory);
+            yield return responseStream.Current.ToConduitResponse();
         }
     }
 
@@ -72,14 +105,14 @@ public class GrpcConduitClient : IConduitClient
             var requestStream = call.RequestStream;
             await foreach (var request in requests)
             {
-                await requestStream.WriteAsync(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request.Payload) });
+                await requestStream.WriteAsync(request.ToGrpcPayload());
             }
 
             await requestStream.CompleteAsync();
         });
         await Task.WhenAll(pushTask);
         var incoming = await call.ResponseAsync;
-        return new ConduitResponse(incoming.Data.Memory);
+        return incoming.ToConduitResponse();
     }
 
     public async IAsyncEnumerable<ConduitResponse> DuplexStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
@@ -93,7 +126,7 @@ public class GrpcConduitClient : IConduitClient
             var requestStream = call.RequestStream;
             await foreach (var request in requests)
             {
-                await requestStream.WriteAsync(new GrpcPayload() { Data = UnsafeByteOperations.UnsafeWrap(request.Payload) });
+                await requestStream.WriteAsync(request.ToGrpcPayload());
             }
 
             await requestStream.CompleteAsync();
@@ -102,7 +135,7 @@ public class GrpcConduitClient : IConduitClient
         var responseStream = call.ResponseStream;
         while (await responseStream.MoveNext(cancellation) && !cancellation.IsCancellationRequested)
         {
-            yield return new ConduitResponse(responseStream.Current.Data.Memory);
+            yield return responseStream.Current.ToConduitResponse();
         }
 
         await Task.WhenAll(pushTask);

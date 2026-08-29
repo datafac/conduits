@@ -13,6 +13,6 @@ service GrpcService {
 }
 
 message GrpcPayload {
-  int32 tag = 1;
-  bytes data = 2;
+  int32 code = 1;
+  bytes dataqqq = 2;
 }

@@ -9,6 +9,7 @@ using DataFac.Conduits.ProtobufNetServer;
 using DataFac.Conduits.Testing;
 using Testing.Calculator;
 using System.Threading;
+using DataFac.Conduits;
 
 namespace XGrpcTests;
 
@@ -37,27 +38,29 @@ public class ProtobufNetServerStreamTests
     [Fact]
     public async Task GetStream()
     {
+        var ct = TestContext.Current.CancellationToken;
         var timeProvider = new FakeTimeProvider();
-        await using var server = new ProtobufGrpcServer(new CalculatorServer(new Calculator(), timeProvider));
+        await using var server = new ProtobufGrpcServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())));
         await using var client = new CalculatorClient(new ProtobufGrpcClient(host, server.BoundPort));
 
         // duration should be ~1.0s
         client.MaxCallDuration = null;
-        var result = await client.GetRange(0, 10, TimeSpan.FromSeconds(0.1)).ToListAsyncInternal();
+        var result = await client.GetRange(0, 10, TimeSpan.FromSeconds(0.1), ct).ToListAsyncInternal();
         result.ShouldBeEquivalentTo(Enumerable.Range(0, 10).ToList());
     }
 
     [Fact]
     public async Task GetStreamWithDeadline()
     {
+        var ct = TestContext.Current.CancellationToken;
         var timeProvider = new FakeTimeProvider();
-        await using var server = new ProtobufGrpcServer(new CalculatorServer(new Calculator(), timeProvider));
+        await using var server = new ProtobufGrpcServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())));
         await using var client = new CalculatorClient(new ProtobufGrpcClient(host, server.BoundPort));
 
         // returning the entire stream would take ~10s, but we have a max call
         // duration of 5s, so this call should timeout after ~5s
         client.MaxCallDuration = TimeSpan.FromSeconds(5);
-        var ex = await Assert.ThrowsAsync<RpcException>(async () => { await client.GetRange(0, 10, TimeSpan.FromSeconds(1)).ToListAsyncInternal(); });
+        var ex = await Assert.ThrowsAsync<RpcException>(async () => { await client.GetRange(0, 10, TimeSpan.FromSeconds(1), ct).ToListAsyncInternal(); });
         ex.Message.ShouldContain("DeadlineExceeded");
     }
 
@@ -65,7 +68,7 @@ public class ProtobufNetServerStreamTests
     public async Task GetStreamWithCancellation()
     {
         var timeProvider = new FakeTimeProvider();
-        await using var server = new ProtobufGrpcServer(new CalculatorServer(new Calculator(), timeProvider));
+        await using var server = new ProtobufGrpcServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())));
         await using var client = new CalculatorClient(new ProtobufGrpcClient(host, server.BoundPort));
 
         // returning the entire stream would take ~10s, but we have a max call

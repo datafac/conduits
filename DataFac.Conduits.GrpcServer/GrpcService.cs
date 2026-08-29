@@ -19,31 +19,31 @@ public class GrpcService : DataFac.Conduits.GrpcCommon.GrpcService.GrpcServiceBa
 
     public override async Task<GrpcPayload> NoStream(GrpcPayload request, ServerCallContext context)
     {
-        var result = await _server.SimpleUnaryCall(new ConduitRequest(request.Data.Memory), context.Deadline, context.CancellationToken);
-        return result.Payload.ToGrpcPayload();
+        var result = await _server.UnaryRequest(request.ToConduitRequest(), context.Deadline, context.CancellationToken);
+        return result.ToGrpcPayload();
     }
 
     public override async Task StreamDn(GrpcPayload request, IServerStreamWriter<GrpcPayload> responseStream, ServerCallContext context)
     {
-        await foreach (var response in _server.ServerStream(new ConduitRequest(request.Data.Memory), context.Deadline, context.CancellationToken))
+        await foreach (var response in _server.ServerStream(request.ToConduitRequest(), context.Deadline, context.CancellationToken))
         {
-            await responseStream.WriteAsync(response.Payload.ToGrpcPayload());
+            await responseStream.WriteAsync(response.ToGrpcPayload());
         }
     }
 
     public override async Task<GrpcPayload> StreamUp(IAsyncStreamReader<GrpcPayload> requestStream, ServerCallContext context)
     {
-        IAsyncEnumerable<ConduitRequest> requests = requestStream.ToAsyncEnumerable((i) => new ConduitRequest(i.Data.Memory), context.CancellationToken);
-        var incoming = await _server.ClientStream(requests, context.Deadline, context.CancellationToken);
-        return incoming.Payload.ToGrpcPayload();
+        IAsyncEnumerable<ConduitRequest> requests = requestStream.ToAsyncEnumerable((i) => i.ToConduitRequest(), context.CancellationToken);
+        var response = await _server.ClientStream(requests, context.Deadline, context.CancellationToken);
+        return response.ToGrpcPayload();
     }
 
     public override async Task BiStream(IAsyncStreamReader<GrpcPayload> requestStream, IServerStreamWriter<GrpcPayload> responseStream, ServerCallContext context)
     {
-        var requests = requestStream.ToAsyncEnumerable((i) => new ConduitRequest(i.Data.Memory), context.CancellationToken);
+        var requests = requestStream.ToAsyncEnumerable((i) => i.ToConduitRequest(), context.CancellationToken);
         await foreach (var response in _server.DuplexStream(requests, context.Deadline, context.CancellationToken))
         {
-            await responseStream.WriteAsync(response.Payload.ToGrpcPayload());
+            await responseStream.WriteAsync(response.ToGrpcPayload());
         }
     }
 }

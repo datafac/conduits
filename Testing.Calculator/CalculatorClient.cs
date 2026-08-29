@@ -3,6 +3,7 @@ using Nerdbank.MessagePack;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -52,6 +53,23 @@ public class CalculatorClient : IAsyncCalculator
             : null;
     }
 
+    private static string DecodeErrorMessage(ReadOnlySpan<byte> payload)
+    {
+        if (payload.Length == 0) return string.Empty;
+        return Encoding.UTF8.GetString(payload.ToArray());
+    }
+
+    private static ConduitResponse HandleResponse(ConduitResponse response)
+    {
+        // todo move this to protocol client
+        return response.Control switch
+        {
+            ControlCode.Ok => response,
+            ControlCode.Timeout => throw new TimeoutException(DecodeErrorMessage(response.Payloadqqq.Span)),
+            _ => throw new Exception($"Unknown control code: {response.Control}")
+        };
+    }
+
     private static ResultBase HandleResult(ResultBase? result)
     {
         return result switch
@@ -77,8 +95,9 @@ public class CalculatorClient : IAsyncCalculator
     {
         DateTime? deadline = calculateDeadline();
         var requestBytes = _serializer.Serialize<RequestBase>(request);
-        var resultBytes = await _conduitClient.SimpleUnaryCall(new ConduitRequest(requestBytes), deadline).ConfigureAwait(false);
-        return _serializer.Deserialize<ResultBase>(resultBytes.Payload);
+        var response = await _conduitClient.UnaryRequest(new ConduitRequest(ControlCode.Ok, requestBytes), deadline).ConfigureAwait(false);
+        var result = HandleResponse(response);
+        return _serializer.Deserialize<ResultBase>(result.Payloadqqq);
     }
 
     public async ValueTask<double> DoBinOp(double a, BinOp op, double b)
@@ -98,11 +117,10 @@ public class CalculatorClient : IAsyncCalculator
     private async IAsyncEnumerable<ResultBase> ServerStream(RequestBase request, CancellationToken cancellation)
     {
         DateTime? deadline = calculateDeadline();
-        var requestBytes = _serializer.Serialize<RequestBase>(request);
-        await foreach (var resultBytes in _conduitClient.ServerStream(new ConduitRequest(requestBytes), deadline, cancellation).ConfigureAwait(false))
+        ReadOnlyMemory<byte> requestBytes = _serializer.Serialize<RequestBase>(request);
+        await foreach (var response in _conduitClient.ServerStream(new ConduitRequest(ControlCode.Ok, requestBytes), deadline, cancellation).ConfigureAwait(false))
         {
-            var result = _serializer.Deserialize<ResultBase>(resultBytes.Payload);
-            yield return HandleResult(result);
+            yield return HandleResult(_serializer.Deserialize<ResultBase>(HandleResponse(response).Payloadqqq));
         }
     }
 

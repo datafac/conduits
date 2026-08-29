@@ -27,12 +27,18 @@ public interface IProtobufNetContract
 public sealed class RequestBlob
 {
     [ProtoMember(1)]
-    public byte[] Blob { get; set; } = Array.Empty<byte>();
+    public int Control { get; set; }
+    
+    [ProtoMember(2)]
+    public byte[] Payload { get; set; } = Array.Empty<byte>();
 }
 
 [ProtoContract]
 public sealed class ResultBlob
 {
     [ProtoMember(1)]
-    public byte[] Blob { get; set; } = Array.Empty<byte>();
+    public int Control { get; set; }
+
+    [ProtoMember(2)]
+    public byte[] Payload { get; set; } = Array.Empty<byte>();
 }

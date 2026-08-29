@@ -7,6 +7,25 @@ using DataFac.Conduits.ProtobufNetCommon;
 
 namespace DataFac.Conduits.ProtobufNetServer;
 
+internal static class PayloadExtensions
+{
+    public static ResultBlob ToResultBlob(this ConduitResponse response)
+    {
+        return new ResultBlob()
+        {
+            Control = (int)response.Control,
+            Payload = response.Payloadqqq.ToArray() // todo alloc!
+        };
+    }
+
+    public static ConduitRequest ToConduitRequest(this RequestBlob request)
+    {
+        return new ConduitRequest(
+            (ControlCode)request.Control,
+            new ReadOnlyMemory<byte>(request.Payload));
+    }
+}
+
 internal class ProtobufNetServer : IProtobufNetContract
 {
     private readonly IConduitServer _requestHandler;
@@ -32,8 +51,8 @@ internal class ProtobufNetServer : IProtobufNetContract
         TimeSpan timeout = GetMaxCallDuration(context);
         using var deadlineCts = new CancellationTokenSource(timeout);
         using var requestCts = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken, deadlineCts.Token);
-        var result = await _requestHandler.SimpleUnaryCall(new ConduitRequest(requestBlob.Blob), context.Deadline, requestCts.Token);
-        return new ResultBlob() { Blob = result.Payload.ToArray() }; // todo alloc!
+        var result = await _requestHandler.UnaryRequest(requestBlob.ToConduitRequest(), context.Deadline, requestCts.Token);
+        return result.ToResultBlob(); 
     }
 
     public async IAsyncEnumerable<ResultBlob> ServerStream(RequestBlob requestBlob, CallContext context)
@@ -41,9 +60,9 @@ internal class ProtobufNetServer : IProtobufNetContract
         TimeSpan timeout = GetMaxCallDuration(context);
         using var deadlineCts = new CancellationTokenSource(timeout);
         using var requestCts = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken, deadlineCts.Token);
-        await foreach (var result in _requestHandler.ServerStream(new ConduitRequest(requestBlob.Blob), context.Deadline, requestCts.Token))
+        await foreach (var result in _requestHandler.ServerStream(requestBlob.ToConduitRequest(), context.Deadline, requestCts.Token))
         {
-            yield return new ResultBlob() { Blob = result.Payload.ToArray() }; // todo alloc!
+            yield return result.ToResultBlob();
         }
     }
 
