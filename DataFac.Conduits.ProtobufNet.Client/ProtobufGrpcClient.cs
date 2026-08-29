@@ -17,7 +17,7 @@ internal static class PayloadExtensions
         return new RequestBlob()
         {
             Control = (int)request.Control,
-            Payload = request.Payloadqqq.ToArray() // todo alloc!
+            Payload = request.Payload.ToArray() // todo alloc!
         };
     }
 

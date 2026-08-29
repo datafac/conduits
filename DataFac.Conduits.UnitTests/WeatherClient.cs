@@ -28,17 +28,17 @@ public class WeatherClient : IWeatherService, IAsyncDisposable
     public async ValueTask<WeatherData> GetWeather(string location, CancellationToken token)
     {
         var request = new WeatherData(WeatherTag.GetWeatherData, location);
-        var reply = await _client.UnaryRequest(new ConduitRequest(ControlCode.Ok, request.ToMemory()), _client.TimeProvider.GetUtcNow().UtcDateTime.AddSeconds(30), token);
-        return WeatherData.FromSpan(reply.Payloadqqq.Span);
+        var reply = await _client.UnaryRequest(new ConduitRequest(request.ToMemory()), _client.TimeProvider.GetUtcNow().UtcDateTime.AddSeconds(30), token);
+        return WeatherData.FromSpan(reply.Payload.Span);
     }
 
     public async IAsyncEnumerable<WeatherData> GetWeatherStream(string location, [EnumeratorCancellation] CancellationToken token)
     {
         var request = new WeatherData(WeatherTag.StreamDn_WeatherFeed, location);
         var payload = request.ToMemory();
-        await foreach (var response in _client.ServerStream(new ConduitRequest(ControlCode.Ok, request.ToMemory()), _client.TimeProvider.GetUtcNow().UtcDateTime.AddSeconds(30), token))
+        await foreach (var response in _client.ServerStream(new ConduitRequest(request.ToMemory()), _client.TimeProvider.GetUtcNow().UtcDateTime.AddSeconds(30), token))
         {
-            var result = WeatherData.FromSpan(response.Payloadqqq.Span);
+            var result = WeatherData.FromSpan(response.Payload.Span);
             if (result is not null)
                 yield return result;
         }
@@ -47,6 +47,6 @@ public class WeatherClient : IWeatherService, IAsyncDisposable
     public async ValueTask UpdateWeather(WeatherData request, CancellationToken token)
     {
 
-        var _ = await _client.UnaryRequest(new ConduitRequest(ControlCode.Ok, request.ToMemory()), _client.TimeProvider.GetUtcNow().UtcDateTime.AddSeconds(30), token);
+        var _ = await _client.UnaryRequest(new ConduitRequest(request.ToMemory()), _client.TimeProvider.GetUtcNow().UtcDateTime.AddSeconds(30), token);
     }
 }

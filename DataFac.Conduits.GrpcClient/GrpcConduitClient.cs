@@ -9,39 +9,6 @@ using System.Threading.Tasks;
 
 namespace DataFac.Conduits.GrpcClient;
 
-internal static class GrpcPayloadExtensions
-{
-    // todo remove
-    public static GrpcPayload ToGrpcPayload(this ConduitResponse response)
-    {
-        return new GrpcPayload()
-        {
-            Code = (int)response.Control,
-            Dataqqq = UnsafeByteOperations.UnsafeWrap(response.Payloadqqq)
-        };
-    }
-
-    public static GrpcPayload ToGrpcPayload(this ConduitRequest request)
-    {
-        return new GrpcPayload()
-        {
-            Code = (int)request.Control,
-            Dataqqq = UnsafeByteOperations.UnsafeWrap(request.Payloadqqq)
-        };
-    }
-
-    // todo remove
-    public static ConduitRequest ToConduitRequest(this GrpcPayload request)
-    {
-        return new ConduitRequest((ControlCode)request.Code, request.Dataqqq.Memory);
-    }
-
-    public static ConduitResponse ToConduitResponse(this GrpcPayload request)
-    {
-        return new ConduitResponse((ControlCode)request.Code, request.Dataqqq.Memory);
-    }
-}
-
 public class GrpcConduitClient : IConduitClient
 {
     private readonly GrpcChannel _channel;

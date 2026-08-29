@@ -64,8 +64,8 @@ public class CalculatorClient : IAsyncCalculator
         // todo move this to protocol client
         return response.Control switch
         {
-            ControlCode.Ok => response,
-            ControlCode.Timeout => throw new TimeoutException(DecodeErrorMessage(response.Payloadqqq.Span)),
+            ControlCode.None => response,
+            ControlCode.Timeout => throw new TimeoutException(DecodeErrorMessage(response.Payload.Span)),
             _ => throw new Exception($"Unknown control code: {response.Control}")
         };
     }
@@ -95,9 +95,9 @@ public class CalculatorClient : IAsyncCalculator
     {
         DateTime? deadline = calculateDeadline();
         var requestBytes = _serializer.Serialize<RequestBase>(request);
-        var response = await _conduitClient.UnaryRequest(new ConduitRequest(ControlCode.Ok, requestBytes), deadline).ConfigureAwait(false);
+        var response = await _conduitClient.UnaryRequest(new ConduitRequest(requestBytes), deadline).ConfigureAwait(false);
         var result = HandleResponse(response);
-        return _serializer.Deserialize<ResultBase>(result.Payloadqqq);
+        return _serializer.Deserialize<ResultBase>(result.Payload);
     }
 
     public async ValueTask<double> DoBinOp(double a, BinOp op, double b)
@@ -118,9 +118,9 @@ public class CalculatorClient : IAsyncCalculator
     {
         DateTime? deadline = calculateDeadline();
         ReadOnlyMemory<byte> requestBytes = _serializer.Serialize<RequestBase>(request);
-        await foreach (var response in _conduitClient.ServerStream(new ConduitRequest(ControlCode.Ok, requestBytes), deadline, cancellation).ConfigureAwait(false))
+        await foreach (var response in _conduitClient.ServerStream(new ConduitRequest(requestBytes), deadline, cancellation).ConfigureAwait(false))
         {
-            yield return HandleResult(_serializer.Deserialize<ResultBase>(HandleResponse(response).Payloadqqq));
+            yield return HandleResult(_serializer.Deserialize<ResultBase>(HandleResponse(response).Payload));
         }
     }
 

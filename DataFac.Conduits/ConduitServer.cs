@@ -44,15 +44,15 @@ public sealed class ConduitServer : IConduitServer
     {
         await foreach (var request in requests)
         {
-            yield return new UserRequest(request.Payloadqqq);
+            yield return new UserRequest(request.Payload);
         }
     }
 
     // todo implement protcol, deadlines and cancellations
     public async ValueTask<ConduitResponse> UnaryRequest(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
-        var response = await _responder.UnaryRequest(new UserRequest(request.Payloadqqq), cancellation);
-        return new ConduitResponse(ControlCode.Ok, response.Payload);
+        var response = await _responder.UnaryRequest(new UserRequest(request.Payload), cancellation);
+        return new ConduitResponse(response.Payload);
     }
 
     private static ReadOnlyMemory<byte> EncodeErrorMessage(string message)
@@ -63,9 +63,9 @@ public sealed class ConduitServer : IConduitServer
 
     public async IAsyncEnumerable<ConduitResponse> ServerStream(ConduitRequest request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
-        await foreach (var response in _responder.ServerStream(new UserRequest(request.Payloadqqq), cancellation))
+        await foreach (var response in _responder.ServerStream(new UserRequest(request.Payload), cancellation))
         {
-            yield return new ConduitResponse(ControlCode.Ok, response.Payload);
+            yield return new ConduitResponse(response.Payload);
 
             // check if deadline exceeded
             if (deadlineUtc.HasValue && _timeProvider.GetUtcNow().UtcDateTime > deadlineUtc.Value)
@@ -79,14 +79,14 @@ public sealed class ConduitServer : IConduitServer
     public async ValueTask<ConduitResponse> ClientStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         var response = await _responder.ClientStream(ToUserRequests(requests), cancellation);
-        return new ConduitResponse(ControlCode.Ok, response.Payload);
+        return new ConduitResponse(response.Payload);
     }
 
     public async IAsyncEnumerable<ConduitResponse> DuplexStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         await foreach (var response in _responder.DuplexStream(ToUserRequests(requests), cancellation))
         {
-            yield return new ConduitResponse(ControlCode.Ok, response.Payload);
+            yield return new ConduitResponse(response.Payload);
 
             // check if deadline exceeded
             if (deadlineUtc.HasValue && _timeProvider.GetUtcNow().UtcDateTime > deadlineUtc.Value)

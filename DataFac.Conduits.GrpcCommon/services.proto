@@ -14,5 +14,5 @@ service GrpcService {
 
 message GrpcPayload {
   int32 code = 1;
-  bytes dataqqq = 2;
+  bytes data = 2;
 }
