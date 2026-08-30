@@ -14,9 +14,8 @@ public sealed class ConduitServer : IConduitServer
 {
     private readonly TimeProvider _timeProvider;
     private readonly IResponder _responder;
-    //private readonly bool _keepActive;
 
-    public ConduitServer(TimeProvider? timeProvider, IResponder responder) // todo, bool keepActive = false)
+    public ConduitServer(TimeProvider? timeProvider, IResponder responder)
     {
         _timeProvider = timeProvider ?? TimeProvider.System;
         _responder = responder;
@@ -27,7 +26,6 @@ public sealed class ConduitServer : IConduitServer
     {
         if (_disposed) return;
         _disposed = true;
-        // dispose responder if (todo) keepActive == false
         if (_responder is IAsyncDisposable disposable)
         {
             await disposable.DisposeAsync();

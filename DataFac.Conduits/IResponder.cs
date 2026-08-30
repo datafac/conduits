@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 
 namespace DataFac.Conduits;
 
-//public interface IRequester
-public interface IResponder // todo : IAsyncDisposable
+//todo? public interface IRequester
+public interface IResponder
 {
     /// <summary>
     /// Handles a single request and returns a single result.
