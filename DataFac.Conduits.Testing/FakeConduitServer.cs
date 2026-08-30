@@ -8,8 +8,6 @@ namespace DataFac.Conduits.Testing;
 
 public sealed class FakeConduitServer : IConduitServer
 {
-    private readonly TimeProvider _timeProvider;
-    public TimeProvider TimeProvider => _timeProvider;
     private readonly IConduitServer _server;
 
     public string ServerName => ThisAssembly.AssemblyName;
@@ -19,10 +17,9 @@ public sealed class FakeConduitServer : IConduitServer
     /// Creates a test/mock server wrapping another conduit server.
     /// </summary>
     /// <param name="server">The wrapped server.</param>
-    public FakeConduitServer(IConduitServer server, TimeProvider? timeProvider)
+    public FakeConduitServer(IConduitServer server)
     {
         _server = server ?? throw new ArgumentNullException(nameof(server));
-        _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
     private volatile bool _disposed = false;

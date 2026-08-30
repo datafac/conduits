@@ -17,7 +17,7 @@ public class UnitTest1
         var timeProvider = new FakeTimeProvider();
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         FakeConduitServer conduitServer;
-        await using (conduitServer = new FakeConduitServer(new ConduitServer(timeProvider, new WeatherServer(new WeatherService(), timeProvider)), timeProvider))
+        await using (conduitServer = new FakeConduitServer(new ConduitServer(timeProvider, new WeatherServer(new WeatherService(), timeProvider))))
         {
             await using var conduitClient = new FakeConduitClient(conduitServer, timeProvider);
             await using var client = new WeatherClient(conduitClient, true);
@@ -44,7 +44,7 @@ public class UnitTest1
     {
         var timeProvider = new FakeTimeProvider();
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        await using var conduitServer = new FakeConduitServer(new ConduitServer(timeProvider, new WeatherServer(new WeatherService(), timeProvider)), timeProvider);
+        await using var conduitServer = new FakeConduitServer(new ConduitServer(timeProvider, new WeatherServer(new WeatherService(), timeProvider)));
         {
             await using var conduitClient = new FakeConduitClient(conduitServer, timeProvider);
             await using var client = new WeatherClient(conduitClient);
@@ -69,7 +69,7 @@ public class UnitTest1
             ? new CancellationTokenSource(TimeSpan.FromSeconds(30))
             : new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
-        await using var conduitServer = new FakeConduitServer(new ConduitServer(timeProvider, new WeatherServer(new WeatherService(), timeProvider)), timeProvider);
+        await using var conduitServer = new FakeConduitServer(new ConduitServer(timeProvider, new WeatherServer(new WeatherService(), timeProvider)));
         {
             await using var client = new WeatherClient(new FakeConduitClient(conduitServer, timeProvider));
             List<WeatherData> responses = new List<WeatherData>();

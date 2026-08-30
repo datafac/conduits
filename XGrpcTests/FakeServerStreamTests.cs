@@ -16,7 +16,7 @@ public class FakeServerStreamTests
     {
         var ct = TestContext.Current.CancellationToken;
         var timeProvider = new FakeTimeProvider();
-        await using var server = new FakeConduitServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())), timeProvider);
+        await using var server = new FakeConduitServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())));
         await using var client = new CalculatorClient(new FakeConduitClient(server, timeProvider));
 
         // duration should be ~1.0s
@@ -29,7 +29,7 @@ public class FakeServerStreamTests
     {
         var ct = TestContext.Current.CancellationToken;
         var timeProvider = new FakeTimeProvider();
-        await using var server = new FakeConduitServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())), timeProvider);
+        await using var server = new FakeConduitServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())));
         await using var client = new CalculatorClient(new FakeConduitClient(server, timeProvider));
 
         // returning the entire stream would take ~10s, but we have a max call
@@ -43,7 +43,7 @@ public class FakeServerStreamTests
     public async Task GetStreamWithCancellation()
     {
         var timeProvider = new FakeTimeProvider();
-        await using var server = new FakeConduitServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())), timeProvider);
+        await using var server = new FakeConduitServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())));
         await using var client = new CalculatorClient(new FakeConduitClient(server, timeProvider));
 
         // returning the entire stream would take ~10s, but we have a max call

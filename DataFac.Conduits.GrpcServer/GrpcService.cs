@@ -9,11 +9,9 @@ namespace DataFac.Conduits.GrpcServer;
 
 public class GrpcService : DataFac.Conduits.GrpcCommon.GrpcService.GrpcServiceBase
 {
-    private readonly ILogger<GrpcService> _logger;
     private readonly IConduitServer _server;
-    public GrpcService(ILogger<GrpcService> logger, IConduitServer server)
+    public GrpcService(IConduitServer server)
     {
-        _logger = logger;
         _server = server;
     }
 

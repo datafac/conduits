@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+    <PackageReference Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="18.7.37220.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DataFac.Conduits.GrpcClient\DataFac.Conduits.GrpcClient.csproj" />
+    <ProjectReference Include="..\DataFac.Conduits.GrpcServer\DataFac.Conduits.GrpcServer.csproj" />
+    <ProjectReference Include="..\DataFac.Conduits.ProtobufNet.Client\DataFac.Conduits.ProtobufNetClient.csproj" />
+    <ProjectReference Include="..\DataFac.Conduits.ProtobufNet.Server\DataFac.Conduits.ProtobufNetServer.csproj" />
+    <ProjectReference Include="..\DataFac.Conduits.Testing\DataFac.Conduits.Testing.csproj" />
+    <ProjectReference Include="..\Testing.Calculator\Testing.Calculator.csproj" />
+  </ItemGroup>
+</Project>
