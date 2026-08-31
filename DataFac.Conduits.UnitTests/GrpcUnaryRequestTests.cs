@@ -1,14 +1,12 @@
-﻿using DataFac.Conduits;
 using DataFac.Conduits.ProtobufNetClient;
 using DataFac.Conduits.ProtobufNetServer;
 using DataFac.Conduits.Testing;
 using Shouldly;
 using System.Threading.Tasks;
 using Testing.Calculator;
+using Xunit;
 
-namespace XGrpcTests;
-
-#pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
+namespace DataFac.Conduits.UnitTests;
 
 public class GrpcUnaryRequestTests
 {

@@ -1,11 +1,11 @@
+using DataFac.Conduits.Testing;
+using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-using DataFac.Conduits.Testing;
-using Shouldly;
 
 namespace DataFac.Conduits.UnitTests;
 

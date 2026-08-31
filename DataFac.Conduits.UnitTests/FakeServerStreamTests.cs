@@ -1,13 +1,13 @@
-﻿using Shouldly;
+using DataFac.Conduits.Testing;
+using Shouldly;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
-using DataFac.Conduits.Testing;
-using Testing.Calculator;
 using System.Threading;
-using DataFac.Conduits;
+using System.Threading.Tasks;
+using Testing.Calculator;
+using Xunit;
 
-namespace XGrpcTests;
+namespace DataFac.Conduits.UnitTests;
 
 public class FakeServerStreamTests
 {

@@ -1,35 +1,16 @@
-﻿using Shouldly;
-using Grpc.Core;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using DataFac.Conduits.ProtobufNetClient;
 using DataFac.Conduits.ProtobufNetServer;
 using DataFac.Conduits.Testing;
-using Testing.Calculator;
+using Grpc.Core;
+using Shouldly;
+using System;
+using System.Linq;
 using System.Threading;
-using DataFac.Conduits;
+using System.Threading.Tasks;
+using Testing.Calculator;
+using Xunit;
 
-namespace XGrpcTests;
-
-#pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
-
-/// <summary>
-/// Helpers provided for older versions of .NET because Microsoft hasn't.
-/// </summary>
-internal static class AsyncEnumerableHelpers
-{
-    public static async ValueTask<List<T>> ToListAsyncInternal<T>(this IAsyncEnumerable<T> source)
-    {
-        var result = new List<T>();
-        await foreach (var item in source)
-        {
-            result.Add(item);
-        }
-        return result;
-    }
-}
+namespace DataFac.Conduits.UnitTests;
 
 public class ProtobufNetServerStreamTests
 {
