@@ -36,7 +36,7 @@ public class FakeServerStreamTests
         // duration of 5s, so this call should timeout after ~5s
         client.MaxCallDuration = TimeSpan.FromSeconds(5);
         var ex = await Assert.ThrowsAsync<TimeoutException>(async () => { await client.GetRange(0, 10, TimeSpan.FromSeconds(1), ct).ToListAsyncInternal(); });
-        ex.Message.ShouldBe("Completion deadline exceeded");
+        ex.Message.ShouldBe("Deadline exceeded");
     }
 
     [Fact]
@@ -51,6 +51,6 @@ public class FakeServerStreamTests
         client.MaxCallDuration = null;
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var ex = await Assert.ThrowsAsync<OperationCanceledException>(async () => { await client.GetRange(0, 10, TimeSpan.FromSeconds(1), cts.Token).ToListAsyncInternal(); });
-        ex.Message.ShouldContain("Cancelled by caller");
+        ex.Message.ShouldContain("Operation cancelled");
     }
 }

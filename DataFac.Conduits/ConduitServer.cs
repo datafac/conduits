@@ -46,17 +46,17 @@ public sealed class ConduitServer : IConduitServer
         }
     }
 
+    private static ReadOnlyMemory<byte> EncodeErrorMessage(string message)
+    {
+        if (message.Length == 0) return ReadOnlyMemory<byte>.Empty;
+        return Encoding.UTF8.GetBytes(message);
+    }
+
     // todo implement protcol, deadlines and cancellations
     public async ValueTask<ConduitResponse> UnaryRequest(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         var response = await _responder.UnaryRequest(new UserRequest(request.Payload), cancellation);
         return new ConduitResponse(response.Payload);
-    }
-
-    private static ReadOnlyMemory<byte> EncodeErrorMessage(string message)
-    {
-        if (message.Length == 0) return ReadOnlyMemory<byte>.Empty;
-        return Encoding.UTF8.GetBytes(message);
     }
 
     public async IAsyncEnumerable<ConduitResponse> ServerStream(ConduitRequest request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
@@ -65,10 +65,17 @@ public sealed class ConduitServer : IConduitServer
         {
             yield return new ConduitResponse(response.Payload);
 
+            // check if cancelled
+            if (cancellation.IsCancellationRequested)
+            {
+                yield return new ConduitResponse(ControlCode.Cancelled, EncodeErrorMessage("Operation cancelled")); // todo static
+                yield break;
+            }
+
             // check if deadline exceeded
             if (deadlineUtc.HasValue && _timeProvider.GetUtcNow().UtcDateTime > deadlineUtc.Value)
             {
-                yield return new ConduitResponse(ControlCode.Timeout, EncodeErrorMessage("Completion deadline exceeded"));
+                yield return new ConduitResponse(ControlCode.Timeout, EncodeErrorMessage("Deadline exceeded"));
                 yield break;
             }
         }
@@ -86,10 +93,17 @@ public sealed class ConduitServer : IConduitServer
         {
             yield return new ConduitResponse(response.Payload);
 
+            // check if cancelled
+            if (cancellation.IsCancellationRequested)
+            {
+                yield return new ConduitResponse(ControlCode.Cancelled, EncodeErrorMessage("Operation cancelled"));
+                yield break;
+            }
+
             // check if deadline exceeded
             if (deadlineUtc.HasValue && _timeProvider.GetUtcNow().UtcDateTime > deadlineUtc.Value)
             {
-                yield return new ConduitResponse(ControlCode.Timeout, EncodeErrorMessage("Completion deadline exceeded"));
+                yield return new ConduitResponse(ControlCode.Timeout, EncodeErrorMessage("Deadline exceeded"));
                 yield break;
             }
         }

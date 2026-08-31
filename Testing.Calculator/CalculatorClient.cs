@@ -3,6 +3,7 @@ using Nerdbank.MessagePack;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,6 +31,7 @@ public class CalculatorClient : IAsyncCalculator
     }
 
     private TimeSpan? _maxCallDuration;
+
     /// <summary>
     /// A duration between 0 and 5 minutes, or null. If not null, this is used to calculate 
     /// a deadline for each call.
@@ -66,6 +68,7 @@ public class CalculatorClient : IAsyncCalculator
         {
             ControlCode.None => response,
             ControlCode.Timeout => throw new TimeoutException(DecodeErrorMessage(response.Payload.Span)),
+            ControlCode.Cancelled => throw new OperationCanceledException(DecodeErrorMessage(response.Payload.Span)),
             _ => throw new Exception($"Unknown control code: {response.Control}")
         };
     }
@@ -114,7 +117,7 @@ public class CalculatorClient : IAsyncCalculator
         }
     }
 
-    private async IAsyncEnumerable<ResultBase> ServerStream(RequestBase request, CancellationToken cancellation)
+    private async IAsyncEnumerable<ResultBase> ServerStream(RequestBase request, [EnumeratorCancellation] CancellationToken cancellation)
     {
         DateTime? deadline = calculateDeadline();
         ReadOnlyMemory<byte> requestBytes = _serializer.Serialize<RequestBase>(request);
@@ -124,7 +127,7 @@ public class CalculatorClient : IAsyncCalculator
         }
     }
 
-    public async IAsyncEnumerable<int> GetRange(int start, int count, TimeSpan delay, CancellationToken cancellation = default)
+    public async IAsyncEnumerable<int> GetRange(int start, int count, TimeSpan delay, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         RequestBase req = new RangeRequest() { Start = start, Count = count, Delay = delay };
         await foreach (var result in ServerStream(req, cancellation).ConfigureAwait(false))
