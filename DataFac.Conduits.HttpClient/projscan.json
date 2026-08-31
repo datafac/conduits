@@ -1,6 +1,0 @@
-{
-  "ExemptionCodes": [
-    "targetframework_notexists",
-    "targetframeworks_exists"
-  ]
-}
