@@ -1,3 +1,6 @@
+using DataFac.Conduits.GrpcClient;
+using Testing.Calculator;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire client integrations.
@@ -18,6 +21,13 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+string grpcService1Adress = Environment.GetEnvironmentVariable("GRPCSERVICE1_HTTPS") 
+    ?? throw new InvalidOperationException("Environment variable 'GRPCSERVICE1_HTTPS' is not set or invalid.");
+
+await using var calclator = new CalculatorClient(new GrpcConduitClient(grpcService1Adress));
+
+var testResult = await calclator.DoBinOp(3.0, BinOp.Multiply, 4.0);
 
 string[] summaries = ["Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"];
 

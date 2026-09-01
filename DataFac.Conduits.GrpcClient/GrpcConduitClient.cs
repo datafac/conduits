@@ -16,7 +16,7 @@ public class GrpcConduitClient : IConduitClient
 
     public TimeProvider TimeProvider => TimeProvider.System;
 
-    public GrpcConduitClient(Uri address)
+    public GrpcConduitClient(string address)
     {
         _channel = GrpcChannel.ForAddress(address);
         _client = new GrpcService.GrpcServiceClient(_channel);

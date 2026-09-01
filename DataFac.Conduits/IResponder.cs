@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 
 namespace DataFac.Conduits;
 
-//todo? public interface IRequester
 public interface IResponder
 {
     /// <summary>

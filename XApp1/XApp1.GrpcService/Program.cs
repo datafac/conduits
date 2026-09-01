@@ -1,7 +1,9 @@
+using DataFac.Conduits;
 using DataFac.Conduits.GrpcServer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Testing.Calculator;
 
 namespace XApp1.GrpcService1;
 
@@ -14,6 +16,9 @@ public class Program
 
         // Add services to the container.
         builder.Services.AddGrpc();
+
+        builder.Services.AddSingleton<IResponder>(sp => new CalculatorServer(new Calculator()));
+        builder.Services.AddSingleton<IConduitServer>(sp => new ConduitServer(null, sp.GetRequiredService<IResponder>()));
 
         var app = builder.Build();
 
