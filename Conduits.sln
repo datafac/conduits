@@ -43,7 +43,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XApp1.ApiService", "XApp1\X
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XApp1.Web", "XApp1\XApp1.Web\XApp1.Web.csproj", "{F0F38D59-6BCA-AE75-7DCB-4CC177179D04}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XApp1.GrpcService", "XApp1\XApp1.GrpcService\XApp1.GrpcService.csproj", "{47F65A4A-A6D2-591E-392F-3FC74928497A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XApp1.GrpcService1", "XApp1\XApp1.GrpcService\XApp1.GrpcService1.csproj", "{47F65A4A-A6D2-591E-392F-3FC74928497A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

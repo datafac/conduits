@@ -1,6 +1,9 @@
-using XApp1.GrpcService.Services;
+using DataFac.Conduits.GrpcServer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
-namespace XApp1.GrpcService;
+namespace XApp1.GrpcService1;
 
 public class Program
 {
@@ -17,7 +20,7 @@ public class Program
         app.MapDefaultEndpoints();
 
         // Configure the HTTP request pipeline.
-        app.MapGrpcService<GreeterService>();
+        app.MapGrpcService<GrpcService>();
         app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
         app.Run();
