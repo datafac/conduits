@@ -1,10 +1,11 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-// todo grpc calc server
-//xxx;
+var grpcService = builder.AddProject<Projects.XApp1_GrpcService>("grpcservice");
 
 var apiService = builder.AddProject<Projects.XApp1_ApiService>("apiservice")
-    .WithHttpHealthCheck("/health");
+    .WithHttpHealthCheck("/health")
+    .WithReference(grpcService)
+    .WaitFor(grpcService);
 
 builder.AddProject<Projects.XApp1_Web>("webfrontend")
     .WithExternalHttpEndpoints()
