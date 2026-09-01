@@ -12,21 +12,22 @@ namespace DataFac.Conduits.GrpcClient;
 public class GrpcConduitClient : IConduitClient
 {
     private readonly GrpcChannel _channel;
+    private readonly GrpcService.GrpcServiceClient _client;
 
     public TimeProvider TimeProvider => TimeProvider.System;
 
     public GrpcConduitClient(Uri address)
     {
         _channel = GrpcChannel.ForAddress(address);
+        _client = new GrpcService.GrpcServiceClient(_channel);
     }
 
     private volatile bool _disposed = false;
-
     public async ValueTask DisposeAsync()
     {
         if (_disposed) return;
         _disposed = true;
-        _channel?.Dispose();
+        _channel.Dispose();
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -44,16 +45,14 @@ public class GrpcConduitClient : IConduitClient
     public async ValueTask<ConduitResponse> UnaryRequest(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         CheckNotDisposed();
-        var client = new GrpcService.GrpcServiceClient(_channel);
-        var incoming = await client.NoStreamAsync(request.ToGrpcPayload(), null, deadlineUtc, cancellation);
+        var incoming = await _client.NoStreamAsync(request.ToGrpcPayload(), null, deadlineUtc, cancellation);
         return incoming.ToConduitResponse();
     }
 
     public async IAsyncEnumerable<ConduitResponse> ServerStream(ConduitRequest request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         CheckNotDisposed();
-        var client = new GrpcService.GrpcServiceClient(_channel);
-        var call = client.StreamDn(request.ToGrpcPayload(), null, deadlineUtc, cancellation);
+        var call = _client.StreamDn(request.ToGrpcPayload(), null, deadlineUtc, cancellation);
 
         var responseStream = call.ResponseStream;
         while (await responseStream.MoveNext(cancellation) && !cancellation.IsCancellationRequested)
@@ -65,8 +64,7 @@ public class GrpcConduitClient : IConduitClient
     public async ValueTask<ConduitResponse> ClientStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         CheckNotDisposed();
-        var client = new GrpcService.GrpcServiceClient(_channel);
-        using var call = client.StreamUp(deadline: deadlineUtc, cancellationToken: cancellation);
+        using var call = _client.StreamUp(deadline: deadlineUtc, cancellationToken: cancellation);
         var pushTask = Task.Run(async () =>
         {
             var requestStream = call.RequestStream;
@@ -85,8 +83,7 @@ public class GrpcConduitClient : IConduitClient
     public async IAsyncEnumerable<ConduitResponse> DuplexStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         CheckNotDisposed();
-        var client = new GrpcService.GrpcServiceClient(_channel);
-        using var call = client.BiStream(cancellationToken: cancellation, deadline: deadlineUtc);
+        using var call = _client.BiStream(cancellationToken: cancellation, deadline: deadlineUtc);
 
         var pushTask = Task.Run(async () =>
         {

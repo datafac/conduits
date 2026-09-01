@@ -38,11 +38,4 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
-
-  <ItemGroup>
-    <None Update="services.proto">
-      <GrpcServices>Server</GrpcServices>
-    </None>
-  </ItemGroup>
-
 </Project>

@@ -1,5 +1,8 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
+// todo grpc calc server
+//xxx;
+
 var apiService = builder.AddProject<Projects.XApp1_ApiService>("apiservice")
     .WithHttpHealthCheck("/health");
 
