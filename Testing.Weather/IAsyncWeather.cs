@@ -7,7 +7,7 @@ namespace Testing.Weather;
 
 public interface IAsyncWeather : IAsyncDisposable
 {
-    ValueTask<WeatherData> GetWeather(CancellationToken cancellation = default);
+    ValueTask<WeatherData> GetWeather(int rngSeed, CancellationToken cancellation = default);
 
-    IAsyncEnumerable<WeatherData> GetForecast(int count, CancellationToken cancellation = default);
+    IAsyncEnumerable<WeatherData> GetForecast(int rngSeed, int count, CancellationToken cancellation = default);
 }

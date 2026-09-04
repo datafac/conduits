@@ -34,7 +34,7 @@ string grpcService2Adress = Environment.GetEnvironmentVariable("GRPCSERVICE2_HTT
     ?? throw new InvalidOperationException("Environment variable 'GRPCSERVICE2_HTTPS' is not set or invalid.");
 
 await using var weatherSvc = new WeatherClient(new ProtocolClient(new GrpcConduitClient(grpcService2Adress)));
-var weather = await weatherSvc.GetWeather();
+var weather = await weatherSvc.GetWeather(12345);
 
 string[] summaries = ["Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"];
 

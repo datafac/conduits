@@ -46,17 +46,17 @@ public class WeatherClient : IAsyncWeather
         };
     }
 
-    public async ValueTask<WeatherData> GetWeather(CancellationToken cancellation = default)
+    public async ValueTask<WeatherData> GetWeather(int rngSeed, CancellationToken cancellation = default)
     {
-        var request = new UserRequest(_serializer.Serialize<RequestBase>(new GetWeatherRequest()));
+        var request = new UserRequest(_serializer.Serialize<RequestBase>(new GetWeatherRequest() { RngSeed = rngSeed }));
         var response = await _userChannel.UnaryRequest(request, cancellation).ConfigureAwait(false);
         var result = HandleResult(_serializer.Deserialize<ResultBase>(response.Payload));
         return result as WeatherData ?? throw new Exception($"Unexpected result type: {result.GetType().Name}");
     }
 
-    public async IAsyncEnumerable<WeatherData> GetForecast(int count, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public async IAsyncEnumerable<WeatherData> GetForecast(int rngSeed, int count, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
-        RequestBase request = new GetForecastRequest() { Count = count };
+        RequestBase request = new GetForecastRequest() { RngSeed = rngSeed, Count = count };
         ReadOnlyMemory<byte> requestBytes = _serializer.Serialize<RequestBase>(request);
         await foreach (var response in _userChannel.ServerStream(new UserRequest(requestBytes), cancellation).ConfigureAwait(false))
         {

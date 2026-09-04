@@ -35,7 +35,7 @@ public class WeatherServer : IUserChannel
         {
             result = request switch
             {
-                GetWeatherRequest br => await _handler.GetWeather(),
+                GetWeatherRequest wr => await _handler.GetWeather(wr.RngSeed, cancellation),
                 _ => new ErrorResult { Code = ErrorCode.UnsupportedRequestType, Message = $"Unknown request type: {request.GetType().Name}" }
             };
         }
@@ -54,9 +54,9 @@ public class WeatherServer : IUserChannel
             yield return errorDeserializationFailure;
             yield break;
         }
-        else if (request is GetForecastRequest rr)
+        else if (request is GetForecastRequest fr)
         {
-            await foreach (var response in _handler.GetForecast(rr.Count, cancellation).ConfigureAwait(false))
+            await foreach (var response in _handler.GetForecast(fr.RngSeed, fr.Count, cancellation).ConfigureAwait(false))
             {
                 yield return new UserResponse(_serializer.Serialize<ResultBase>(response));
             }

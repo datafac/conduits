@@ -17,12 +17,16 @@ namespace Testing.Weather;
 public abstract partial class RequestBase { }
 
 [GenerateShape]
-public sealed partial class GetWeatherRequest : RequestBase { }
+public sealed partial class GetWeatherRequest : RequestBase
+{
+    [Key(1)] public int RngSeed { get; set; }
+}
 
 [GenerateShape]
 public sealed partial class GetForecastRequest : RequestBase
 {
-    [Key(1)] public int Count { get; set; }
+    [Key(1)] public int RngSeed { get; set; }
+    [Key(2)] public int Count { get; set; }
 }
 
 [GenerateShape]

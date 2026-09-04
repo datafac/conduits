@@ -12,9 +12,9 @@ public class WeatherService : IAsyncWeather
 
     public async ValueTask DisposeAsync() { }
 
-    public async ValueTask<WeatherData> GetWeather(CancellationToken cancellation = default)
+    public async ValueTask<WeatherData> GetWeather(int rngSeed, CancellationToken cancellation = default)
     {
-        var rng = new Random(Environment.TickCount);
+        var rng = rngSeed == 0 ? new Random(Environment.TickCount) : new Random(rngSeed);
         return new WeatherData()
         {
             DateTimeUtc = DateTime.UtcNow.Ticks,
@@ -23,9 +23,9 @@ public class WeatherService : IAsyncWeather
         };
     }
 
-    public async IAsyncEnumerable<WeatherData> GetForecast(int count, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public async IAsyncEnumerable<WeatherData> GetForecast(int rngSeed, int count, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
-        var rng = new Random(Environment.TickCount);
+        var rng = rngSeed == 0 ? new Random(Environment.TickCount) : new Random(rngSeed);
         for (var i = 0; i < count; i++)
         {
             yield return new WeatherData()
