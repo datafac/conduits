@@ -49,7 +49,7 @@ public sealed partial class RangeResult : ResultBase
 public sealed partial class ErrorResult : ResultBase
 {
     [Key(1)]
-    public ExcpCode Code { get; set; }
+    public ErrorCode Code { get; set; }
 
     [Key(2)]
     public string Message { get; set; } = string.Empty;

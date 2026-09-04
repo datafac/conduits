@@ -3,7 +3,7 @@ using DataFac.Conduits.GrpcServer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Testing.Calculator;
+using Testing.Weather;
 
 namespace XApp1.GrpcService2;
 
@@ -17,7 +17,7 @@ public class Program
         // Add services to the container.
         builder.Services.AddGrpc();
 
-        builder.Services.AddSingleton<IUserChannel>(sp => new CalculatorServer(new Calculator()));
+        builder.Services.AddSingleton<IUserChannel>(sp => new WeatherServer(new WeatherService()));
         builder.Services.AddSingleton<INetChannel>(sp => new ProtocolServer(null, sp.GetRequiredService<IUserChannel>()));
 
         var app = builder.Build();

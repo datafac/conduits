@@ -6,76 +6,64 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Testing.Calculator;
+namespace Testing.Weather;
 
-public class CalculatorServer : IUserChannel
+public class WeatherServer : IUserChannel
 {
-    private static readonly MessagePackSerializer serializer = new MessagePackSerializer();
+    private static readonly MessagePackSerializer _serializer = new MessagePackSerializer();
     private static readonly UserResponse errorDeserializationFailure
-        = new UserResponse(serializer.Serialize<ResultBase>(
+        = new UserResponse(_serializer.Serialize<ResultBase>(
             new ErrorResult
             {
                 Code = ErrorCode.DeserializationError,
                 Message = "Failed to deserialize request"
             }));
 
-    private readonly IAsyncCalculator _calculator;
+    private readonly IAsyncWeather _handler;
 
-    public string ServerName => throw new NotImplementedException();
-
-    public string ServerVersion => throw new NotImplementedException();
-
-    public CalculatorServer(IAsyncCalculator calculator)
+    public WeatherServer(IAsyncWeather handler)
     {
-        _calculator = calculator;
+        _handler = handler;
     }
 
     public async ValueTask<UserResponse> UnaryRequest(UserRequest requestBytes, CancellationToken cancellation = default)
     {
-        RequestBase? request = serializer.Deserialize<RequestBase>(requestBytes.Payload);
+        RequestBase? request = _serializer.Deserialize<RequestBase>(requestBytes.Payload);
         if (request is null) return errorDeserializationFailure;
         ResultBase result;
         try
         {
             result = request switch
             {
-                BinOpRequest br => new UnaryResult() { X = await _calculator.DoBinOp(br.A, br.Op, br.B) },
+                GetWeatherRequest br => await _handler.GetWeather(),
                 _ => new ErrorResult { Code = ErrorCode.UnsupportedRequestType, Message = $"Unknown request type: {request.GetType().Name}" }
             };
-        }
-        catch (DivideByZeroException e)
-        {
-            result = new ErrorResult { Code = ErrorCode.DivideByZero, Message = e.Message };
-        }
-        catch (OverflowException e)
-        {
-            result = new ErrorResult { Code = ErrorCode.Overflow, Message = e.Message };
         }
         catch (Exception e)
         {
             result = new ErrorResult { Code = ErrorCode.OtherException, Message = e.Message };
         }
-        return new UserResponse(serializer.Serialize<ResultBase>(result));
+        return new UserResponse(_serializer.Serialize<ResultBase>(result));
     }
 
     public async IAsyncEnumerable<UserResponse> ServerStream(UserRequest requestBytes, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
-        RequestBase? request = serializer.Deserialize<RequestBase>(requestBytes.Payload);
+        RequestBase? request = _serializer.Deserialize<RequestBase>(requestBytes.Payload);
         if (request is null)
         {
             yield return errorDeserializationFailure;
             yield break;
         }
-        else if (request is RangeRequest rr)
+        else if (request is GetForecastRequest rr)
         {
-            await foreach (int x in _calculator.GetRange(rr.Start, rr.Count, rr.Delay, cancellation).ConfigureAwait(false))
+            await foreach (var response in _handler.GetForecast(rr.Count, cancellation).ConfigureAwait(false))
             {
-                yield return new UserResponse(serializer.Serialize<ResultBase>(new RangeResult() { X = x }));
+                yield return new UserResponse(_serializer.Serialize<ResultBase>(response));
             }
         }
         else
         {
-            yield return new UserResponse(serializer.Serialize<ResultBase>(new ErrorResult { Code = ErrorCode.UnsupportedRequestType, Message = $"Unknown request type: {request.GetType().Name}" }));
+            yield return new UserResponse(_serializer.Serialize<ResultBase>(new ErrorResult { Code = ErrorCode.UnsupportedRequestType, Message = $"Unknown request type: {request.GetType().Name}" }));
         }
     }
 
@@ -88,4 +76,5 @@ public class CalculatorServer : IUserChannel
     {
         throw new NotImplementedException();
     }
+
 }

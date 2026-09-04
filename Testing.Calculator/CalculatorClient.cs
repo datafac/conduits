@@ -36,14 +36,12 @@ public class CalculatorClient : IAsyncCalculator
             null => throw new InvalidDataException("Failed to deserialise result"),
             ErrorResult errorResult => errorResult.Code switch
             {
-                ExcpCode.DeserializationError => throw new InvalidDataException(errorResult.Message),
-                ExcpCode.DeadlineExceededqqq => throw new TimeoutException(errorResult.Message),
-                ExcpCode.OperationCancelled => throw new OperationCanceledException(errorResult.Message),
-                ExcpCode.UnsupportedRequestType => throw new NotSupportedException(errorResult.Message),
-                ExcpCode.UnsupportedResponseType => throw new NotSupportedException(errorResult.Message),
-                ExcpCode.OtherException => throw new Exception(errorResult.Message),
-                ExcpCode.DivideByZero => throw new DivideByZeroException(errorResult.Message),
-                ExcpCode.Overflow => throw new OverflowException(errorResult.Message),
+                ErrorCode.None => result,
+                ErrorCode.DeserializationError => throw new InvalidDataException(errorResult.Message),
+                ErrorCode.UnsupportedRequestType => throw new NotSupportedException(errorResult.Message),
+                ErrorCode.OtherException => throw new Exception(errorResult.Message),
+                ErrorCode.DivideByZero => throw new DivideByZeroException(errorResult.Message),
+                ErrorCode.Overflow => throw new OverflowException(errorResult.Message),
                 _ => throw new Exception($"Unknown error code: {errorResult.Code}")
             },
             _ => result
@@ -73,7 +71,6 @@ public class CalculatorClient : IAsyncCalculator
 
     private async IAsyncEnumerable<ResultBase> ServerStream(RequestBase request, [EnumeratorCancellation] CancellationToken cancellation)
     {
-        //DateTime? deadline = calculateDeadline();
         ReadOnlyMemory<byte> requestBytes = _serializer.Serialize<RequestBase>(request);
         await foreach (var response in _userChannel.ServerStream(new UserRequest(requestBytes), cancellation).ConfigureAwait(false))
         {

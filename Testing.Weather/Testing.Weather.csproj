@@ -14,7 +14,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\DataFac.Conduits\DataFac.Conduits.csproj" />
+		<ProjectReference Include="..\DataFac.Conduits\DataFac.Conduits.csproj" />
 	</ItemGroup>
 
 </Project>

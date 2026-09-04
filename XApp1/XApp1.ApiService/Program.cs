@@ -1,6 +1,7 @@
 using DataFac.Conduits;
 using DataFac.Conduits.GrpcClient;
 using Testing.Calculator;
+using Testing.Weather;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,14 +27,14 @@ if (app.Environment.IsDevelopment())
 string grpcService1Adress = Environment.GetEnvironmentVariable("GRPCSERVICE1_HTTPS")
     ?? throw new InvalidOperationException("Environment variable 'GRPCSERVICE1_HTTPS' is not set or invalid.");
 
-await using var calclator1 = new CalculatorClient(new ProtocolClient(new GrpcConduitClient(grpcService1Adress)));
-var testResult1 = await calclator1.DoBinOp(3.0, BinOp.Multiply, 4.0);
+await using var calclator = new CalculatorClient(new ProtocolClient(new GrpcConduitClient(grpcService1Adress)));
+var answer = await calclator.DoBinOp(3.0, BinOp.Multiply, 4.0);
 
 string grpcService2Adress = Environment.GetEnvironmentVariable("GRPCSERVICE2_HTTPS")
     ?? throw new InvalidOperationException("Environment variable 'GRPCSERVICE2_HTTPS' is not set or invalid.");
 
-await using var calclator2 = new CalculatorClient(new ProtocolClient(new GrpcConduitClient(grpcService2Adress)));
-var testResult2 = await calclator2.DoBinOp(3.0, BinOp.Multiply, 4.0);
+await using var weatherSvc = new WeatherClient(new ProtocolClient(new GrpcConduitClient(grpcService2Adress)));
+var weather = await weatherSvc.GetWeather();
 
 string[] summaries = ["Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"];
 
