@@ -17,10 +17,9 @@ public class UnitTest1
         var timeProvider = new FakeTimeProvider();
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         FakeConduitServer conduitServer;
-        await using (conduitServer = new FakeConduitServer(new ConduitServer(timeProvider, new WeatherServer(new WeatherService(), timeProvider))))
+        await using (conduitServer = new FakeConduitServer(new ProtocolServer(timeProvider, new WeatherServer(new WeatherService(), timeProvider))))
         {
-            await using var conduitClient = new FakeConduitClient(conduitServer, timeProvider);
-            await using var client = new WeatherClient(conduitClient, true);
+            await using var client = new WeatherClient(new ProtocolClient(new FakeConduitClient(conduitServer, timeProvider)), true);
             var weather = await client.GetWeather("Brisbane", cts.Token);
             weather.ShouldNotBeNull();
             weather.Tag.ShouldBe(WeatherTag.NotFound);
@@ -28,8 +27,7 @@ public class UnitTest1
         // note: conduitServer is disposed
         // repeat
         {
-            await using var conduitClient = new FakeConduitClient(conduitServer, timeProvider);
-            await using var client = new WeatherClient(conduitClient, false);
+            await using var client = new WeatherClient(new ProtocolClient(new FakeConduitClient(conduitServer, timeProvider)), false);
             var ex = await Assert.ThrowsAsync<ObjectDisposedException>(
                          async () =>
                          {
@@ -44,17 +42,16 @@ public class UnitTest1
     {
         var timeProvider = new FakeTimeProvider();
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        await using var conduitServer = new FakeConduitServer(new ConduitServer(timeProvider, new WeatherServer(new WeatherService(), timeProvider)));
+        await using var conduitServer = new FakeConduitServer(new ProtocolServer(timeProvider, new WeatherServer(new WeatherService(), timeProvider)));
         {
-            await using var conduitClient = new FakeConduitClient(conduitServer, timeProvider);
-            await using var client = new WeatherClient(conduitClient);
+            await using var client = new WeatherClient(new ProtocolClient(new FakeConduitClient(conduitServer, timeProvider)), true);
             await client.UpdateWeather(new WeatherData(WeatherTag.WeatherData, "Brisbane", 31, timeProvider.GetUtcNow().UtcDateTime), cts.Token);
             var weather = await client.GetWeather("Brisbane", cts.Token);
             weather.TemperatureC.ShouldBe(31.0D);
         }
         // repeat
         {
-            await using var client = new WeatherClient(new FakeConduitClient(conduitServer, timeProvider));
+            await using var client = new WeatherClient(new ProtocolClient(new FakeConduitClient(conduitServer, timeProvider)), true);
             var weather = await client.GetWeather("Brisbane", cts.Token);
             weather.TemperatureC.ShouldBe(31.0D);
         }
@@ -69,9 +66,9 @@ public class UnitTest1
             ? new CancellationTokenSource(TimeSpan.FromSeconds(30))
             : new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
-        await using var conduitServer = new FakeConduitServer(new ConduitServer(timeProvider, new WeatherServer(new WeatherService(), timeProvider)));
+        await using var conduitServer = new FakeConduitServer(new ProtocolServer(timeProvider, new WeatherServer(new WeatherService(), timeProvider)));
         {
-            await using var client = new WeatherClient(new FakeConduitClient(conduitServer, timeProvider));
+            await using var client = new WeatherClient(new ProtocolClient(new FakeConduitClient(conduitServer, timeProvider)), true);
             List<WeatherData> responses = new List<WeatherData>();
             Exception? fault = null;
             var subscriber = Task.Run(async () =>
@@ -116,7 +113,7 @@ public class UnitTest1
                 ? new CancellationTokenSource(TimeSpan.FromSeconds(30))
                 : new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
-            await using var client = new WeatherClient(new FakeConduitClient(conduitServer, timeProvider));
+            await using var client = new WeatherClient(new ProtocolClient(new FakeConduitClient(conduitServer, timeProvider)), true);
             List<WeatherData> responses = new List<WeatherData>();
             Exception? fault = null;
             try

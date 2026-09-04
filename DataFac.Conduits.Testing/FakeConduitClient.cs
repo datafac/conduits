@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace DataFac.Conduits.Testing;
 
-public class FakeConduitClient : IConduitClient, IAsyncDisposable
+public class FakeConduitClient : INetChannel, IAsyncDisposable
 {
     private readonly FakeConduitServer _server;
     private readonly TimeProvider _timeProvider;
@@ -24,25 +24,25 @@ public class FakeConduitClient : IConduitClient, IAsyncDisposable
         _disposed = true;
     }
 
-    public IAsyncEnumerable<ConduitResponse> ServerStream(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public IAsyncEnumerable<NetResponse> ServerStream(NetRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
         return _server.ServerStream(request, deadlineUtc, cancellation);
     }
 
-    public ValueTask<ConduitResponse> UnaryRequest(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public ValueTask<NetResponse> UnaryRequest(NetRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
         return _server.UnaryRequest(request, deadlineUtc, cancellation);
     }
 
-    public ValueTask<ConduitResponse> ClientStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public ValueTask<NetResponse> ClientStream(IAsyncEnumerable<NetRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
         return _server.ClientStream(requests, deadlineUtc, cancellation);
     }
 
-    public IAsyncEnumerable<ConduitResponse> DuplexStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public IAsyncEnumerable<NetResponse> DuplexStream(IAsyncEnumerable<NetRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
         return _server.DuplexStream(requests, deadlineUtc, cancellation);

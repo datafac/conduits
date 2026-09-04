@@ -8,73 +8,62 @@ using Xunit;
 
 namespace DataFac.Conduits.UnitTests;
 
-public class GrpcUnaryRequestTests
+public class CalculatorTests
 {
     private const string host = "localhost";
 
-    [Fact]
-    public async Task Multiply()
+    [Theory]
+    [InlineData(3, BinOp.Multiply, 4, 12)]
+    [InlineData(12, BinOp.Divide, 4, 3)]
+    [InlineData(12, BinOp.Divide, 0, double.PositiveInfinity)]
+    [InlineData(0, BinOp.Divide, 0, double.NaN)]
+    [InlineData(4, BinOp.Add, 3, 7)]
+    [InlineData(4, BinOp.Subtract, 3, 1)]
+    public async Task BinOp_Direct(double a, BinOp op, double b, double expected)
     {
-        var timeProvider = new FakeTimeProvider();
-        await using var server = new ProtobufGrpcServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())));
-        await using var client = new CalculatorClient(new ProtobufGrpcClient(host, server.BoundPort));
+        await using var client = new CalculatorClient(new CalculatorServer(new Calculator()));
 
-        var result = await client.DoBinOp(3, BinOp.Multiply, 4);
-        result.ShouldBe(12);
+        var ct = TestContext.Current.CancellationToken;
+
+        var result = await client.DoBinOp(a, op, b, ct);
+        result.ShouldBe(expected);
     }
 
-    [Fact]
-    public async Task Divide()
+    [Theory]
+    [InlineData(3, BinOp.Multiply, 4, 12)]
+    [InlineData(12, BinOp.Divide, 4, 3)]
+    [InlineData(12, BinOp.Divide, 0, double.PositiveInfinity)]
+    [InlineData(0, BinOp.Divide, 0, double.NaN)]
+    [InlineData(4, BinOp.Add, 3, 7)]
+    [InlineData(4, BinOp.Subtract, 3, 1)]
+    public async Task BinOp_OverProtocol(double a, BinOp op, double b, double expected)
     {
         var timeProvider = new FakeTimeProvider();
-        await using var server = new ProtobufGrpcServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())));
-        await using var client = new CalculatorClient(new ProtobufGrpcClient(host, server.BoundPort));
+        await using var server = new ProtocolServer(timeProvider, new CalculatorServer(new Calculator()));
+        await using var client = new CalculatorClient(new ProtocolClient(server));
 
-        var result = await client.DoBinOp(12, BinOp.Divide, 4);
-        result.ShouldBe(3);
+        var ct = TestContext.Current.CancellationToken;
+
+        var result = await client.DoBinOp(a, op, b, ct);
+        result.ShouldBe(expected);
     }
 
-    [Fact]
-    public async Task DivideByZero()
+    [Theory]
+    [InlineData(3, BinOp.Multiply, 4, 12)]
+    [InlineData(12, BinOp.Divide, 4, 3)]
+    [InlineData(12, BinOp.Divide, 0, double.PositiveInfinity)]
+    [InlineData(0, BinOp.Divide, 0, double.NaN)]
+    [InlineData(4, BinOp.Add, 3, 7)]
+    [InlineData(4, BinOp.Subtract, 3, 1)]
+    public async Task BinOp_ViaConduit(double a, BinOp op, double b, double expected)
     {
         var timeProvider = new FakeTimeProvider();
-        await using var server = new ProtobufGrpcServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())));
-        await using var client = new CalculatorClient(new ProtobufGrpcClient(host, server.BoundPort));
+        await using var server = new ProtobufGrpcServer(new ProtocolServer(timeProvider, new CalculatorServer(new Calculator())));
+        await using var client = new CalculatorClient(new ProtocolClient(new ProtobufGrpcClient(host, server.BoundPort)));
 
-        var result = await client.DoBinOp(12, BinOp.Divide, 0);
-        result.ShouldBe(double.PositiveInfinity);
-    }
+        var ct = TestContext.Current.CancellationToken;
 
-    [Fact]
-    public async Task DivideByZero2()
-    {
-        var timeProvider = new FakeTimeProvider();
-        await using var server = new ProtobufGrpcServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())));
-        await using var client = new CalculatorClient(new ProtobufGrpcClient(host, server.BoundPort));
-
-        var result = await client.DoBinOp(0, BinOp.Divide, 0);
-        result.ShouldBe(double.NaN);
-    }
-
-    [Fact]
-    public async Task Add()
-    {
-        var timeProvider = new FakeTimeProvider();
-        await using var server = new ProtobufGrpcServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())));
-        await using var client = new CalculatorClient(new ProtobufGrpcClient(host, server.BoundPort));
-
-        var result = await client.DoBinOp(4, BinOp.Add, 3);
-        result.ShouldBe(7);
-    }
-
-    [Fact]
-    public async Task Subtract()
-    {
-        var timeProvider = new FakeTimeProvider();
-        await using var server = new ProtobufGrpcServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())));
-        await using var client = new CalculatorClient(new ProtobufGrpcClient(host, server.BoundPort));
-
-        var result = await client.DoBinOp(4, BinOp.Subtract, 3);
-        result.ShouldBe(1);
+        var result = await client.DoBinOp(a, op, b, ct);
+        result.ShouldBe(expected);
     }
 }

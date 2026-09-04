@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace DataFac.Conduits;
 
-public interface IResponder
+public interface INetChannel
 {
     /// <summary>
     /// Handles a single request and returns a single result.
@@ -12,7 +13,7 @@ public interface IResponder
     /// <param name="request"></param>
     /// <param name="deadlineUtc"></param>
     /// <param name="cancellation"></param>
-    ValueTask<UserResponse> UnaryRequest(UserRequest request, CancellationToken cancellation = default);
+    ValueTask<NetResponse> UnaryRequest(NetRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default);
 
     /// <summary>
     /// Handles a single request and returns a stream of results.
@@ -20,7 +21,7 @@ public interface IResponder
     /// <param name="request"></param>
     /// <param name="deadlineUtc"></param>
     /// <param name="cancellation"></param>
-    IAsyncEnumerable<UserResponse> ServerStream(UserRequest request, CancellationToken cancellation = default);
+    IAsyncEnumerable<NetResponse> ServerStream(NetRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default);
 
     /// <summary>
     /// Handles a stream of requests then returns a single result.
@@ -29,7 +30,7 @@ public interface IResponder
     /// <param name="deadlineUtc"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<UserResponse> ClientStream(IAsyncEnumerable<UserRequest> requests, CancellationToken cancellation = default);
+    ValueTask<NetResponse> ClientStream(IAsyncEnumerable<NetRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default);
 
     /// <summary>
     /// Simultaneously handles a stream of requests and a stream of results. These may be interleaved.
@@ -38,5 +39,5 @@ public interface IResponder
     /// <param name="deadlineUtc"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    IAsyncEnumerable<UserResponse> DuplexStream(IAsyncEnumerable<UserRequest> requests, CancellationToken cancellation = default);
+    IAsyncEnumerable<NetResponse> DuplexStream(IAsyncEnumerable<NetRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default);
 }

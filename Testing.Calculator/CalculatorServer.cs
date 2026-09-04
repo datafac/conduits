@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Testing.Calculator;
 
-public class CalculatorServer : IResponder
+public class CalculatorServer : IUserChannel
 {
     private static readonly MessagePackSerializer serializer = new MessagePackSerializer();
     private static readonly UserResponse errorDeserializationFailure

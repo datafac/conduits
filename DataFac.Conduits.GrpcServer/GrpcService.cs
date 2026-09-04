@@ -9,8 +9,8 @@ namespace DataFac.Conduits.GrpcServer;
 
 public class GrpcService : DataFac.Conduits.GrpcCommon.GrpcService.GrpcServiceBase
 {
-    private readonly IConduitServer _server;
-    public GrpcService(IConduitServer server)
+    private readonly INetChannel _server;
+    public GrpcService(INetChannel server)
     {
         _server = server;
     }
@@ -31,7 +31,7 @@ public class GrpcService : DataFac.Conduits.GrpcCommon.GrpcService.GrpcServiceBa
 
     public override async Task<GrpcPayload> StreamUp(IAsyncStreamReader<GrpcPayload> requestStream, ServerCallContext context)
     {
-        IAsyncEnumerable<ConduitRequest> requests = requestStream.ToAsyncEnumerable((i) => i.ToConduitRequest(), context.CancellationToken);
+        IAsyncEnumerable<NetRequest> requests = requestStream.ToAsyncEnumerable((i) => i.ToConduitRequest(), context.CancellationToken);
         var response = await _server.ClientStream(requests, context.Deadline, context.CancellationToken);
         return response.ToGrpcPayload();
     }

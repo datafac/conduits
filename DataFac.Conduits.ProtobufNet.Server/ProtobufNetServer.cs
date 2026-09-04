@@ -9,7 +9,7 @@ namespace DataFac.Conduits.ProtobufNetServer;
 
 internal static class PayloadExtensions
 {
-    public static ResultBlob ToResultBlob(this ConduitResponse response)
+    public static ResultBlob ToResultBlob(this NetResponse response)
     {
         return new ResultBlob()
         {
@@ -18,9 +18,9 @@ internal static class PayloadExtensions
         };
     }
 
-    public static ConduitRequest ToConduitRequest(this RequestBlob request)
+    public static NetRequest ToConduitRequest(this RequestBlob request)
     {
-        return new ConduitRequest(
+        return new NetRequest(
             (ControlCode)request.Control,
             new ReadOnlyMemory<byte>(request.Payload));
     }
@@ -28,9 +28,9 @@ internal static class PayloadExtensions
 
 internal class ProtobufNetServer : IProtobufNetContract
 {
-    private readonly IConduitServer _requestHandler;
+    private readonly INetChannel _requestHandler;
 
-    public ProtobufNetServer(IConduitServer requestHandler)
+    public ProtobufNetServer(INetChannel requestHandler)
     {
         _requestHandler = requestHandler;
     }

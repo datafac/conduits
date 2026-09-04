@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DataFac.Conduits.UnitTests;
 
-internal sealed class WeatherServer : IResponder
+internal sealed class WeatherServer : IUserChannel
 {
     private readonly TimeProvider _timeProvider;
     public TimeProvider TimeProvider => _timeProvider;

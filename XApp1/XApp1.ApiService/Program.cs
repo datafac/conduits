@@ -1,3 +1,4 @@
+using DataFac.Conduits;
 using DataFac.Conduits.GrpcClient;
 using Testing.Calculator;
 
@@ -25,7 +26,7 @@ if (app.Environment.IsDevelopment())
 string grpcService1Adress = Environment.GetEnvironmentVariable("GRPCSERVICE1_HTTPS") 
     ?? throw new InvalidOperationException("Environment variable 'GRPCSERVICE1_HTTPS' is not set or invalid.");
 
-await using var calclator = new CalculatorClient(new GrpcConduitClient(grpcService1Adress));
+await using var calclator = new CalculatorClient(new ProtocolClient(new GrpcConduitClient(grpcService1Adress)));
 
 var testResult = await calclator.DoBinOp(3.0, BinOp.Multiply, 4.0);
 

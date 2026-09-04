@@ -12,7 +12,7 @@ namespace DataFac.Conduits.ProtobufNetClient;
 
 internal static class PayloadExtensions
 {
-    public static RequestBlob ToRequestBlob(this ConduitRequest request)
+    public static RequestBlob ToRequestBlob(this NetRequest request)
     {
         return new RequestBlob()
         {
@@ -21,15 +21,15 @@ internal static class PayloadExtensions
         };
     }
 
-    public static ConduitResponse ToConduitResponse(this ResultBlob result)
+    public static NetResponse ToConduitResponse(this ResultBlob result)
     {
-        return new ConduitResponse(
+        return new NetResponse(
             (ControlCode)result.Control,
             new ReadOnlyMemory<byte>(result.Payload));
     }
 }
 
-public class ProtobufGrpcClient : IConduitClient
+public class ProtobufGrpcClient : INetChannel
 {
     private readonly Channel _channel;
     private readonly IProtobufNetContract _contract;
@@ -48,7 +48,7 @@ public class ProtobufGrpcClient : IConduitClient
         GC.SuppressFinalize(this);
     }
 
-    public async ValueTask<ConduitResponse> UnaryRequest(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public async ValueTask<NetResponse> UnaryRequest(NetRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         var callOptions = new CallOptions(null, deadlineUtc, cancellation);
         RequestBlob requestBlob = request.ToRequestBlob();
@@ -56,7 +56,7 @@ public class ProtobufGrpcClient : IConduitClient
         return resultBlob.ToConduitResponse();
     }
 
-    public async IAsyncEnumerable<ConduitResponse> ServerStream(ConduitRequest request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public async IAsyncEnumerable<NetResponse> ServerStream(NetRequest request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         var callOptions = new CallOptions(null, deadlineUtc, cancellation);
         RequestBlob requestBlob = request.ToRequestBlob();
@@ -66,12 +66,12 @@ public class ProtobufGrpcClient : IConduitClient
         }
     }
 
-    public ValueTask<ConduitResponse> ClientStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public ValueTask<NetResponse> ClientStream(IAsyncEnumerable<NetRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         throw new NotImplementedException();
     }
 
-    public IAsyncEnumerable<ConduitResponse> DuplexStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public IAsyncEnumerable<NetResponse> DuplexStream(IAsyncEnumerable<NetRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         throw new NotImplementedException();
     }

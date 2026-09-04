@@ -13,7 +13,7 @@ public interface IAsyncCalculator : IAsyncDisposable
     /// <param name="x"></param>
     /// <param name="op"></param>
     /// <param name="y"></param>
-    ValueTask<double> DoBinOp(double x, BinOp op, double y);
+    ValueTask<double> DoBinOp(double x, BinOp op, double y, CancellationToken cancellation = default);
 
     /// <summary>
     /// Returns a stream of integers starting at <paramref name="start"/> and continuing 

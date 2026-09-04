@@ -11,7 +11,7 @@ public class Calculator : IAsyncCalculator
 {
     public async ValueTask DisposeAsync() { }
 
-    public async ValueTask<double> DoBinOp(double x, BinOp op, double y)
+    public async ValueTask<double> DoBinOp(double x, BinOp op, double y, CancellationToken cancellation = default)
     {
         return op switch
         {

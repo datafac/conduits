@@ -21,11 +21,10 @@ public class ProtobufNetServerStreamTests
     {
         var ct = TestContext.Current.CancellationToken;
         var timeProvider = new FakeTimeProvider();
-        await using var server = new ProtobufGrpcServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())));
-        await using var client = new CalculatorClient(new ProtobufGrpcClient(host, server.BoundPort));
+        await using var server = new ProtobufGrpcServer(new ProtocolServer(timeProvider, new CalculatorServer(new Calculator())));
+        await using var client = new CalculatorClient(new ProtocolClient(new ProtobufGrpcClient(host, server.BoundPort)));
 
         // duration should be ~1.0s
-        client.MaxCallDuration = null;
         var result = await client.GetRange(0, 10, TimeSpan.FromSeconds(0.1), ct).ToListAsyncInternal();
         result.ShouldBeEquivalentTo(Enumerable.Range(0, 10).ToList());
     }
@@ -35,12 +34,11 @@ public class ProtobufNetServerStreamTests
     {
         var ct = TestContext.Current.CancellationToken;
         var timeProvider = new FakeTimeProvider();
-        await using var server = new ProtobufGrpcServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())));
-        await using var client = new CalculatorClient(new ProtobufGrpcClient(host, server.BoundPort));
+        await using var server = new ProtobufGrpcServer(new ProtocolServer(timeProvider, new CalculatorServer(new Calculator())));
+        await using var client = new CalculatorClient(new ProtocolClient(new ProtobufGrpcClient(host, server.BoundPort), TimeSpan.FromSeconds(5), timeProvider));
 
         // returning the entire stream would take ~10s, but we have a max call
         // duration of 5s, so this call should timeout after ~5s
-        client.MaxCallDuration = TimeSpan.FromSeconds(5);
         var ex = await Assert.ThrowsAsync<RpcException>(async () => { await client.GetRange(0, 10, TimeSpan.FromSeconds(1), ct).ToListAsyncInternal(); });
         ex.Message.ShouldContain("DeadlineExceeded");
     }
@@ -49,12 +47,11 @@ public class ProtobufNetServerStreamTests
     public async Task GetStreamWithCancellation()
     {
         var timeProvider = new FakeTimeProvider();
-        await using var server = new ProtobufGrpcServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())));
-        await using var client = new CalculatorClient(new ProtobufGrpcClient(host, server.BoundPort));
+        await using var server = new ProtobufGrpcServer(new ProtocolServer(timeProvider, new CalculatorServer(new Calculator())));
+        await using var client = new CalculatorClient(new ProtocolClient(new ProtobufGrpcClient(host, server.BoundPort)));
 
         // returning the entire stream would take ~10s, but we have a max call
         // duration of 5s, so this call should timeout after ~5s
-        client.MaxCallDuration = null;
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var ex = await Assert.ThrowsAsync<RpcException>(async () => { await client.GetRange(0, 10, TimeSpan.FromSeconds(1), cts.Token).ToListAsyncInternal(); });
         ex.Message.ShouldContain("Cancelled");

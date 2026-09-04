@@ -5,7 +5,7 @@ namespace DataFac.Conduits.GrpcClient;
 
 internal static class GrpcPayloadExtensions
 {
-    public static GrpcPayload ToGrpcPayload(this ConduitRequest request)
+    public static GrpcPayload ToGrpcPayload(this NetRequest request)
     {
         return new GrpcPayload()
         {
@@ -13,8 +13,8 @@ internal static class GrpcPayloadExtensions
             Data = UnsafeByteOperations.UnsafeWrap(request.Payload)
         };
     }
-    public static ConduitResponse ToConduitResponse(this GrpcPayload request)
+    public static NetResponse ToConduitResponse(this GrpcPayload request)
     {
-        return new ConduitResponse((ControlCode)request.Code, request.Data.Memory);
+        return new NetResponse((ControlCode)request.Code, request.Data.Memory);
     }
 }

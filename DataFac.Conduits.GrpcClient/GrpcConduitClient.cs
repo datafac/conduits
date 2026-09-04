@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DataFac.Conduits.GrpcClient;
 
-public class GrpcConduitClient : IConduitClient
+public class GrpcConduitClient : INetChannel
 {
     private readonly GrpcChannel _channel;
     private readonly GrpcService.GrpcServiceClient _client;
@@ -42,14 +42,14 @@ public class GrpcConduitClient : IConduitClient
         if (_disposed) ThrowDisposed();
     }
 
-    public async ValueTask<ConduitResponse> UnaryRequest(ConduitRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public async ValueTask<NetResponse> UnaryRequest(NetRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         CheckNotDisposed();
         var incoming = await _client.NoStreamAsync(request.ToGrpcPayload(), null, deadlineUtc, cancellation);
         return incoming.ToConduitResponse();
     }
 
-    public async IAsyncEnumerable<ConduitResponse> ServerStream(ConduitRequest request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public async IAsyncEnumerable<NetResponse> ServerStream(NetRequest request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         CheckNotDisposed();
         var call = _client.StreamDn(request.ToGrpcPayload(), null, deadlineUtc, cancellation);
@@ -61,7 +61,7 @@ public class GrpcConduitClient : IConduitClient
         }
     }
 
-    public async ValueTask<ConduitResponse> ClientStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public async ValueTask<NetResponse> ClientStream(IAsyncEnumerable<NetRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         CheckNotDisposed();
         using var call = _client.StreamUp(deadline: deadlineUtc, cancellationToken: cancellation);
@@ -80,7 +80,7 @@ public class GrpcConduitClient : IConduitClient
         return incoming.ToConduitResponse();
     }
 
-    public async IAsyncEnumerable<ConduitResponse> DuplexStream(IAsyncEnumerable<ConduitRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public async IAsyncEnumerable<NetResponse> DuplexStream(IAsyncEnumerable<NetRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         CheckNotDisposed();
         using var call = _client.BiStream(cancellationToken: cancellation, deadline: deadlineUtc);
