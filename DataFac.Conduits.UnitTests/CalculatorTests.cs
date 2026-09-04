@@ -1,6 +1,7 @@
 using DataFac.Conduits.ProtobufNetClient;
 using DataFac.Conduits.ProtobufNetServer;
 using DataFac.Conduits.Testing;
+using ProtoBuf.Grpc.Configuration;
 using Shouldly;
 using System.Threading.Tasks;
 using Testing.Calculator;
@@ -55,7 +56,7 @@ public class CalculatorTests
     [InlineData(0, BinOp.Divide, 0, double.NaN)]
     [InlineData(4, BinOp.Add, 3, 7)]
     [InlineData(4, BinOp.Subtract, 3, 1)]
-    public async Task BinOp_ViaConduit(double a, BinOp op, double b, double expected)
+    public async Task BinOp_ViaProtobufNet(double a, BinOp op, double b, double expected)
     {
         var timeProvider = new FakeTimeProvider();
         await using var server = new ProtobufGrpcServer(new ProtocolServer(timeProvider, new CalculatorServer(new Calculator())));

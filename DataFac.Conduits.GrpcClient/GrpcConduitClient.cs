@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DataFac.Conduits.GrpcClient;
 
-public class GrpcConduitClient : INetChannel
+public class GrpcConduitClient : INetChannel, IAsyncDisposable
 {
     private readonly GrpcChannel _channel;
     private readonly GrpcService.GrpcServiceClient _client;
