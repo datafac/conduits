@@ -59,7 +59,6 @@ namespace Testing.Benchmarks
         [Benchmark(Baseline = true)]
         public async ValueTask<double> TestFake()
         {
-
             double result = await fakeClient.DoBinOp(3, BinOp.Multiply, 4);
             return result;
         }
@@ -67,7 +66,6 @@ namespace Testing.Benchmarks
         [Benchmark]
         public async ValueTask<double> ProtobufNet()
         {
-
             double result = await pbufClient.DoBinOp(3, BinOp.Multiply, 4);
             return result;
         }
