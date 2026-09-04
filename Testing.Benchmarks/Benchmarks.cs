@@ -4,12 +4,9 @@
 
 using BenchmarkDotNet.Attributes;
 using DataFac.Conduits;
-using DataFac.Conduits.GrpcClient;
 using DataFac.Conduits.ProtobufNetClient;
 using DataFac.Conduits.ProtobufNetServer;
 using DataFac.Conduits.Testing;
-using Microsoft.VSDiagnostics;
-using ProtoBuf.Grpc.Configuration;
 using System.Threading.Tasks;
 using Testing.Calculator;
 
