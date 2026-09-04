@@ -23,12 +23,17 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-string grpcService1Adress = Environment.GetEnvironmentVariable("GRPCSERVICE1_HTTPS") 
+string grpcService1Adress = Environment.GetEnvironmentVariable("GRPCSERVICE1_HTTPS")
     ?? throw new InvalidOperationException("Environment variable 'GRPCSERVICE1_HTTPS' is not set or invalid.");
 
-await using var calclator = new CalculatorClient(new ProtocolClient(new GrpcConduitClient(grpcService1Adress)));
+await using var calclator1 = new CalculatorClient(new ProtocolClient(new GrpcConduitClient(grpcService1Adress)));
+var testResult1 = await calclator1.DoBinOp(3.0, BinOp.Multiply, 4.0);
 
-var testResult = await calclator.DoBinOp(3.0, BinOp.Multiply, 4.0);
+string grpcService2Adress = Environment.GetEnvironmentVariable("GRPCSERVICE2_HTTPS")
+    ?? throw new InvalidOperationException("Environment variable 'GRPCSERVICE2_HTTPS' is not set or invalid.");
+
+await using var calclator2 = new CalculatorClient(new ProtocolClient(new GrpcConduitClient(grpcService2Adress)));
+var testResult2 = await calclator2.DoBinOp(3.0, BinOp.Multiply, 4.0);
 
 string[] summaries = ["Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"];
 
