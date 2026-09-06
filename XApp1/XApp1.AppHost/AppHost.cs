@@ -12,10 +12,21 @@ var apiService = builder.AddProject<Projects.XApp1_ApiService>("apiservice")
     .WaitFor(grpcService2)
     ;
 
+var apiService2 = builder.AddProject<Projects.XApp1_ApiService2>("apiservice2")
+    .WithHttpHealthCheck("/health")
+    .WithReference(grpcService1)
+    .WithReference(grpcService2)
+    .WaitFor(grpcService1)
+    .WaitFor(grpcService2)
+    ;
+
 builder.AddProject<Projects.XApp1_Web>("webfrontend")
     .WithExternalHttpEndpoints()
     .WithHttpHealthCheck("/health")
     .WithReference(apiService)
-    .WaitFor(apiService);
+    .WaitFor(apiService)
+    .WithReference(apiService2)
+    .WaitFor(apiService2)
+    ;
 
 builder.Build().Run();

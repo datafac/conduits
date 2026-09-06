@@ -24,16 +24,16 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-string grpcService1Adress = Environment.GetEnvironmentVariable("GRPCSERVICE1_HTTPS")
-    ?? throw new InvalidOperationException("Environment variable 'GRPCSERVICE1_HTTPS' is not set or invalid.");
+string GetServiceAddress(string variableName)
+{
+    return Environment.GetEnvironmentVariable(variableName)
+        ?? throw new InvalidOperationException($"Environment variable '{variableName}' is not set or invalid.");
+}
 
-await using var calclator = new CalculatorClient(new ProtocolClient(new GrpcConduitClient(grpcService1Adress)));
+await using var calclator = new CalculatorClient(new ProtocolClient(new GrpcConduitClient(GetServiceAddress("GRPCSERVICE1_HTTPS"))));
 var answer = await calclator.DoBinOp(3.0, BinOp.Multiply, 4.0);
 
-string grpcService2Adress = Environment.GetEnvironmentVariable("GRPCSERVICE2_HTTPS")
-    ?? throw new InvalidOperationException("Environment variable 'GRPCSERVICE2_HTTPS' is not set or invalid.");
-
-await using var weatherSvc = new WeatherClient(new ProtocolClient(new GrpcConduitClient(grpcService2Adress)));
+await using var weatherSvc = new WeatherClient(new ProtocolClient(new   GrpcConduitClient(GetServiceAddress("GRPCSERVICE2_HTTPS"))));
 var weather = await weatherSvc.GetWeather(12345);
 
 string[] summaries = ["Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"];
@@ -62,3 +62,4 @@ record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
+
