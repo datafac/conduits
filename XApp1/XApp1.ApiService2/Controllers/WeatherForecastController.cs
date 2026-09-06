@@ -28,11 +28,6 @@ public class WeatherForecastController : ControllerBase, IAsyncDisposable
         await _weatherSvc.DisposeAsync();
     }
 
-    private static readonly string[] Summaries =
-    [
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    ];
-
     [HttpGet(Name = "GetWeatherForecast")]
     public async IAsyncEnumerable<WeatherForecast> GetAll()
     {
