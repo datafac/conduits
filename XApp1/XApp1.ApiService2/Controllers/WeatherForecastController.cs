@@ -1,6 +1,10 @@
 using DataFac.Conduits;
 using DataFac.Conduits.GrpcClient;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
+using Nerdbank.MessagePack;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Testing.Weather;
 
 namespace XApp1.ApiService2.Controllers;
@@ -18,6 +22,8 @@ public class WeatherForecastController : ControllerBase, IAsyncDisposable
     private readonly string _weatherSvcAddress = GetServiceAddress("GRPCSERVICE2_HTTPS");
     private readonly WeatherClient _weatherSvc;
 
+    private readonly MessagePackSerializer _serializer = new MessagePackSerializer();
+
     public WeatherForecastController()
     {
         _weatherSvc = new WeatherClient(new ProtocolClient(new GrpcConduitClient(_weatherSvcAddress)));
@@ -29,18 +35,17 @@ public class WeatherForecastController : ControllerBase, IAsyncDisposable
     }
 
     [HttpGet(Name = "GetWeatherForecast")]
-    public async IAsyncEnumerable<WeatherForecast> GetAll()
+    public async Task<JsonMessage> GetAll()
     {
-        var weather = await _weatherSvc.GetWeather(12345);
-
+        List<WeatherData> results = new List<WeatherData>();
         await foreach (var wd in _weatherSvc.GetForecast(0, 7))
         {
-            yield return new WeatherForecast
-            {
-                Date = DateOnly.FromDateTime(new DateTime(wd.DateTimeUtc, DateTimeKind.Utc)),
-                TemperatureC = wd.TemperatureC,
-                Summary = wd.Summary
-            };
+            results.Add(wd);
         }
+
+        BatchResult batch = new BatchResult() { Results = results.ToArray() };
+        byte[] payload = _serializer.Serialize<ResultBase>(batch);
+        var message = new JsonMessage { Payload = payload };
+        return message;
     }
 }

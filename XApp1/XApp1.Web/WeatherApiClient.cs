@@ -1,29 +1,51 @@
+using Nerdbank.MessagePack;
+using System.Runtime.CompilerServices;
+using Testing.Weather;
+
 namespace XApp1.Web;
 
 public class WeatherApiClient(HttpClient httpClient)
 {
-    public async Task<WeatherForecast[]> GetWeatherAsync(int maxItems = 10, CancellationToken cancellationToken = default)
-    {
-        List<WeatherForecast>? forecasts = null;
+    private readonly MessagePackSerializer _serializer = new MessagePackSerializer();
 
-        await foreach (var forecast in httpClient.GetFromJsonAsAsyncEnumerable<WeatherForecast>("/weatherforecast", cancellationToken))
+    private static IEnumerable<WeatherData> GetWeatherData(ResultBase? result)
+    {
+        if (result is WeatherData weather1)
         {
-            if (forecasts?.Count >= maxItems)
+            yield return weather1;
+        }
+        else if (result is BatchResult batch)
+        {
+            foreach (var item in batch.Results)
             {
-                break;
-            }
-            if (forecast is not null)
-            {
-                forecasts ??= [];
-                forecasts.Add(forecast);
+                foreach(var weather2 in GetWeatherData(item))
+                {
+                    yield return weather2;
+                }
             }
         }
+        else if (result is ErrorResult error)
+        {
+            throw new Exception(error.Message);
+        }
+    }
 
-        return forecasts?.ToArray() ?? [];
+    public async Task<WeatherData[]> GetWeatherAsyncEnum(CancellationToken cancellationToken = default)
+    {
+        //string json = await httpClient.GetStringAsync("/weatherforecast", cancellationToken);
+        JsonMessage? message = await httpClient.GetFromJsonAsync<JsonMessage>("/weatherforecast", cancellationToken);
+        ReadOnlyMemory<byte> buffer = message?.Payload ?? ReadOnlyMemory<byte>.Empty;
+        var result = _serializer.Deserialize<ResultBase>(buffer);
+        return GetWeatherData(result).ToArray();
     }
 }
 
-public record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+//public record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+//{
+//    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+//}
+
+public class JsonMessage
 {
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    public byte[]? Payload { get; set; }
 }

@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Testing.Weather\Testing.Weather.csproj" />
     <ProjectReference Include="..\XApp1.ServiceDefaults\XApp1.ServiceDefaults.csproj" />
   </ItemGroup>
 

@@ -1,12 +1,17 @@
 namespace XApp1.ApiService2;
 
-public class WeatherForecast
+//public class WeatherForecast
+//{
+//    public DateOnly Date { get; set; }
+
+//    public int TemperatureC { get; set; }
+
+//    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+
+//    public string? Summary { get; set; }
+//}
+
+public class JsonMessage
 {
-    public DateOnly Date { get; set; }
-
-    public int TemperatureC { get; set; }
-
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-
-    public string? Summary { get; set; }
+    public byte[]? Payload { get; set; }
 }
