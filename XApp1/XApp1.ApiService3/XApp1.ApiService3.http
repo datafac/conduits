@@ -1,0 +1,6 @@
+@XApp1.ApiService3_HostAddress = http://localhost:5045
+
+GET {{XApp1.ApiService3_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

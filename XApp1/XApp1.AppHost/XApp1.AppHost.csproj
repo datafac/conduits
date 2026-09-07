@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\XApp1.ApiService2\XApp1.ApiService2.csproj" />
+    <ProjectReference Include="..\XApp1.ApiService3\XApp1.ApiService3.csproj" />
     <ProjectReference Include="..\XApp1.ApiService\XApp1.ApiService.csproj" />
     <ProjectReference Include="..\XApp1.GrpcService2\XApp1.GrpcService2.csproj" />
     <ProjectReference Include="..\XApp1.GrpcService\XApp1.GrpcService1.csproj" />

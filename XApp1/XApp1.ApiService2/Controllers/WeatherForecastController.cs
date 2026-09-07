@@ -19,10 +19,10 @@ public class WeatherForecastController : ControllerBase, IAsyncDisposable
             ?? throw new InvalidOperationException($"Environment variable '{variableName}' is not set or invalid.");
     }
 
-    private readonly string _weatherSvcAddress = GetServiceAddress("GRPCSERVICE2_HTTPS");
+    private static readonly string _weatherSvcAddress = GetServiceAddress("GRPCSERVICE2_HTTPS");
     private readonly WeatherClient _weatherSvc;
 
-    private readonly MessagePackSerializer _serializer = new MessagePackSerializer();
+    private static readonly MessagePackSerializer _serializer = new MessagePackSerializer();
 
     public WeatherForecastController()
     {

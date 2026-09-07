@@ -51,6 +51,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testing.Weather", "Testing.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XApp1.ApiService2", "XApp1\XApp1.ApiService2\XApp1.ApiService2.csproj", "{1655B09B-5F94-C331-E45D-22D0803189FD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XApp1.ApiService3", "XApp1\XApp1.ApiService3\XApp1.ApiService3.csproj", "{79384FC0-8B5E-A33E-F712-11B0DD4A7E0F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -133,6 +135,10 @@ Global
 		{1655B09B-5F94-C331-E45D-22D0803189FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1655B09B-5F94-C331-E45D-22D0803189FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1655B09B-5F94-C331-E45D-22D0803189FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79384FC0-8B5E-A33E-F712-11B0DD4A7E0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79384FC0-8B5E-A33E-F712-11B0DD4A7E0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79384FC0-8B5E-A33E-F712-11B0DD4A7E0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79384FC0-8B5E-A33E-F712-11B0DD4A7E0F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
