@@ -2,6 +2,7 @@
 using DataFac.Conduits;
 using DataFac.Conduits.GrpcClient;
 using Nerdbank.MessagePack;
+using System.Text.Json;
 using Testing.Weather;
 
 namespace XApp1.ApiService3;
@@ -44,15 +45,21 @@ public class Program
 
         app.UseAuthorization();
 
-        app.MapGet("/weatherforecast", async (HttpContext httpContext) =>
+        app.MapPost("/weatherforecast", async (HttpContext httpContext, JsonMessage jsonRequest) =>
         {
-            WeatherData[] results = await _weatherSvc.GetForecast(0, 7).ToArrayAsync();
-            BatchResult batch = new BatchResult() { Results = results.ToArray() };
-            byte[] payload = _serializer.Serialize<ResultBase>(batch);
-            var message = new JsonMessage { Payload = payload };
-            return message;
+            RequestBase? requestBase = _serializer.Deserialize<RequestBase>(jsonRequest?.Payload ?? Array.Empty<byte>());
+            switch(requestBase)
+            {
+                case GetForecastRequest fr:
+                    WeatherData[] results = await _weatherSvc.GetForecast(fr.RngSeed, fr.Count).ToArrayAsync();
+                    BatchResult batch = new BatchResult() { Results = results };
+                    return new JsonMessage { Payload = _serializer.Serialize<ResultBase>(batch) };
+                default:
+                    ErrorResult error = new ErrorResult() { Code = ErrorCode.UnsupportedRequestType, Message = $"Request type '{requestBase?.GetType().Name}' is not supported." };
+                    return new JsonMessage { Payload = _serializer.Serialize<ResultBase>(new BatchResult() { Results = new ResultBase[] { error } }) };
+            }
         })
-        .WithName("GetWeatherForecast");
+        .WithName("PostWeatherForecast");
 
         app.Run();
     }

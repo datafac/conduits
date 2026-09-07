@@ -1,5 +1,6 @@
 using Nerdbank.MessagePack;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using Testing.Weather;
 
 namespace XApp1.Web;
@@ -32,18 +33,16 @@ public class WeatherApiClient(HttpClient httpClient)
 
     public async Task<WeatherData[]> GetWeatherAsyncEnum(CancellationToken cancellationToken = default)
     {
-        //string json = await httpClient.GetStringAsync("/weatherforecast", cancellationToken);
-        JsonMessage? message = await httpClient.GetFromJsonAsync<JsonMessage>("/weatherforecast", cancellationToken);
-        ReadOnlyMemory<byte> buffer = message?.Payload ?? ReadOnlyMemory<byte>.Empty;
+        var request = new GetForecastRequest() { RngSeed = 0, Count = 7 };
+        byte[] requestBytes = _serializer.Serialize<RequestBase>(request);
+        var jsonRequest = new JsonMessage { Payload = requestBytes };
+        var httpResponse = await httpClient.PostAsJsonAsync<JsonMessage>("/weatherforecast", jsonRequest, cancellationToken);
+        JsonMessage? jsonResponse = await httpResponse.Content.ReadFromJsonAsync<JsonMessage>(cancellationToken);
+        ReadOnlyMemory<byte> buffer = jsonResponse?.Payload ?? ReadOnlyMemory<byte>.Empty;
         var result = _serializer.Deserialize<ResultBase>(buffer);
         return GetWeatherData(result).ToArray();
     }
 }
-
-//public record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-//{
-//    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-//}
 
 public class JsonMessage
 {

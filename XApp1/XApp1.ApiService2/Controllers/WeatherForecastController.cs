@@ -1,10 +1,7 @@
 using DataFac.Conduits;
 using DataFac.Conduits.GrpcClient;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Nerdbank.MessagePack;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Testing.Weather;
 
 namespace XApp1.ApiService2.Controllers;
@@ -37,13 +34,8 @@ public class WeatherForecastController : ControllerBase, IAsyncDisposable
     [HttpGet(Name = "GetWeatherForecast")]
     public async Task<JsonMessage> GetAll()
     {
-        List<WeatherData> results = new List<WeatherData>();
-        await foreach (var wd in _weatherSvc.GetForecast(0, 7))
-        {
-            results.Add(wd);
-        }
-
-        BatchResult batch = new BatchResult() { Results = results.ToArray() };
+        WeatherData[] results = await _weatherSvc.GetForecast(0, 7).ToArrayAsync();
+        BatchResult batch = new BatchResult() { Results = results };
         byte[] payload = _serializer.Serialize<ResultBase>(batch);
         var message = new JsonMessage { Payload = payload };
         return message;
