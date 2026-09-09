@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\DataFac.Conduits.GrpcClient\DataFac.Conduits.GrpcClient.csproj" />
+    <ProjectReference Include="..\..\DataFac.Conduits.HttpCommon\DataFac.Conduits.HttpCommon.csproj" />
     <ProjectReference Include="..\..\Testing.Weather\Testing.Weather.csproj" />
     <ProjectReference Include="..\XApp1.ServiceDefaults\XApp1.ServiceDefaults.csproj" />
   </ItemGroup>

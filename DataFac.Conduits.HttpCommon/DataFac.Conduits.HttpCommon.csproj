@@ -18,7 +18,7 @@
 		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 		<RepositoryUrl>https://github.com/datafac/conduits</RepositoryUrl>
 		<PackageProjectUrl>https://github.com/datafac/conduits</PackageProjectUrl>
-		<Description>Conduits gRPC .proto files</Description>
+		<Description>Conduits http common types</Description>
 		<Title>Package title</Title>
 		<Product>Conduits</Product>
 	</PropertyGroup>
@@ -31,11 +31,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Grpc.Core.Api" Version="2.83.0" />
 		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.11" />
 		<PackageReference Include="Nerdbank.GitVersioning" Version="3.10.94">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 	</ItemGroup>
+
 </Project>

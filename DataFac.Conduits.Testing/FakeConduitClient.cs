@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace DataFac.Conduits.Testing;
 
-public class FakeConduitClient : INetChannel, IAsyncDisposable
+public class FakeConduitClient : INetConduit, IAsyncDisposable
 {
     private readonly FakeConduitServer _server;
     private readonly TimeProvider _timeProvider;

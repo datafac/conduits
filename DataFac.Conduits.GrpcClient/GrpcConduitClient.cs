@@ -8,12 +8,10 @@ using System.Threading.Tasks;
 
 namespace DataFac.Conduits.GrpcClient;
 
-public class GrpcConduitClient : INetChannel, IAsyncDisposable
+public class GrpcConduitClient : INetConduit, IAsyncDisposable
 {
     private readonly GrpcChannel _channel;
     private readonly GrpcService.GrpcServiceClient _client;
-
-    public TimeProvider TimeProvider => TimeProvider.System;
 
     public GrpcConduitClient(string address)
     {
@@ -27,6 +25,7 @@ public class GrpcConduitClient : INetChannel, IAsyncDisposable
         if (_disposed) return;
         _disposed = true;
         _channel.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -73,13 +72,13 @@ public class GrpcConduitClient : INetChannel, IAsyncDisposable
             }
 
             await requestStream.CompleteAsync();
-        });
-        await Task.WhenAll(pushTask);
+        }, cancellation);
+        await pushTask;
         var incoming = await call.ResponseAsync;
         return incoming.ToConduitResponse();
     }
 
-    public async IAsyncEnumerable<NetResponse> DuplexStream(IAsyncEnumerable<NetRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
+    public async IAsyncEnumerable<NetResponse> DuplexStream(IAsyncEnumerable<NetRequest> requests, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         CheckNotDisposed();
         using var call = _client.BiStream(cancellationToken: cancellation, deadline: deadlineUtc);
@@ -93,7 +92,7 @@ public class GrpcConduitClient : INetChannel, IAsyncDisposable
             }
 
             await requestStream.CompleteAsync();
-        });
+        }, cancellation);
 
         var responseStream = call.ResponseStream;
         while (await responseStream.MoveNext(cancellation) && !cancellation.IsCancellationRequested)
@@ -101,6 +100,6 @@ public class GrpcConduitClient : INetChannel, IAsyncDisposable
             yield return responseStream.Current.ToConduitResponse();
         }
 
-        await Task.WhenAll(pushTask);
+        await pushTask;
     }
 }

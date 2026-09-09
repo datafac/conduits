@@ -8,10 +8,10 @@ namespace DataFac.Conduits.UnitTests;
 
 public class WeatherClient : IWeatherService, IAsyncDisposable
 {
-    private readonly IUserChannel _client;
+    private readonly IAppConduit _client;
     private readonly bool Owned;
 
-    public WeatherClient(IUserChannel client, bool owned = false)
+    public WeatherClient(IAppConduit client, bool owned = false)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
         Owned = owned;
@@ -28,7 +28,7 @@ public class WeatherClient : IWeatherService, IAsyncDisposable
     public async ValueTask<WeatherData> GetWeather(string location, CancellationToken token)
     {
         var request = new WeatherData(WeatherTag.GetWeatherData, location);
-        var reply = await _client.UnaryRequest(new UserRequest(request.ToMemory()), token);
+        var reply = await _client.UnaryRequest(new AppRequest(request.ToMemory()), token);
         return WeatherData.FromSpan(reply.Payload.Span);
     }
 
@@ -36,7 +36,7 @@ public class WeatherClient : IWeatherService, IAsyncDisposable
     {
         var request = new WeatherData(WeatherTag.StreamDn_WeatherFeed, location);
         var payload = request.ToMemory();
-        await foreach (var response in _client.ServerStream(new UserRequest(request.ToMemory()), token))
+        await foreach (var response in _client.ServerStream(new AppRequest(request.ToMemory()), token))
         {
             var result = WeatherData.FromSpan(response.Payload.Span);
             if (result is not null)
@@ -47,6 +47,6 @@ public class WeatherClient : IWeatherService, IAsyncDisposable
     public async ValueTask UpdateWeather(WeatherData request, CancellationToken token)
     {
 
-        var _ = await _client.UnaryRequest(new UserRequest(request.ToMemory()), token);
+        var _ = await _client.UnaryRequest(new AppRequest(request.ToMemory()), token);
     }
 }

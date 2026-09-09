@@ -10,9 +10,9 @@ namespace DataFac.Conduits;
 /// <summary>
 /// Implements client-side conduit protocol.
 /// </summary>
-public sealed class ProtocolClient : IUserChannel, IAsyncDisposable
+public sealed class ProtocolClient : IAppConduit, IAsyncDisposable
 {
-    private readonly INetChannel _netChannel;
+    private readonly INetConduit _netChannel;
 
     private readonly TimeProvider _timeProvider;
     public TimeProvider TimeProvider => _timeProvider;
@@ -37,7 +37,7 @@ public sealed class ProtocolClient : IUserChannel, IAsyncDisposable
         set => _maxCallDuration = SanitiseMaxCallDuration(value);
     }
 
-    public ProtocolClient(INetChannel netChannel, TimeSpan? maxCallDuration = null, TimeProvider? timeProvider = null)
+    public ProtocolClient(INetConduit netChannel, TimeSpan? maxCallDuration = null, TimeProvider? timeProvider = null)
     {
         _netChannel = netChannel;
         _maxCallDuration = SanitiseMaxCallDuration(maxCallDuration);
@@ -83,25 +83,25 @@ public sealed class ProtocolClient : IUserChannel, IAsyncDisposable
         };
     }
 
-    public async ValueTask<UserResponse> UnaryRequest(UserRequest request, CancellationToken cancellation = default)
+    public async ValueTask<AppResponse> UnaryRequest(AppRequest request, CancellationToken cancellation = default)
     {
         DateTime? deadline = calculateDeadline();
         var response = await _netChannel.UnaryRequest(new NetRequest(request.Payload), deadline).ConfigureAwait(false);
         var result = HandleResponse(response);
-        return new UserResponse(result.Payload);
+        return new AppResponse(result.Payload);
     }
 
-    public async IAsyncEnumerable<UserResponse> ServerStream(UserRequest request, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public async IAsyncEnumerable<AppResponse> ServerStream(AppRequest request, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         DateTime? deadline = calculateDeadline();
         await foreach (var response in _netChannel.ServerStream(new NetRequest(request.Payload), deadline, cancellation).ConfigureAwait(false))
         {
             var result = HandleResponse(response);
-            yield return new UserResponse(result.Payload);
+            yield return new AppResponse(result.Payload);
         }
     }
 
-    public async ValueTask<UserResponse> ClientStream(IAsyncEnumerable<UserRequest> requests, CancellationToken cancellation = default)
+    public async ValueTask<AppResponse> ClientStream(IAsyncEnumerable<AppRequest> requests, CancellationToken cancellation = default)
     {
         DateTime? deadline = calculateDeadline();
 
@@ -115,10 +115,10 @@ public sealed class ProtocolClient : IUserChannel, IAsyncDisposable
 
         var response = await _netChannel.ClientStream(ToNetRequests(), deadline).ConfigureAwait(false);
         var result = HandleResponse(response);
-        return new UserResponse(result.Payload);
+        return new AppResponse(result.Payload);
     }
 
-    public async IAsyncEnumerable<UserResponse> DuplexStream(IAsyncEnumerable<UserRequest> requests, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public async IAsyncEnumerable<AppResponse> DuplexStream(IAsyncEnumerable<AppRequest> requests, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         DateTime? deadline = calculateDeadline();
 
@@ -134,7 +134,7 @@ public sealed class ProtocolClient : IUserChannel, IAsyncDisposable
         await foreach (var response in _netChannel.DuplexStream(ToNetRequests(), deadline, cancellation).ConfigureAwait(false))
         {
             var result = HandleResponse(response);
-            yield return new UserResponse(result.Payload);
+            yield return new AppResponse(result.Payload);
         }
     }
 

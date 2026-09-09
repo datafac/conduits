@@ -7,8 +7,8 @@ namespace DataFac.Conduits.GrpcServer;
 
 public class GrpcService : DataFac.Conduits.GrpcCommon.GrpcService.GrpcServiceBase
 {
-    private readonly INetChannel _server;
-    public GrpcService(INetChannel server)
+    private readonly INetConduit _server;
+    public GrpcService(INetConduit server)
     {
         _server = server;
     }

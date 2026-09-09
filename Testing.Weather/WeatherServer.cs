@@ -2,17 +2,18 @@
 using Nerdbank.MessagePack;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Testing.Weather;
 
-public class WeatherServer : IUserChannel
+public class WeatherServer : IAppConduit
 {
     private static readonly MessagePackSerializer _serializer = new MessagePackSerializer();
-    private static readonly UserResponse errorDeserializationFailure
-        = new UserResponse(_serializer.Serialize<ResultBase>(
+    private static readonly AppResponse errorDeserializationFailure
+        = new AppResponse(_serializer.Serialize<ResultBase>(
             new ErrorResult
             {
                 Code = ErrorCode.DeserializationError,
@@ -26,7 +27,13 @@ public class WeatherServer : IUserChannel
         _handler = handler;
     }
 
-    public async ValueTask<UserResponse> UnaryRequest(UserRequest requestBytes, CancellationToken cancellation = default)
+    private async Task<BatchResult> GetForecastAsArray(GetForecastRequest fr, CancellationToken cancellation)
+    {
+        var all = await _handler.GetForecast(fr.RngSeed, fr.Count, cancellation).ToArrayAsync();
+        return new BatchResult { Results = all };
+    }
+
+    public async ValueTask<AppResponse> UnaryRequest(AppRequest requestBytes, CancellationToken cancellation = default)
     {
         RequestBase? request = _serializer.Deserialize<RequestBase>(requestBytes.Payload);
         if (request is null) return errorDeserializationFailure;
@@ -36,6 +43,7 @@ public class WeatherServer : IUserChannel
             result = request switch
             {
                 GetWeatherRequest wr => await _handler.GetWeather(wr.RngSeed, cancellation),
+                GetForecastRequest fr => await GetForecastAsArray(fr, cancellation),
                 _ => new ErrorResult { Code = ErrorCode.UnsupportedRequestType, Message = $"Unknown request type: {request.GetType().Name}" }
             };
         }
@@ -43,10 +51,10 @@ public class WeatherServer : IUserChannel
         {
             result = new ErrorResult { Code = ErrorCode.OtherException, Message = e.Message };
         }
-        return new UserResponse(_serializer.Serialize<ResultBase>(result));
+        return new AppResponse(_serializer.Serialize<ResultBase>(result));
     }
 
-    public async IAsyncEnumerable<UserResponse> ServerStream(UserRequest requestBytes, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public async IAsyncEnumerable<AppResponse> ServerStream(AppRequest requestBytes, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         RequestBase? request = _serializer.Deserialize<RequestBase>(requestBytes.Payload);
         if (request is null)
@@ -54,25 +62,30 @@ public class WeatherServer : IUserChannel
             yield return errorDeserializationFailure;
             yield break;
         }
+        else if (request is GetWeatherRequest wr)
+        {
+            var weather = await _handler.GetWeather(wr.RngSeed, cancellation);
+            yield return new AppResponse(_serializer.Serialize<ResultBase>(weather));
+        }
         else if (request is GetForecastRequest fr)
         {
             await foreach (var response in _handler.GetForecast(fr.RngSeed, fr.Count, cancellation).ConfigureAwait(false))
             {
-                yield return new UserResponse(_serializer.Serialize<ResultBase>(response));
+                yield return new AppResponse(_serializer.Serialize<ResultBase>(response));
             }
         }
         else
         {
-            yield return new UserResponse(_serializer.Serialize<ResultBase>(new ErrorResult { Code = ErrorCode.UnsupportedRequestType, Message = $"Unknown request type: {request.GetType().Name}" }));
+            yield return new AppResponse(_serializer.Serialize<ResultBase>(new ErrorResult { Code = ErrorCode.UnsupportedRequestType, Message = $"Unknown request type: {request.GetType().Name}" }));
         }
     }
 
-    public ValueTask<UserResponse> ClientStream(IAsyncEnumerable<UserRequest> requests, CancellationToken cancellation = default)
+    public ValueTask<AppResponse> ClientStream(IAsyncEnumerable<AppRequest> requests, CancellationToken cancellation = default)
     {
         throw new NotImplementedException();
     }
 
-    public IAsyncEnumerable<UserResponse> DuplexStream(IAsyncEnumerable<UserRequest> requests, CancellationToken cancellation = default)
+    public IAsyncEnumerable<AppResponse> DuplexStream(IAsyncEnumerable<AppRequest> requests, CancellationToken cancellation = default)
     {
         throw new NotImplementedException();
     }

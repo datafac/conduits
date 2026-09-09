@@ -28,9 +28,9 @@ internal static class PayloadExtensions
 
 internal class ProtobufNetServer : IProtobufNetContract
 {
-    private readonly INetChannel _requestHandler;
+    private readonly INetConduit _requestHandler;
 
-    public ProtobufNetServer(INetChannel requestHandler)
+    public ProtobufNetServer(INetConduit requestHandler)
     {
         _requestHandler = requestHandler;
     }

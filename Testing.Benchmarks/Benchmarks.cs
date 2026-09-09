@@ -26,7 +26,7 @@ namespace Testing.Benchmarks
         private ProtobufGrpcServer pbufServer;
         private CalculatorClient pbufClient;
 
-        private byte[] data;
+        //private byte[] data;
 
         [GlobalSetup]
         public void Setup()

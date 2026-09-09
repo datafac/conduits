@@ -16,7 +16,7 @@ public sealed class ProtobufGrpcServer : IAsyncDisposable
 {
     private readonly Server _server;
 
-    private ProtobufGrpcServer(INetChannel netChannel, ServerPort serverPort)
+    private ProtobufGrpcServer(INetConduit netChannel, ServerPort serverPort)
     {
         _server = new Server() { Ports = { serverPort } };
         _server.Services.AddCodeFirst<IProtobufNetContract>(new ProtobufNetServer(netChannel));
@@ -27,12 +27,12 @@ public sealed class ProtobufGrpcServer : IAsyncDisposable
     /// Returns a new server instance bound to any unused port. Use the BoundPort property
     /// to discover the actual port assigned.
     /// </summary>
-    public ProtobufGrpcServer(INetChannel netChannel) : this(netChannel, new ServerPort("localhost", ServerPort.PickUnused, ServerCredentials.Insecure)) { }
+    public ProtobufGrpcServer(INetConduit netChannel) : this(netChannel, new ServerPort("localhost", ServerPort.PickUnused, ServerCredentials.Insecure)) { }
 
     /// <summary>
     /// Returns a new server instance bound to a specific port.
     /// </summary>
-    public ProtobufGrpcServer(INetChannel netChannel, int port) : this(netChannel, new ServerPort("localhost", port, ServerCredentials.Insecure)) { }
+    public ProtobufGrpcServer(INetConduit netChannel, int port) : this(netChannel, new ServerPort("localhost", port, ServerCredentials.Insecure)) { }
 
     /// <summary>
     /// Returns the port assigned to the server.

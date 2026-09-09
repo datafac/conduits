@@ -2,11 +2,11 @@
 
 namespace DataFac.Conduits;
 
-public readonly struct UserRequest
+public readonly struct AppResponse
 {
     public readonly ReadOnlyMemory<byte> Payload;
 
-    public UserRequest(ReadOnlyMemory<byte> payload)
+    public AppResponse(ReadOnlyMemory<byte> payload)
     {
         Payload = payload;
     }

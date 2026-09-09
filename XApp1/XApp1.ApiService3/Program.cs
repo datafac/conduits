@@ -1,16 +1,12 @@
 
 using DataFac.Conduits;
 using DataFac.Conduits.GrpcClient;
-using Nerdbank.MessagePack;
-using System.Text.Json;
-using Testing.Weather;
+using DataFac.Conduits.HttpCommon;
 
 namespace XApp1.ApiService3;
 
 public class Program
 {
-    private static readonly MessagePackSerializer _serializer = new MessagePackSerializer();
-
     private static string GetServiceAddress(string variableName)
     {
         return Environment.GetEnvironmentVariable(variableName)
@@ -18,7 +14,8 @@ public class Program
     }
 
     private static readonly string _weatherSvcAddress = GetServiceAddress("GRPCSERVICE2_HTTPS");
-    private static readonly WeatherClient _weatherSvc = new WeatherClient(new ProtocolClient(new GrpcConduitClient(_weatherSvcAddress)));
+    private static readonly ProtocolClient _protocolClient = new ProtocolClient(new GrpcConduitClient(_weatherSvcAddress));
+    private static readonly ProtocolServer _protocolServer = new ProtocolServer(null, _protocolClient);
 
     public static void Main(string[] args)
     {
@@ -45,21 +42,13 @@ public class Program
 
         app.UseAuthorization();
 
-        app.MapPost("/weatherforecast", async (HttpContext httpContext, JsonMessage jsonRequest) =>
+        app.MapPost(EndpointPath.UnaryRequest, async (HttpContext httpContext, JsonRequest jsonRequest) =>
         {
-            RequestBase? requestBase = _serializer.Deserialize<RequestBase>(jsonRequest?.Payload ?? Array.Empty<byte>());
-            switch(requestBase)
-            {
-                case GetForecastRequest fr:
-                    WeatherData[] results = await _weatherSvc.GetForecast(fr.RngSeed, fr.Count).ToArrayAsync();
-                    BatchResult batch = new BatchResult() { Results = results };
-                    return new JsonMessage { Payload = _serializer.Serialize<ResultBase>(batch) };
-                default:
-                    ErrorResult error = new ErrorResult() { Code = ErrorCode.UnsupportedRequestType, Message = $"Request type '{requestBase?.GetType().Name}' is not supported." };
-                    return new JsonMessage { Payload = _serializer.Serialize<ResultBase>(new BatchResult() { Results = new ResultBase[] { error } }) };
-            }
-        })
-        .WithName("PostWeatherForecast");
+            NetRequest netRequest = new NetRequest(new ReadOnlyMemory<byte>(jsonRequest.Payload));
+            DateTime? deadlineUtc = jsonRequest.DeadlineUtc.HasValue ? new DateTime(jsonRequest.DeadlineUtc.Value, DateTimeKind.Utc) : null;
+            var netResponse = await _protocolServer.UnaryRequest(netRequest, deadlineUtc);
+            return new JsonResponse() { ControlCode = (int)netResponse.Control, Payload = netResponse.Payload.ToArray() }; // todo alloc!
+        });
 
         app.Run();
     }

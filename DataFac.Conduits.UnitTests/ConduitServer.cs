@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DataFac.Conduits.UnitTests;
 
-internal sealed class WeatherServer : IUserChannel
+internal sealed class WeatherServer : IAppConduit
 {
     private readonly TimeProvider _timeProvider;
     public TimeProvider TimeProvider => _timeProvider;
@@ -27,7 +27,7 @@ internal sealed class WeatherServer : IUserChannel
         // nothing to dispose yet
     }
 
-    private async ValueTask<UserResponse> ProcessRequest(UserRequest request, CancellationToken token)
+    private async ValueTask<AppResponse> ProcessRequest(AppRequest request, CancellationToken token)
     {
         var weatherRequest = WeatherData.FromSpan(request.Payload.Span);
         switch (weatherRequest.Tag)
@@ -35,24 +35,24 @@ internal sealed class WeatherServer : IUserChannel
             case WeatherTag.GetWeatherData:
                 {
                     WeatherData weatherResponse = await _server.GetWeather(weatherRequest.Location, token);
-                    return new UserResponse(weatherResponse.ToMemory());
+                    return new AppResponse(weatherResponse.ToMemory());
                 }
             case WeatherTag.WeatherData:
                 {
                     await _server.UpdateWeather(weatherRequest, token);
-                    return new UserResponse(new WeatherData(WeatherTag.OK, weatherRequest.Location).ToMemory());
+                    return new AppResponse(new WeatherData(WeatherTag.OK, weatherRequest.Location).ToMemory());
                 }
             default:
-                return new UserResponse(WeatherData.Empty.ToMemory());
+                return new AppResponse(WeatherData.Empty.ToMemory());
         }
     }
 
-    public async ValueTask<UserResponse> UnaryRequest(UserRequest request, CancellationToken cancellation = default)
+    public async ValueTask<AppResponse> UnaryRequest(AppRequest request, CancellationToken cancellation = default)
     {
         return await ProcessRequest(request, cancellation);
     }
 
-    public async IAsyncEnumerable<UserResponse> ServerStream(UserRequest request, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public async IAsyncEnumerable<AppResponse> ServerStream(AppRequest request, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         var weatherRequest = WeatherData.FromSpan(request.Payload.Span);
         switch (weatherRequest.Tag)
@@ -61,7 +61,7 @@ internal sealed class WeatherServer : IUserChannel
                 {
                     await foreach (WeatherData response in _server.GetWeatherStream(weatherRequest.Location, cancellation))
                     {
-                        yield return new UserResponse(response.ToMemory());
+                        yield return new AppResponse(response.ToMemory());
                     }
                 }
                 break;
@@ -70,7 +70,7 @@ internal sealed class WeatherServer : IUserChannel
         }
     }
 
-    public async ValueTask<UserResponse> ClientStream(IAsyncEnumerable<UserRequest> requests, CancellationToken cancellation = default)
+    public async ValueTask<AppResponse> ClientStream(IAsyncEnumerable<AppRequest> requests, CancellationToken cancellation = default)
     {
         var pushTask = Task.Run(async () =>
         {
@@ -90,10 +90,10 @@ internal sealed class WeatherServer : IUserChannel
             }
         });
         await Task.WhenAll(pushTask);
-        return new UserResponse(WeatherData.Empty.ToMemory());
+        return new AppResponse(WeatherData.Empty.ToMemory());
     }
 
-    public async IAsyncEnumerable<UserResponse> DuplexStream(IAsyncEnumerable<UserRequest> requests, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public async IAsyncEnumerable<AppResponse> DuplexStream(IAsyncEnumerable<AppRequest> requests, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         var pushTask = Task.Run(async () =>
         {
@@ -115,7 +115,7 @@ internal sealed class WeatherServer : IUserChannel
         var location = string.Empty; // all
         await foreach (WeatherData response in _server.GetWeatherStream(location, cancellation))
         {
-            yield return new UserResponse(response.ToMemory());
+            yield return new AppResponse(response.ToMemory());
         }
         await Task.WhenAll(pushTask);
     }

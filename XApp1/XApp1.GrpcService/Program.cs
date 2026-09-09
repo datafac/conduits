@@ -17,8 +17,8 @@ public class Program
         // Add services to the container.
         builder.Services.AddGrpc();
 
-        builder.Services.AddSingleton<IUserChannel>(sp => new CalculatorServer(new Calculator()));
-        builder.Services.AddSingleton<INetChannel>(sp => new ProtocolServer(null, sp.GetRequiredService<IUserChannel>()));
+        builder.Services.AddSingleton<IAppConduit>(sp => new CalculatorServer(new Calculator()));
+        builder.Services.AddSingleton<INetConduit>(sp => new ProtocolServer(null, sp.GetRequiredService<IAppConduit>()));
 
         var app = builder.Build();
 

@@ -8,16 +8,13 @@ namespace DataFac.Conduits.Testing;
 
 public sealed class FakeConduitServer
 {
-    private readonly INetChannel _server;
-
-    public string ServerName => ThisAssembly.AssemblyName;
-    public string ServerVersion => ThisAssembly.AssemblyVersion;
+    private readonly INetConduit _server;
 
     /// <summary>
     /// Creates a test/mock server wrapping another conduit server.
     /// </summary>
     /// <param name="server">The wrapped server.</param>
-    public FakeConduitServer(INetChannel server)
+    public FakeConduitServer(INetConduit server)
     {
         _server = server ?? throw new ArgumentNullException(nameof(server));
     }
@@ -51,7 +48,7 @@ public sealed class FakeConduitServer
         return _server.ClientStream(requests, deadlineUtc, cancellation);
     }
 
-    public IAsyncEnumerable<NetResponse> DuplexStream(IAsyncEnumerable<NetRequest> requests, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public IAsyncEnumerable<NetResponse> DuplexStream(IAsyncEnumerable<NetRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
         return _server.DuplexStream(requests, deadlineUtc, cancellation);

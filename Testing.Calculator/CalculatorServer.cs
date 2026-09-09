@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace Testing.Calculator;
 
-public class CalculatorServer : IUserChannel
+public class CalculatorServer : IAppConduit
 {
     private static readonly MessagePackSerializer serializer = new MessagePackSerializer();
-    private static readonly UserResponse errorDeserializationFailure
-        = new UserResponse(serializer.Serialize<ResultBase>(
+    private static readonly AppResponse errorDeserializationFailure
+        = new AppResponse(serializer.Serialize<ResultBase>(
             new ErrorResult
             {
                 Code = ErrorCode.DeserializationError,
@@ -30,7 +30,7 @@ public class CalculatorServer : IUserChannel
         _calculator = calculator;
     }
 
-    public async ValueTask<UserResponse> UnaryRequest(UserRequest requestBytes, CancellationToken cancellation = default)
+    public async ValueTask<AppResponse> UnaryRequest(AppRequest requestBytes, CancellationToken cancellation = default)
     {
         RequestBase? request = serializer.Deserialize<RequestBase>(requestBytes.Payload);
         if (request is null) return errorDeserializationFailure;
@@ -55,10 +55,10 @@ public class CalculatorServer : IUserChannel
         {
             result = new ErrorResult { Code = ErrorCode.OtherException, Message = e.Message };
         }
-        return new UserResponse(serializer.Serialize<ResultBase>(result));
+        return new AppResponse(serializer.Serialize<ResultBase>(result));
     }
 
-    public async IAsyncEnumerable<UserResponse> ServerStream(UserRequest requestBytes, [EnumeratorCancellation] CancellationToken cancellation = default)
+    public async IAsyncEnumerable<AppResponse> ServerStream(AppRequest requestBytes, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         RequestBase? request = serializer.Deserialize<RequestBase>(requestBytes.Payload);
         if (request is null)
@@ -70,21 +70,21 @@ public class CalculatorServer : IUserChannel
         {
             await foreach (int x in _calculator.GetRange(rr.Start, rr.Count, rr.Delay, cancellation).ConfigureAwait(false))
             {
-                yield return new UserResponse(serializer.Serialize<ResultBase>(new RangeResult() { X = x }));
+                yield return new AppResponse(serializer.Serialize<ResultBase>(new RangeResult() { X = x }));
             }
         }
         else
         {
-            yield return new UserResponse(serializer.Serialize<ResultBase>(new ErrorResult { Code = ErrorCode.UnsupportedRequestType, Message = $"Unknown request type: {request.GetType().Name}" }));
+            yield return new AppResponse(serializer.Serialize<ResultBase>(new ErrorResult { Code = ErrorCode.UnsupportedRequestType, Message = $"Unknown request type: {request.GetType().Name}" }));
         }
     }
 
-    public ValueTask<UserResponse> ClientStream(IAsyncEnumerable<UserRequest> requests, CancellationToken cancellation = default)
+    public ValueTask<AppResponse> ClientStream(IAsyncEnumerable<AppRequest> requests, CancellationToken cancellation = default)
     {
         throw new NotImplementedException();
     }
 
-    public IAsyncEnumerable<UserResponse> DuplexStream(IAsyncEnumerable<UserRequest> requests, CancellationToken cancellation = default)
+    public IAsyncEnumerable<AppResponse> DuplexStream(IAsyncEnumerable<AppRequest> requests, CancellationToken cancellation = default)
     {
         throw new NotImplementedException();
     }

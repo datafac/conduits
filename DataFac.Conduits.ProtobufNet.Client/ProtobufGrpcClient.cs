@@ -29,7 +29,7 @@ internal static class PayloadExtensions
     }
 }
 
-public class ProtobufGrpcClient : INetChannel
+public class ProtobufGrpcClient : INetConduit
 {
     private readonly Channel _channel;
     private readonly IProtobufNetContract _contract;
