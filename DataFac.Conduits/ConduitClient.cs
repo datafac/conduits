@@ -11,7 +11,7 @@ namespace DataFac.Conduits;
 /// <summary>
 /// Implements client-side conduit protocol.
 /// </summary>
-public sealed class ProtocolClient : IAppConduit, IAsyncDisposable
+public sealed class ConduitClient : IAppConduit, IAsyncDisposable
 {
     private readonly INetConduit _netChannel;
 
@@ -38,7 +38,7 @@ public sealed class ProtocolClient : IAppConduit, IAsyncDisposable
         set => _maxCallDuration = SanitiseMaxCallDuration(value);
     }
 
-    public ProtocolClient(INetConduit netChannel, TimeSpan? maxCallDuration = null, TimeProvider? timeProvider = null)
+    public ConduitClient(INetConduit netChannel, TimeSpan? maxCallDuration = null, TimeProvider? timeProvider = null)
     {
         _netChannel = netChannel;
         _maxCallDuration = SanitiseMaxCallDuration(maxCallDuration);

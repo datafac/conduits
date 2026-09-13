@@ -21,7 +21,7 @@ public class WeatherApiClient
     public WeatherApiClient(HttpClient httpClient)
     {
         _httpClient = httpClient;
-        _weatherSvc = new WeatherClient(new ProtocolClient(new HttpConduitClient(httpClient)));
+        _weatherSvc = new WeatherClient(new ConduitClient(new HttpConduitClient(httpClient)));
     }
 
     private static IEnumerable<WeatherData> GetWeatherData(ResultBase? result)

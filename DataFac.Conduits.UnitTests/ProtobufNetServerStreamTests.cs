@@ -21,8 +21,8 @@ public class ProtobufNetServerStreamTests
     {
         var ct = TestContext.Current.CancellationToken;
         var timeProvider = new FakeTimeProvider();
-        await using var server = new ProtobufGrpcServer(new ProtocolServer(timeProvider, new CalculatorServer(new Calculator())));
-        await using var client = new CalculatorClient(new ProtocolClient(new ProtobufGrpcClient(host, server.BoundPort)));
+        await using var server = new ProtobufGrpcServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())));
+        await using var client = new CalculatorClient(new ConduitClient(new ProtobufGrpcClient(host, server.BoundPort)));
 
         // duration should be ~1.0s
         var result = await client.GetRange(0, 10, TimeSpan.FromSeconds(0.1), ct).ToListAsyncInternal();
@@ -34,8 +34,8 @@ public class ProtobufNetServerStreamTests
     {
         var ct = TestContext.Current.CancellationToken;
         var timeProvider = new FakeTimeProvider();
-        await using var server = new ProtobufGrpcServer(new ProtocolServer(timeProvider, new CalculatorServer(new Calculator())));
-        await using var client = new CalculatorClient(new ProtocolClient(new ProtobufGrpcClient(host, server.BoundPort), TimeSpan.FromSeconds(5), timeProvider));
+        await using var server = new ProtobufGrpcServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())));
+        await using var client = new CalculatorClient(new ConduitClient(new ProtobufGrpcClient(host, server.BoundPort), TimeSpan.FromSeconds(5), timeProvider));
 
         // returning the entire stream would take ~10s, but we have a max call
         // duration of 5s, so this call should timeout after ~5s
@@ -47,8 +47,8 @@ public class ProtobufNetServerStreamTests
     public async Task GetStreamWithCancellation()
     {
         var timeProvider = new FakeTimeProvider();
-        await using var server = new ProtobufGrpcServer(new ProtocolServer(timeProvider, new CalculatorServer(new Calculator())));
-        await using var client = new CalculatorClient(new ProtocolClient(new ProtobufGrpcClient(host, server.BoundPort)));
+        await using var server = new ProtobufGrpcServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())));
+        await using var client = new CalculatorClient(new ConduitClient(new ProtobufGrpcClient(host, server.BoundPort)));
 
         // returning the entire stream would take ~10s, but we have a max call
         // duration of 5s, so this call should timeout after ~5s

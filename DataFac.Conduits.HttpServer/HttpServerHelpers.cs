@@ -7,7 +7,7 @@ namespace DataFac.Conduits.HttpServer
 {
     public static class HttpServerHelpers
     {
-        public static void MapConduitEndpoints(this IEndpointRouteBuilder app, ProtocolServer protocolServer)
+        public static void MapConduitEndpoints(this IEndpointRouteBuilder app, ConduitServer protocolServer)
         {
             app.MapPost(EndpointPath.UnaryRequest, async (HttpContext httpContext, JsonRequest jsonRequest) =>
             {

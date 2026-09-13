@@ -18,7 +18,7 @@ public class Program
         builder.Services.AddGrpc();
 
         builder.Services.AddSingleton<IAppConduit>(sp => new CalculatorServer(new Calculator()));
-        builder.Services.AddSingleton<INetConduit>(sp => new ProtocolServer(null, sp.GetRequiredService<IAppConduit>()));
+        builder.Services.AddSingleton<INetConduit>(sp => new ConduitServer(null, sp.GetRequiredService<IAppConduit>()));
 
         var app = builder.Build();
 

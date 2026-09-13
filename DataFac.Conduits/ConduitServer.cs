@@ -10,12 +10,12 @@ namespace DataFac.Conduits;
 /// <summary>
 /// Implements server-side conduit protocol.
 /// </summary>
-public sealed class ProtocolServer : INetConduit, IAsyncDisposable
+public sealed class ConduitServer : INetConduit, IAsyncDisposable
 {
     private readonly TimeProvider _timeProvider;
     private readonly IAppConduit _userChannel;
 
-    public ProtocolServer(TimeProvider? timeProvider, IAppConduit userChannel)
+    public ConduitServer(TimeProvider? timeProvider, IAppConduit userChannel)
     {
         _timeProvider = timeProvider ?? TimeProvider.System;
         _userChannel = userChannel;
