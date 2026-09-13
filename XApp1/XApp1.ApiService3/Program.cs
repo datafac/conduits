@@ -1,6 +1,7 @@
 
 using DataFac.Conduits;
 using DataFac.Conduits.GrpcClient;
+using DataFac.Conduits.HttpServer;
 
 namespace XApp1.ApiService3;
 
@@ -13,8 +14,7 @@ public class Program
     }
 
     private static readonly string _weatherSvcAddress = GetServiceAddress("GRPCSERVICE2_HTTPS");
-    private static readonly ProtocolClient _protocolClient = new ProtocolClient(new GrpcConduitClient(_weatherSvcAddress));
-    private static readonly ProtocolServer _protocolServer = new ProtocolServer(null, _protocolClient);
+    private static readonly ProtocolServer _protocolServer = new ProtocolServer(null, new ProtocolClient(new GrpcConduitClient(_weatherSvcAddress)));
 
     public static void Main(string[] args)
     {
