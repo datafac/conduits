@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,18 +13,7 @@ public class WeatherService : IAsyncWeather
 
     public async ValueTask DisposeAsync() { }
 
-    public async ValueTask<WeatherData> GetWeather(int rngSeed, CancellationToken cancellation = default)
-    {
-        var rng = rngSeed == 0 ? new Random(Environment.TickCount) : new Random(rngSeed);
-        return new WeatherData()
-        {
-            DateTimeUtc = DateTime.UtcNow.Ticks,
-            TemperatureC = rng.Next(-20, 55),
-            Summary = summaries[rng.Next(summaries.Length)]
-        };
-    }
-
-    public async IAsyncEnumerable<WeatherData> GetForecast(int rngSeed, int count, [EnumeratorCancellation] CancellationToken cancellation = default)
+    private IEnumerable<WeatherData> GenerateWeather(int rngSeed, int count)
     {
         var rng = rngSeed == 0 ? new Random(Environment.TickCount) : new Random(rngSeed);
         for (var i = 0; i < count; i++)
@@ -37,4 +27,11 @@ public class WeatherService : IAsyncWeather
         }
     }
 
+    public async ValueTask<WeatherForecast> GetWeatherForecast(int rngSeed, int count, CancellationToken cancellation = default)
+    {
+        return new WeatherForecast()
+        {
+            Batch = GenerateWeather(rngSeed, count).ToArray()
+        };
+    }
 }

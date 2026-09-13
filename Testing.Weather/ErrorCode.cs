@@ -7,8 +7,8 @@ public enum ErrorCode
     // weather errors
 
     // general errors
-    DeserializationError = 97,
-    UnsupportedRequestType = 98,
+    InvalidData = 97,
+    InvalidOp = 98,
     OtherException = 99,
 
 }

@@ -5,15 +5,8 @@ using System;
 namespace Testing.Weather;
 
 [GenerateShape]
-[DerivedTypeShape(typeof(GetWeatherRequest), Tag = 1)]
-[DerivedTypeShape(typeof(GetForecastRequest), Tag = 2)]
+[DerivedTypeShape(typeof(GetForecastRequest), Tag = 1)]
 public abstract partial class RequestBase { }
-
-[GenerateShape]
-public sealed partial class GetWeatherRequest : RequestBase
-{
-    [Key(1)] public int RngSeed { get; set; }
-}
 
 [GenerateShape]
 public sealed partial class GetForecastRequest : RequestBase
@@ -26,6 +19,7 @@ public sealed partial class GetForecastRequest : RequestBase
 [DerivedTypeShape(typeof(ErrorResult), Tag = 1)]
 [DerivedTypeShape(typeof(BatchResult), Tag = 2)]
 [DerivedTypeShape(typeof(WeatherData), Tag = 3)]
+[DerivedTypeShape(typeof(WeatherForecast), Tag = 4)]
 public abstract partial class ResultBase { }
 
 [GenerateShape]
@@ -36,6 +30,12 @@ public sealed partial class WeatherData : ResultBase
     [Key(2)] public int TemperatureC { get; set; }
     public int TemperatureF => 32 + (int)(TemperatureC * 9.0 / 5.0);
     [Key(3)] public string? Summary { get; set; }
+}
+
+[GenerateShape]
+public sealed partial class WeatherForecast : ResultBase
+{
+    [Key(1)] public WeatherData[] Batch { get; set; } = Array.Empty<WeatherData>();
 }
 
 [GenerateShape]

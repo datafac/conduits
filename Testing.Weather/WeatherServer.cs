@@ -12,13 +12,6 @@ namespace Testing.Weather;
 public class WeatherServer : IAppConduit
 {
     private static readonly MessagePackSerializer _serializer = new MessagePackSerializer();
-    private static readonly AppResponse errorDeserializationFailure
-        = new AppResponse(_serializer.Serialize<ResultBase>(
-            new ErrorResult
-            {
-                Code = ErrorCode.DeserializationError,
-                Message = "Failed to deserialize request"
-            }));
 
     private readonly IAsyncWeather _handler;
 
@@ -27,24 +20,17 @@ public class WeatherServer : IAppConduit
         _handler = handler;
     }
 
-    private async Task<BatchResult> GetForecastAsArray(GetForecastRequest fr, CancellationToken cancellation)
+    public async ValueTask<AppResponse> UnaryRequest(AppRequest appRequest, CancellationToken cancellation = default)
     {
-        var all = await _handler.GetForecast(fr.RngSeed, fr.Count, cancellation).ToArrayAsync();
-        return new BatchResult { Results = all };
-    }
-
-    public async ValueTask<AppResponse> UnaryRequest(AppRequest requestBytes, CancellationToken cancellation = default)
-    {
-        RequestBase? request = _serializer.Deserialize<RequestBase>(requestBytes.Payload);
-        if (request is null) return errorDeserializationFailure;
+        RequestBase? request = _serializer.Deserialize<RequestBase>(appRequest.Payload);
         ResultBase result;
         try
         {
             result = request switch
             {
-                GetWeatherRequest wr => await _handler.GetWeather(wr.RngSeed, cancellation),
-                GetForecastRequest fr => await GetForecastAsArray(fr, cancellation),
-                _ => new ErrorResult { Code = ErrorCode.UnsupportedRequestType, Message = $"Unknown request type: {request.GetType().Name}" }
+                null => new ErrorResult { Code = ErrorCode.InvalidData, Message = "Failed to deserialize request" },
+                GetForecastRequest fr => await _handler.GetWeatherForecast(fr.RngSeed, fr.Count, cancellation),
+                _ => new ErrorResult { Code = ErrorCode.InvalidData, Message = $"Unknown request type: {request.GetType().Name}" }
             };
         }
         catch (Exception e)
@@ -56,38 +42,20 @@ public class WeatherServer : IAppConduit
 
     public async IAsyncEnumerable<AppResponse> ServerStream(AppRequest requestBytes, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
-        RequestBase? request = _serializer.Deserialize<RequestBase>(requestBytes.Payload);
-        if (request is null)
-        {
-            yield return errorDeserializationFailure;
-            yield break;
-        }
-        else if (request is GetWeatherRequest wr)
-        {
-            var weather = await _handler.GetWeather(wr.RngSeed, cancellation);
-            yield return new AppResponse(_serializer.Serialize<ResultBase>(weather));
-        }
-        else if (request is GetForecastRequest fr)
-        {
-            await foreach (var response in _handler.GetForecast(fr.RngSeed, fr.Count, cancellation).ConfigureAwait(false))
-            {
-                yield return new AppResponse(_serializer.Serialize<ResultBase>(response));
-            }
-        }
-        else
-        {
-            yield return new AppResponse(_serializer.Serialize<ResultBase>(new ErrorResult { Code = ErrorCode.UnsupportedRequestType, Message = $"Unknown request type: {request.GetType().Name}" }));
-        }
+        var result = new AppResponse(_serializer.Serialize<ResultBase>(new ErrorResult { Code = ErrorCode.InvalidOp, Message = "Server streaming is not supported" }));
+        yield return result;
     }
 
-    public ValueTask<AppResponse> ClientStream(IAsyncEnumerable<AppRequest> requests, CancellationToken cancellation = default)
+    public async ValueTask<AppResponse> ClientStream(IAsyncEnumerable<AppRequest> requests, CancellationToken cancellation = default)
     {
-        throw new NotImplementedException();
+        var result = new AppResponse(_serializer.Serialize<ResultBase>(new ErrorResult { Code = ErrorCode.InvalidOp, Message = "Client streaming is not supported" }));
+        return result;
     }
 
-    public IAsyncEnumerable<AppResponse> DuplexStream(IAsyncEnumerable<AppRequest> requests, CancellationToken cancellation = default)
+    public async IAsyncEnumerable<AppResponse> DuplexStream(IAsyncEnumerable<AppRequest> requests, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
-        throw new NotImplementedException();
+        var result = new AppResponse(_serializer.Serialize<ResultBase>(new ErrorResult { Code = ErrorCode.InvalidOp, Message = "Duplex streaming is not supported" }));
+        yield return result;
     }
 
 }

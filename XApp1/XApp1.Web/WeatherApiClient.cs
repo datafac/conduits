@@ -48,7 +48,8 @@ public class WeatherApiClient
 
     public async Task<WeatherData[]> GetWeatherAsyncEnum(CancellationToken cancellation = default)
     {
-        return await _weatherSvc.GetForecast(0, 7, cancellation).ToArrayAsync(cancellation);
+        var response = await _weatherSvc.GetWeatherForecast(0, 7, cancellation);
+        return response.Batch;
     }
 }
 
