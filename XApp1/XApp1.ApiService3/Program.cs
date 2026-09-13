@@ -1,7 +1,6 @@
 
 using DataFac.Conduits;
 using DataFac.Conduits.GrpcClient;
-using DataFac.Conduits.HttpCommon;
 
 namespace XApp1.ApiService3;
 
@@ -42,13 +41,7 @@ public class Program
 
         app.UseAuthorization();
 
-        app.MapPost(EndpointPath.UnaryRequest, async (HttpContext httpContext, JsonRequest jsonRequest) =>
-        {
-            NetRequest netRequest = new NetRequest(new ReadOnlyMemory<byte>(jsonRequest.Payload));
-            DateTime? deadlineUtc = jsonRequest.DeadlineUtc.HasValue ? new DateTime(jsonRequest.DeadlineUtc.Value, DateTimeKind.Utc) : null;
-            var netResponse = await _protocolServer.UnaryRequest(netRequest, deadlineUtc);
-            return new JsonResponse() { ControlCode = (int)netResponse.Control, Payload = netResponse.Payload.ToArray() }; // todo alloc!
-        });
+        app.MapConduitEndpoints(_protocolServer);
 
         app.Run();
     }

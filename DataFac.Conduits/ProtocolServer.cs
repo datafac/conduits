@@ -31,12 +31,7 @@ public sealed class ProtocolServer : INetConduit, IAsyncDisposable
             await disposable.DisposeAsync();
         }
     }
-
     public TimeProvider TimeProvider => _timeProvider;
-
-    public string ServerName => ThisAssembly.AssemblyName;
-
-    public string ServerVersion => ThisAssembly.AssemblyFileVersion;
 
     private static ReadOnlyMemory<byte> EncodeErrorMessage(string message)
     {

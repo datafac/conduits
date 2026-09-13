@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
@@ -69,7 +70,19 @@ public sealed class ProtocolClient : IAppConduit, IAsyncDisposable
     private static string DecodeErrorMessage(ReadOnlySpan<byte> payload)
     {
         if (payload.Length == 0) return string.Empty;
+#if NET8_0_OR_GREATER
+        Span<char> chars = stackalloc char[payload.Length];
+        if (Encoding.UTF8.TryGetChars(payload, chars, out int charsWritten))
+        {
+            return new string(chars.Slice(0, charsWritten));
+        }
+        else
+        {
+            return Encoding.UTF8.GetString(payload.ToArray());
+        }
+#else
         return Encoding.UTF8.GetString(payload.ToArray());
+#endif
     }
 
     private static NetResponse HandleResponse(NetResponse response)
@@ -79,6 +92,8 @@ public sealed class ProtocolClient : IAppConduit, IAsyncDisposable
             ControlCode.None => response,
             ControlCode.Timeout => throw new TimeoutException(DecodeErrorMessage(response.Payload.Span)),
             ControlCode.Cancelled => throw new OperationCanceledException(DecodeErrorMessage(response.Payload.Span)),
+            ControlCode.InvalidOp => throw new InvalidOperationException(DecodeErrorMessage(response.Payload.Span)),
+            ControlCode.InvalidData => throw new InvalidDataException(DecodeErrorMessage(response.Payload.Span)),
             _ => throw new Exception($"Unknown control code: {response.Control}")
         };
     }
@@ -137,5 +152,4 @@ public sealed class ProtocolClient : IAppConduit, IAsyncDisposable
             yield return new AppResponse(result.Payload);
         }
     }
-
 }

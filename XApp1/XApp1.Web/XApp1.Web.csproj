@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\DataFac.Conduits.HttpClient\DataFac.Conduits.HttpClient.csproj" />
     <ProjectReference Include="..\..\DataFac.Conduits.HttpCommon\DataFac.Conduits.HttpCommon.csproj" />
     <ProjectReference Include="..\..\Testing.Weather\Testing.Weather.csproj" />
     <ProjectReference Include="..\XApp1.ServiceDefaults\XApp1.ServiceDefaults.csproj" />

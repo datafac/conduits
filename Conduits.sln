@@ -51,6 +51,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XApp1.ApiService3", "XApp1\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataFac.Conduits.HttpCommon", "DataFac.Conduits.HttpCommon\DataFac.Conduits.HttpCommon.csproj", "{71EB1014-7EEE-482A-BC17-14D34A77FA31}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataFac.Conduits.HttpClient", "DataFac.Conduits.HttpClient\DataFac.Conduits.HttpClient.csproj", "{F3A29F1D-904E-4985-BC25-1CDF8837FABC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -133,6 +135,10 @@ Global
 		{71EB1014-7EEE-482A-BC17-14D34A77FA31}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{71EB1014-7EEE-482A-BC17-14D34A77FA31}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71EB1014-7EEE-482A-BC17-14D34A77FA31}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3A29F1D-904E-4985-BC25-1CDF8837FABC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3A29F1D-904E-4985-BC25-1CDF8837FABC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3A29F1D-904E-4985-BC25-1CDF8837FABC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3A29F1D-904E-4985-BC25-1CDF8837FABC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
