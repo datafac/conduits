@@ -12,6 +12,15 @@ public class CalculatorTests
 {
     private const string host = "localhost";
 
+    [Fact]
+    public async Task AppInfo()
+    {
+        await using var client = new CalculatorClient(new CalculatorServer(new Calculator()));
+
+        string appInfo = await client.GetAppInfo();
+        appInfo.ShouldStartWith("AppName=Testing.Calculator;Version=1.0.");
+    }
+
     [Theory]
     [InlineData(3, BinOp.Multiply, 4, 12)]
     [InlineData(12, BinOp.Divide, 4, 3)]
