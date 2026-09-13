@@ -1,17 +1,4 @@
-﻿using System;
-
-namespace DataFac.Conduits.HttpCommon;
-
-public class JsonRequest
-{
-    public long? DeadlineUtc { get; set; }
-    public byte[]? Payload { get; set; }
-}
-public class JsonResponse
-{
-    public int ControlCode { get; set; }
-    public byte[]? Payload { get; set; }
-}
+﻿namespace DataFac.Conduits.HttpCommon;
 
 public static class EndpointPath
 {
