@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -46,6 +47,11 @@ public class CalculatorClient : IAsyncCalculator
             },
             _ => result
         };
+    }
+
+    public async ValueTask<string> GetAppInfo()
+    {
+        return await _userChannel.GetAppInfo().ConfigureAwait(false);
     }
 
     private async ValueTask<ResultBase?> UnaryCall(RequestBase request, CancellationToken cancellation)

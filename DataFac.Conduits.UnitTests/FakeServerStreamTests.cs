@@ -12,6 +12,18 @@ namespace DataFac.Conduits.UnitTests;
 public class FakeServerStreamTests
 {
     [Fact]
+    public async Task GetAppInfo()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var timeProvider = new FakeTimeProvider();
+        await using var server = new FakeConduitServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())));
+        await using var client = new CalculatorClient(new ConduitClient(new FakeConduitClient(server, timeProvider)));
+
+        string appInfo = await client.GetAppInfo();
+        appInfo.ShouldBe("AppName=Testing.Calculator;Version=1.0.63.28588");
+    }
+
+    [Fact]
     public async Task GetStream()
     {
         var ct = TestContext.Current.CancellationToken;

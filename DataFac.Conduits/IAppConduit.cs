@@ -7,6 +7,12 @@ namespace DataFac.Conduits;
 public interface IAppConduit
 {
     /// <summary>
+    /// Returns information about the server application, such as its name, version, and other metadata.
+    /// </summary>
+    /// <returns></returns>
+    ValueTask<string> GetAppInfo();
+
+    /// <summary>
     /// Handles a single request and returns a single result.
     /// </summary>
     /// <param name="request"></param>

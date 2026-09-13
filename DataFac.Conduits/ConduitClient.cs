@@ -61,13 +61,13 @@ public sealed class ConduitClient : IAppConduit, IAsyncDisposable
             : null;
     }
 
-    private static ReadOnlyMemory<byte> EncodeErrorMessage(string message)
+    private static ReadOnlyMemory<byte> EncodeMessage(string message)
     {
         if (message.Length == 0) return ReadOnlyMemory<byte>.Empty;
         return Encoding.UTF8.GetBytes(message);
     }
 
-    private static string DecodeErrorMessage(ReadOnlySpan<byte> payload)
+    private static string DecodeMessage(ReadOnlySpan<byte> payload)
     {
         if (payload.Length == 0) return string.Empty;
 #if NET8_0_OR_GREATER
@@ -90,12 +90,21 @@ public sealed class ConduitClient : IAppConduit, IAsyncDisposable
         return response.Control switch
         {
             ControlCode.None => response,
-            ControlCode.Timeout => throw new TimeoutException(DecodeErrorMessage(response.Payload.Span)),
-            ControlCode.Cancelled => throw new OperationCanceledException(DecodeErrorMessage(response.Payload.Span)),
-            ControlCode.InvalidOp => throw new InvalidOperationException(DecodeErrorMessage(response.Payload.Span)),
-            ControlCode.InvalidData => throw new InvalidDataException(DecodeErrorMessage(response.Payload.Span)),
+            ControlCode.GetAppInfo => response,
+            ControlCode.Timeout => throw new TimeoutException(DecodeMessage(response.Payload.Span)),
+            ControlCode.Cancelled => throw new OperationCanceledException(DecodeMessage(response.Payload.Span)),
+            ControlCode.InvalidOp => throw new InvalidOperationException(DecodeMessage(response.Payload.Span)),
+            ControlCode.InvalidData => throw new InvalidDataException(DecodeMessage(response.Payload.Span)),
             _ => throw new Exception($"Unknown control code: {response.Control}")
         };
+    }
+
+
+    public async ValueTask<string> GetAppInfo()
+    {
+        var response = await _netChannel.UnaryRequest(new NetRequest(ControlCode.GetAppInfo), null).ConfigureAwait(false);
+        var result = HandleResponse(response);
+        return DecodeMessage(result.Payload.Span);
     }
 
     public async ValueTask<AppResponse> UnaryRequest(AppRequest request, CancellationToken cancellation = default)

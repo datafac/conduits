@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,6 +19,17 @@ public class WeatherServer : IAppConduit
     public WeatherServer(IAsyncWeather handler)
     {
         _handler = handler;
+    }
+
+    public async ValueTask<string> GetAppInfo()
+    {
+        StringBuilder result = new StringBuilder();
+        result.Append("AppName=");
+        result.Append(ThisAssembly.AssemblyName);
+        result.Append(';');
+        result.Append("Version=");
+        result.Append(ThisAssembly.AssemblyFileVersion);
+        return result.ToString();
     }
 
     public async ValueTask<AppResponse> UnaryRequest(AppRequest appRequest, CancellationToken cancellation = default)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,6 +26,17 @@ internal sealed class WeatherServer : IAppConduit
     public async ValueTask DisposeAsync()
     {
         // nothing to dispose yet
+    }
+
+    public async ValueTask<string> GetAppInfo()
+    {
+        StringBuilder result = new StringBuilder();
+        result.Append("AppName=");
+        result.Append(ThisAssembly.AssemblyName);
+        result.Append(';');
+        result.Append("Version=");
+        result.Append(ThisAssembly.AssemblyFileVersion);
+        return result.ToString();
     }
 
     private async ValueTask<AppResponse> ProcessRequest(AppRequest request, CancellationToken token)

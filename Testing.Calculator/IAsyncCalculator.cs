@@ -7,6 +7,8 @@ namespace Testing.Calculator;
 
 public interface IAsyncCalculator : IAsyncDisposable
 {
+    ValueTask<string> GetAppInfo();
+
     /// <summary>
     /// Returns the binary operation (x op y) of two doubles.
     /// </summary>

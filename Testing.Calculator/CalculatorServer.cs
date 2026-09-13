@@ -3,6 +3,7 @@ using Nerdbank.MessagePack;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -28,6 +29,17 @@ public class CalculatorServer : IAppConduit
     public CalculatorServer(IAsyncCalculator calculator)
     {
         _calculator = calculator;
+    }
+
+    public async ValueTask<string> GetAppInfo()
+    {
+        StringBuilder result = new StringBuilder();
+        result.Append("AppName=");
+        result.Append(ThisAssembly.AssemblyName);
+        result.Append(';');
+        result.Append("Version=");
+        result.Append(ThisAssembly.AssemblyFileVersion);
+        return result.ToString();
     }
 
     public async ValueTask<AppResponse> UnaryRequest(AppRequest requestBytes, CancellationToken cancellation = default)
