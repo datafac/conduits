@@ -35,6 +35,7 @@
 		<ProjectReference Include="..\DataFac.Conduits.ProtobufNet.Server\DataFac.Conduits.ProtobufNetServer.csproj" />
 		<ProjectReference Include="..\DataFac.Conduits.Testing\DataFac.Conduits.Testing.csproj" />
 		<ProjectReference Include="..\Testing.Calculator\Testing.Calculator.csproj" />
+		<ProjectReference Include="..\Testing.Weather\Testing.Weather.csproj" />
 	</ItemGroup>
 
 </Project>
