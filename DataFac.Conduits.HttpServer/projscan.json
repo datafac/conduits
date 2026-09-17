@@ -1,0 +1,5 @@
+{
+  "ExemptionCodes": [
+    "targetframeworks_contains_net8"
+  ]
+}

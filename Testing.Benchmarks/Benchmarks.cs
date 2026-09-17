@@ -17,16 +17,14 @@ namespace Testing.Benchmarks
     {
         private const string host = "localhost";
 
-        private FakeConduitServer fakeServer;
-        private CalculatorClient fakeClient;
+        private FakeConduitServer fakeServer = null!;
+        private CalculatorClient fakeClient = null!;
 
-        //private DataFac.Conduits.GrpcServer.GrpcService grpcServer;
-        //private CalculatorClient grpcClient;
+        //private GrpcService grpcServer = null!;
+        //private CalculatorClient grpcClient = null!;
 
-        private ProtobufGrpcServer pbufServer;
-        private CalculatorClient pbufClient;
-
-        //private byte[] data;
+        private ProtobufGrpcServer pbufServer = null!;
+        private CalculatorClient pbufClient = null!;
 
         [GlobalSetup]
         public void Setup()
@@ -35,8 +33,9 @@ namespace Testing.Benchmarks
             pbufServer = new ProtobufGrpcServer(new ConduitServer(timeProvider, new CalculatorServer(new Testing.Calculator.Calculator())));
             pbufClient = new CalculatorClient(new ConduitClient(new ProtobufGrpcClient(host, pbufServer.BoundPort)));
 
-            //DataFac.Conduits.GrpcServer.GrpcService grpcServer = new DataFac.Conduits.GrpcServer.GrpcService(new ConduitServer(timeProvider, new CalculatorServer(new Testing.Calculator.Calculator())));
-            //grpcClient = new CalculatorClient(new GrpcConduitClient(address));
+            //string grpcAddress = "localhost:todo";
+            //grpcServer = new GrpcService(new ConduitServer(timeProvider, new CalculatorServer(new Testing.Calculator.Calculator())));
+            //grpcClient = new CalculatorClient(new ConduitClient(new GrpcConduitClient(grpcAddress)));
 
             fakeServer = new FakeConduitServer(new ConduitServer(timeProvider, new CalculatorServer(new Testing.Calculator.Calculator())));
             fakeClient = new CalculatorClient(new ConduitClient(new FakeConduitClient(fakeServer, timeProvider)));

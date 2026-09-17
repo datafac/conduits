@@ -1,21 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<WarningsAsErrors>nullable</WarningsAsErrors>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\DataFac.Conduits.GrpcClient\DataFac.Conduits.GrpcClient.csproj" />
-    <ProjectReference Include="..\..\DataFac.Conduits.HttpCommon\DataFac.Conduits.HttpCommon.csproj" />
-    <ProjectReference Include="..\..\DataFac.Conduits.HttpServer\DataFac.Conduits.HttpServer.csproj" />
-    <ProjectReference Include="..\..\Testing.Weather\Testing.Weather.csproj" />
-    <ProjectReference Include="..\XApp1.ServiceDefaults\XApp1.ServiceDefaults.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\DataFac.Conduits.GrpcClient\DataFac.Conduits.GrpcClient.csproj" />
+		<ProjectReference Include="..\..\DataFac.Conduits.HttpCommon\DataFac.Conduits.HttpCommon.csproj" />
+		<ProjectReference Include="..\..\DataFac.Conduits.HttpServer\DataFac.Conduits.HttpServer.csproj" />
+		<ProjectReference Include="..\..\Testing.Weather\Testing.Weather.csproj" />
+		<ProjectReference Include="..\XApp1.ServiceDefaults\XApp1.ServiceDefaults.csproj" />
+	</ItemGroup>
 
 </Project>
