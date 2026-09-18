@@ -10,7 +10,7 @@ using Xunit;
 
 namespace DataFac.Conduits.UnitTests;
 
-public class UnitTest1
+public class WeatherTests
 {
     [Fact]
     public async Task DisposedServiceShouldThrow()
