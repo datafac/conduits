@@ -30,9 +30,9 @@ public partial class MessageLeaf
 public class ShapeTests
 {
 #if NET8_0_OR_GREATER
-    //[Fact]
-    //public void ShapeTest1()
-    //{
+    [Fact]
+    public void ShapeTest1()
+    {
     //    var leaf = new MessageLeaf() { A = 1, B = 2, X = 8, Y = 9 };
     //    ITypeShapeProvider tsp = xxx;
     //    var shape = leaf.GetTypeShape<MessageLeaf>();
@@ -42,6 +42,6 @@ public class ShapeTests
 
     //    ITypeShape<MessageLeaf> ts = MessageLeaf.GetTypeShape<MessageLeaf>();
 
-    //}
+    }
 #endif
 }
