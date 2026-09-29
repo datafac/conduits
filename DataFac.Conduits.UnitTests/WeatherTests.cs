@@ -17,10 +17,10 @@ public class WeatherTests
     {
         var timeProvider = new FakeTimeProvider();
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        FakeConduitServer conduitServer = new FakeConduitServer(new ConduitServer(timeProvider, new WeatherServer(new WeatherService())));
+        FakeConduitServer conduitServer = new FakeConduitServer(new ConduitServer(timeProvider, new WeatherServer(new WeatherService()), true), true);
         try
         {
-            await using var client = new WeatherClient(new ConduitClient(new FakeConduitClient(conduitServer, timeProvider)));
+            await using var client = new WeatherClient(new ConduitClient(new FakeConduitClient(conduitServer, timeProvider), true));
             var weather = await client.GetWeatherForecast(1, 7, cts.Token);
             weather.ShouldNotBeNull();
             weather.Batch.Length.ShouldBe(7);
@@ -32,7 +32,7 @@ public class WeatherTests
         // note: conduitServer is disposed
         // repeat
         {
-            await using var client = new WeatherClient(new ConduitClient(new FakeConduitClient(conduitServer, timeProvider)));
+            await using var client = new WeatherClient(new ConduitClient(new FakeConduitClient(conduitServer, timeProvider), true));
             var ex = await Assert.ThrowsAsync<ObjectDisposedException>(
                          async () =>
                          {
@@ -47,16 +47,16 @@ public class WeatherTests
     {
         var timeProvider = new FakeTimeProvider();
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        await using var conduitServer = new FakeConduitServer(new ConduitServer(timeProvider, new WeatherServer(new WeatherService())));
+        await using var conduitServer = new FakeConduitServer(new ConduitServer(timeProvider, new WeatherServer(new WeatherService()), true), true);
         {
-            await using var client = new WeatherClient(new ConduitClient(new FakeConduitClient(conduitServer, timeProvider)));
+            await using var client = new WeatherClient(new ConduitClient(new FakeConduitClient(conduitServer, timeProvider), true));
             var weather = await client.GetWeatherForecast(1, 7, cts.Token);
             weather.ShouldNotBeNull();
             weather.Batch.Length.ShouldBe(7);
         }
         // repeat
         {
-            await using var client = new WeatherClient(new ConduitClient(new FakeConduitClient(conduitServer, timeProvider)));
+            await using var client = new WeatherClient(new ConduitClient(new FakeConduitClient(conduitServer, timeProvider), true));
             var weather = await client.GetWeatherForecast(1, 7, cts.Token);
             weather.ShouldNotBeNull();
             weather.Batch.Length.ShouldBe(7);

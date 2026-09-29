@@ -13,12 +13,14 @@ namespace DataFac.Conduits;
 public sealed class ConduitServer : INetConduit, IAsyncDisposable
 {
     private readonly TimeProvider _timeProvider;
-    private readonly IAppConduit _userChannel;
+    private readonly IAppConduit _appConduit;
+    private readonly bool _chainDispose;
 
-    public ConduitServer(TimeProvider? timeProvider, IAppConduit userChannel)
+    public ConduitServer(TimeProvider? timeProvider, IAppConduit appConduit, bool chainDispose = false)
     {
         _timeProvider = timeProvider ?? TimeProvider.System;
-        _userChannel = userChannel;
+        _appConduit = appConduit;
+        _chainDispose = chainDispose;
     }
 
     private volatile bool _disposed = false;
@@ -26,47 +28,49 @@ public sealed class ConduitServer : INetConduit, IAsyncDisposable
     {
         if (_disposed) return;
         _disposed = true;
-        if (_userChannel is IAsyncDisposable disposable)
+        if (_chainDispose)
         {
-            await disposable.DisposeAsync();
+            if (_appConduit is IAsyncDisposable disposable1)
+            {
+                await disposable1.DisposeAsync();
+            }
+            else if (_appConduit is IDisposable disposable2)
+            {
+                disposable2.Dispose();
+            }
         }
+        GC.SuppressFinalize(this);
     }
     public TimeProvider TimeProvider => _timeProvider;
-
-    private static ReadOnlyMemory<byte> EncodeMessage(string message)
-    {
-        if (message.Length == 0) return ReadOnlyMemory<byte>.Empty;
-        return Encoding.UTF8.GetBytes(message);
-    }
 
     public async ValueTask<NetResponse> UnaryRequest(NetRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         if (request.Control == ControlCode.GetAppInfo)
         {
-            var appInfo = await _userChannel.GetAppInfo();
-            return new NetResponse(ControlCode.GetAppInfo, EncodeMessage(appInfo));
+            var appInfo = await _appConduit.GetAppInfo();
+            return new NetResponse(ControlCode.GetAppInfo, appInfo.EncodeMsg());
         }
         else
         {
-            var response = await _userChannel.UnaryRequest(new AppRequest(request.Payload), cancellation);
+            var response = await _appConduit.UnaryRequest(new AppRequest(request.Payload), cancellation);
             return new NetResponse(response.Payload);
         }
     }
 
     public async IAsyncEnumerable<NetResponse> ServerStream(NetRequest request, DateTime? deadlineUtc = null, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
-        await foreach (var response in _userChannel.ServerStream(new AppRequest(request.Payload), cancellation))
+        await foreach (var response in _appConduit.ServerStream(new AppRequest(request.Payload), cancellation))
         {
             if (cancellation.IsCancellationRequested)
             {
                 // cancelled
-                yield return new NetResponse(ControlCode.Cancelled, EncodeMessage("Operation cancelled"));
+                yield return new NetResponse(ControlCode.Cancelled, "Operation cancelled".EncodeMsg());
                 yield break;
             }
             else if (deadlineUtc.HasValue && _timeProvider.GetUtcNow().UtcDateTime > deadlineUtc.Value)
             {
                 // deadline exceeded
-                yield return new NetResponse(ControlCode.Timeout, EncodeMessage("Deadline exceeded"));
+                yield return new NetResponse(ControlCode.Timeout, "Deadline exceeded".EncodeMsg());
                 yield break;
             }
             else
@@ -87,13 +91,13 @@ public sealed class ConduitServer : INetConduit, IAsyncDisposable
                 if (cancellation.IsCancellationRequested)
                 {
                     // cancelled
-                    altResponse = new NetResponse(ControlCode.Cancelled, EncodeMessage("Operation cancelled"));
+                    altResponse = new NetResponse(ControlCode.Cancelled, "Operation cancelled".EncodeMsg());
                     yield break;
                 }
                 else if (deadlineUtc.HasValue && _timeProvider.GetUtcNow().UtcDateTime > deadlineUtc.Value)
                 {
                     // deadline exceeded
-                    altResponse = new NetResponse(ControlCode.Timeout, EncodeMessage("Deadline exceeded"));
+                    altResponse = new NetResponse(ControlCode.Timeout, "Deadline exceeded".EncodeMsg());
                     yield break;
                 }
                 else
@@ -103,7 +107,7 @@ public sealed class ConduitServer : INetConduit, IAsyncDisposable
             }
         }
 
-        var response = await _userChannel.ClientStream(ToAppRequests(), cancellation);
+        var response = await _appConduit.ClientStream(ToAppRequests(), cancellation);
 
         return altResponse.HasValue
             ? altResponse.Value
@@ -121,13 +125,13 @@ public sealed class ConduitServer : INetConduit, IAsyncDisposable
                 if (cancellation.IsCancellationRequested)
                 {
                     // cancelled
-                    altResponse = new NetResponse(ControlCode.Cancelled, EncodeMessage("Operation cancelled"));
+                    altResponse = new NetResponse(ControlCode.Cancelled, "Operation cancelled".EncodeMsg());
                     yield break;
                 }
                 else if (deadlineUtc.HasValue && _timeProvider.GetUtcNow().UtcDateTime > deadlineUtc.Value)
                 {
                     // deadline exceeded
-                    altResponse = new NetResponse(ControlCode.Timeout, EncodeMessage("Deadline exceeded"));
+                    altResponse = new NetResponse(ControlCode.Timeout, "Deadline exceeded".EncodeMsg());
                     yield break;
                 }
                 else
@@ -137,7 +141,7 @@ public sealed class ConduitServer : INetConduit, IAsyncDisposable
             }
         }
 
-        await foreach (var response in _userChannel.DuplexStream(ToAppRequests(), cancellation))
+        await foreach (var response in _appConduit.DuplexStream(ToAppRequests(), cancellation))
         {
             if (altResponse.HasValue)
             {
@@ -148,13 +152,13 @@ public sealed class ConduitServer : INetConduit, IAsyncDisposable
             else if (cancellation.IsCancellationRequested)
             {
                 // cancelled
-                yield return new NetResponse(ControlCode.Cancelled, EncodeMessage("Operation cancelled"));
+                yield return new NetResponse(ControlCode.Cancelled, "Operation cancelled".EncodeMsg());
                 yield break;
             }
             else if (deadlineUtc.HasValue && _timeProvider.GetUtcNow().UtcDateTime > deadlineUtc.Value)
             {
                 // deadline exceeded
-                yield return new NetResponse(ControlCode.Timeout, EncodeMessage("Deadline exceeded"));
+                yield return new NetResponse(ControlCode.Timeout, "Deadline exceeded".EncodeMsg());
                 yield break;
             }
             else

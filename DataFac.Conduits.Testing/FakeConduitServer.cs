@@ -7,15 +7,17 @@ namespace DataFac.Conduits.Testing;
 
 public sealed class FakeConduitServer
 {
-    private readonly INetConduit _server;
+    private readonly INetConduit _netConduit;
+    private readonly bool _chainDispose;
 
     /// <summary>
     /// Creates a test/mock server wrapping another conduit server.
     /// </summary>
     /// <param name="server">The wrapped server.</param>
-    public FakeConduitServer(INetConduit server)
+    public FakeConduitServer(INetConduit netConduit, bool chainDispose = false)
     {
-        _server = server ?? throw new ArgumentNullException(nameof(server));
+        _netConduit = netConduit ?? throw new ArgumentNullException(nameof(netConduit));
+        _chainDispose = chainDispose;
     }
 
     private volatile bool _disposed = false;
@@ -23,33 +25,41 @@ public sealed class FakeConduitServer
     {
         if (_disposed) return;
         _disposed = true;
-        if(_server is IAsyncDisposable disposable)
+        if (_chainDispose)
         {
-            await disposable.DisposeAsync();
+            if (_netConduit is IAsyncDisposable disposable1)
+            {
+                await disposable1.DisposeAsync();
+            }
+            else if (_netConduit is IDisposable disposable2)
+            {
+                disposable2.Dispose();
+            }
         }
+        GC.SuppressFinalize(this);
     }
 
     public ValueTask<NetResponse> UnaryRequest(NetRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
-        return _server.UnaryRequest(request, deadlineUtc, cancellation);
+        return _netConduit.UnaryRequest(request, deadlineUtc, cancellation);
     }
 
     public IAsyncEnumerable<NetResponse> ServerStream(NetRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
-        return _server.ServerStream(request, deadlineUtc, cancellation);
+        return _netConduit.ServerStream(request, deadlineUtc, cancellation);
     }
 
     public ValueTask<NetResponse> ClientStream(IAsyncEnumerable<NetRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
-        return _server.ClientStream(requests, deadlineUtc, cancellation);
+        return _netConduit.ClientStream(requests, deadlineUtc, cancellation);
     }
 
     public IAsyncEnumerable<NetResponse> DuplexStream(IAsyncEnumerable<NetRequest> requests, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));
-        return _server.DuplexStream(requests, deadlineUtc, cancellation);
+        return _netConduit.DuplexStream(requests, deadlineUtc, cancellation);
     }
 }

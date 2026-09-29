@@ -22,6 +22,7 @@ public class FakeConduitClient : INetConduit, IAsyncDisposable
     {
         if (_disposed) return;
         _disposed = true;
+        GC.SuppressFinalize(this);
     }
 
     public IAsyncEnumerable<NetResponse> ServerStream(NetRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)

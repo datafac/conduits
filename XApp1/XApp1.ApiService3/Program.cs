@@ -14,7 +14,7 @@ public class Program
     }
 
     private static readonly string _weatherSvcAddress = GetServiceAddress("GRPCSERVICE2_HTTPS");
-    private static readonly ConduitServer _protocolServer = new ConduitServer(null, new ConduitClient(new GrpcConduitClient(_weatherSvcAddress)));
+    private static readonly ConduitServer _protocolServer = new ConduitServer(null, new ConduitClient(new GrpcConduitClient(_weatherSvcAddress), true), true);
 
     public static void Main(string[] args)
     {

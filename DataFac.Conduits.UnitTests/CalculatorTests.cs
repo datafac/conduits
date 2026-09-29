@@ -48,7 +48,7 @@ public class CalculatorTests
     public async Task BinOp_OverProtocol(double a, BinOp op, double b, double expected)
     {
         var timeProvider = new FakeTimeProvider();
-        await using var server = new ConduitServer(timeProvider, new CalculatorServer(new Calculator()));
+        await using var server = new ConduitServer(timeProvider, new CalculatorServer(new Calculator()), true);
         await using var client = new CalculatorClient(new ConduitClient(server));
 
         var ct = TestContext.Current.CancellationToken;
@@ -67,8 +67,8 @@ public class CalculatorTests
     public async Task BinOp_ViaProtobufNet(double a, BinOp op, double b, double expected)
     {
         var timeProvider = new FakeTimeProvider();
-        await using var server = new ProtobufGrpcServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator())));
-        await using var client = new CalculatorClient(new ConduitClient(new ProtobufGrpcClient(host, server.BoundPort)));
+        await using var server = new ProtobufGrpcServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator()), true), true);
+        await using var client = new CalculatorClient(new ConduitClient(new ProtobufGrpcClient(host, server.BoundPort), true));
 
         var ct = TestContext.Current.CancellationToken;
 

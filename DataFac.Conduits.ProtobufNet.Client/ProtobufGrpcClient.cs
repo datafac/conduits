@@ -42,8 +42,11 @@ public class ProtobufGrpcClient : INetConduit
         _contract = _channel.CreateGrpcService<IProtobufNetContract>();
     }
 
+    private volatile bool _disposed = false;
     public async ValueTask DisposeAsync()
     {
+        if (_disposed) return;
+        _disposed = true;
         await _channel.ShutdownAsync().ConfigureAwait(false);
         GC.SuppressFinalize(this);
     }

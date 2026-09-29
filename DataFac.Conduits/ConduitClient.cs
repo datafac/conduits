@@ -13,10 +13,19 @@ namespace DataFac.Conduits;
 /// </summary>
 public sealed class ConduitClient : IAppConduit, IAsyncDisposable
 {
-    private readonly INetConduit _netChannel;
+    private readonly INetConduit _netConduit;
+    private readonly bool _chainDispose;
 
     private readonly TimeProvider _timeProvider;
     public TimeProvider TimeProvider => _timeProvider;
+
+    public ConduitClient(INetConduit netConduit, bool chainDispose = false, TimeSpan? maxCallDuration = null, TimeProvider? timeProvider = null) // todo default false
+    {
+        _netConduit = netConduit;
+        _chainDispose = chainDispose;
+        _maxCallDuration = SanitiseMaxCallDuration(maxCallDuration);
+        _timeProvider = timeProvider ?? TimeProvider.System;
+    }
 
     private static TimeSpan? SanitiseMaxCallDuration(TimeSpan? value)
     {
@@ -38,18 +47,21 @@ public sealed class ConduitClient : IAppConduit, IAsyncDisposable
         set => _maxCallDuration = SanitiseMaxCallDuration(value);
     }
 
-    public ConduitClient(INetConduit netChannel, TimeSpan? maxCallDuration = null, TimeProvider? timeProvider = null)
-    {
-        _netChannel = netChannel;
-        _maxCallDuration = SanitiseMaxCallDuration(maxCallDuration);
-        _timeProvider = timeProvider ?? TimeProvider.System;
-    }
-
+    private volatile bool _disposed = false;
     public async ValueTask DisposeAsync()
     {
-        if (_netChannel is IAsyncDisposable disposable)
+        if (_disposed) return;
+        _disposed = true;
+        if (_chainDispose)
         {
-            await disposable.DisposeAsync();
+            if (_netConduit is IAsyncDisposable disposable1)
+            {
+                await disposable1.DisposeAsync();
+            }
+            else if (_netConduit is IDisposable disposable2)
+            {
+                disposable2.Dispose();
+            }
         }
         GC.SuppressFinalize(this);
     }
@@ -61,40 +73,16 @@ public sealed class ConduitClient : IAppConduit, IAsyncDisposable
             : null;
     }
 
-    private static ReadOnlyMemory<byte> EncodeMessage(string message)
-    {
-        if (message.Length == 0) return ReadOnlyMemory<byte>.Empty;
-        return Encoding.UTF8.GetBytes(message);
-    }
-
-    private static string DecodeMessage(ReadOnlySpan<byte> payload)
-    {
-        if (payload.Length == 0) return string.Empty;
-#if NET8_0_OR_GREATER
-        Span<char> chars = stackalloc char[payload.Length];
-        if (Encoding.UTF8.TryGetChars(payload, chars, out int charsWritten))
-        {
-            return new string(chars.Slice(0, charsWritten));
-        }
-        else
-        {
-            return Encoding.UTF8.GetString(payload.ToArray());
-        }
-#else
-        return Encoding.UTF8.GetString(payload.ToArray());
-#endif
-    }
-
     private static NetResponse HandleResponse(NetResponse response)
     {
         return response.Control switch
         {
             ControlCode.None => response,
             ControlCode.GetAppInfo => response,
-            ControlCode.Timeout => throw new TimeoutException(DecodeMessage(response.Payload.Span)),
-            ControlCode.Cancelled => throw new OperationCanceledException(DecodeMessage(response.Payload.Span)),
-            ControlCode.InvalidOp => throw new InvalidOperationException(DecodeMessage(response.Payload.Span)),
-            ControlCode.InvalidData => throw new InvalidDataException(DecodeMessage(response.Payload.Span)),
+            ControlCode.Timeout => throw new TimeoutException(response.Payload.DecodeMsg()),
+            ControlCode.Cancelled => throw new OperationCanceledException(response.Payload.DecodeMsg()),
+            ControlCode.InvalidOp => throw new InvalidOperationException(response.Payload.DecodeMsg()),
+            ControlCode.InvalidData => throw new InvalidDataException(response.Payload.DecodeMsg()),
             _ => throw new Exception($"Unknown control code: {response.Control}")
         };
     }
@@ -102,15 +90,15 @@ public sealed class ConduitClient : IAppConduit, IAsyncDisposable
 
     public async ValueTask<string> GetAppInfo()
     {
-        var response = await _netChannel.UnaryRequest(new NetRequest(ControlCode.GetAppInfo), null).ConfigureAwait(false);
+        var response = await _netConduit.UnaryRequest(new NetRequest(ControlCode.GetAppInfo), null).ConfigureAwait(false);
         var result = HandleResponse(response);
-        return DecodeMessage(result.Payload.Span);
+        return result.Payload.DecodeMsg();
     }
 
     public async ValueTask<AppResponse> UnaryRequest(AppRequest request, CancellationToken cancellation = default)
     {
         DateTime? deadline = calculateDeadline();
-        var response = await _netChannel.UnaryRequest(new NetRequest(request.Payload), deadline).ConfigureAwait(false);
+        var response = await _netConduit.UnaryRequest(new NetRequest(request.Payload), deadline).ConfigureAwait(false);
         var result = HandleResponse(response);
         return new AppResponse(result.Payload);
     }
@@ -118,7 +106,7 @@ public sealed class ConduitClient : IAppConduit, IAsyncDisposable
     public async IAsyncEnumerable<AppResponse> ServerStream(AppRequest request, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         DateTime? deadline = calculateDeadline();
-        await foreach (var response in _netChannel.ServerStream(new NetRequest(request.Payload), deadline, cancellation).ConfigureAwait(false))
+        await foreach (var response in _netConduit.ServerStream(new NetRequest(request.Payload), deadline, cancellation).ConfigureAwait(false))
         {
             var result = HandleResponse(response);
             yield return new AppResponse(result.Payload);
@@ -137,7 +125,7 @@ public sealed class ConduitClient : IAppConduit, IAsyncDisposable
             }
         }
 
-        var response = await _netChannel.ClientStream(ToNetRequests(), deadline).ConfigureAwait(false);
+        var response = await _netConduit.ClientStream(ToNetRequests(), deadline).ConfigureAwait(false);
         var result = HandleResponse(response);
         return new AppResponse(result.Payload);
     }
@@ -155,7 +143,7 @@ public sealed class ConduitClient : IAppConduit, IAsyncDisposable
             }
         }
 
-        await foreach (var response in _netChannel.DuplexStream(ToNetRequests(), deadline, cancellation).ConfigureAwait(false))
+        await foreach (var response in _netConduit.DuplexStream(ToNetRequests(), deadline, cancellation).ConfigureAwait(false))
         {
             var result = HandleResponse(response);
             yield return new AppResponse(result.Payload);

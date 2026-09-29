@@ -30,15 +30,15 @@ namespace Testing.Benchmarks
         public void Setup()
         {
             var timeProvider = new FakeTimeProvider();
-            pbufServer = new ProtobufGrpcServer(new ConduitServer(timeProvider, new CalculatorServer(new Testing.Calculator.Calculator())));
-            pbufClient = new CalculatorClient(new ConduitClient(new ProtobufGrpcClient(host, pbufServer.BoundPort)));
+            pbufServer = new ProtobufGrpcServer(new ConduitServer(timeProvider, new CalculatorServer(new Testing.Calculator.Calculator()), true), true);
+            pbufClient = new CalculatorClient(new ConduitClient(new ProtobufGrpcClient(host, pbufServer.BoundPort), true));
 
             //string grpcAddress = "localhost:todo";
             //grpcServer = new GrpcService(new ConduitServer(timeProvider, new CalculatorServer(new Testing.Calculator.Calculator())));
             //grpcClient = new CalculatorClient(new ConduitClient(new GrpcConduitClient(grpcAddress)));
 
-            fakeServer = new FakeConduitServer(new ConduitServer(timeProvider, new CalculatorServer(new Testing.Calculator.Calculator())));
-            fakeClient = new CalculatorClient(new ConduitClient(new FakeConduitClient(fakeServer, timeProvider)));
+            fakeServer = new FakeConduitServer(new ConduitServer(timeProvider, new CalculatorServer(new Testing.Calculator.Calculator()), true), true);
+            fakeClient = new CalculatorClient(new ConduitClient(new FakeConduitClient(fakeServer, timeProvider), true));
         }
 
         [GlobalCleanup]
