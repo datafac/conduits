@@ -1,8 +1,6 @@
 using DataFac.Conduits.Testing;
 using Shouldly;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Testing.Weather;

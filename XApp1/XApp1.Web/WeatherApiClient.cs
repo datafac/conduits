@@ -1,9 +1,7 @@
 using DataFac.Conduits;
 using DataFac.Conduits.HttpClient;
-using Nerdbank.MessagePack;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,8 +11,6 @@ namespace XApp1.Web;
 
 public class WeatherApiClient
 {
-    private readonly MessagePackSerializer _serializer = new MessagePackSerializer();
-
     private readonly IAsyncWeather _weatherSvc;
 
     private readonly HttpClient _httpClient;
