@@ -87,9 +87,9 @@ public sealed class ConduitClient : IAppConduit, IAsyncDisposable
     }
 
 
-    public async ValueTask<AppInfo> GetAppInfo()
+    public async ValueTask<AppInfo> GetAppInfo(CancellationToken cancellation = default)
     {
-        var response = await _netConduit.UnaryRequest(new NetRequest(ControlCode.GetAppInfo), null).ConfigureAwait(false);
+        var response = await _netConduit.UnaryRequest(new NetRequest(ControlCode.GetAppInfo), null, cancellation).ConfigureAwait(false);
         var result = HandleResponse(response);
         return AppInfo.ParseFrom(result.Payload.DecodeMsg());
     }

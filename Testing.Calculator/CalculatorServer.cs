@@ -31,7 +31,7 @@ public class CalculatorServer : IAppConduit
         _calculator = calculator;
     }
 
-    public async ValueTask<AppInfo> GetAppInfo()
+    public async ValueTask<AppInfo> GetAppInfo(CancellationToken cancellation = default)
     {
         return new AppInfo($"{ThisAssembly.AssemblyName}.{nameof(CalculatorServer)}", new Version(ThisAssembly.AssemblyFileVersion));
     }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DataFac.Conduits;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -24,15 +25,9 @@ public class Calculator : IAsyncCalculator
         };
     }
 
-    public async ValueTask<string> GetAppInfo()
+    public async ValueTask<AppInfo> GetAppInfo()
     {
-        StringBuilder result = new StringBuilder();
-        result.Append("AppName=");
-        result.Append(ThisAssembly.AssemblyName);
-        result.Append(';');
-        result.Append("Version=");
-        result.Append(ThisAssembly.AssemblyFileVersion);
-        return result.ToString();
+        return new AppInfo($"{ThisAssembly.AssemblyName}.{nameof(Calculator)}", new Version(ThisAssembly.AssemblyFileVersion));
     }
 
     public async IAsyncEnumerable<int> GetRange(int start, int count, TimeSpan delay, [EnumeratorCancellation] CancellationToken cancellation)

@@ -48,12 +48,6 @@ public class CalculatorClient : IAsyncCalculator
         };
     }
 
-    public async ValueTask<string> GetAppInfo()
-    {
-        var appInfo= await _userChannel.GetAppInfo().ConfigureAwait(false);
-        return appInfo.ToString();
-    }
-
     private async ValueTask<ResultBase?> UnaryCall(RequestBase request, CancellationToken cancellation)
     {
         var requestBytes = _serializer.Serialize<RequestBase>(request);

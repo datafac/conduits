@@ -19,6 +19,10 @@ call :import DataFac.Conduits.ProtobufNet.Server
 call :import DataFac.Conduits.Testing
 call :import DataFac.Conduits.UnitTests
 
+call :import Testing.Calculator
+call :import Testing.ChatHub
+call :import Testing.Weather
+
 goto :eof
 
 :import csFromDir

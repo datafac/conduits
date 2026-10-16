@@ -51,7 +51,7 @@ public sealed class ConduitServer : INetConduit, IAsyncDisposable
     {
         if (request.Control == ControlCode.GetAppInfo)
         {
-            var appInfo = await _appConduit.GetAppInfo();
+            var appInfo = await _appConduit.GetAppInfo(cancellation);
             return new NetResponse(ControlCode.GetAppInfo, appInfo.ToString().EncodeMsg());
         }
         else
