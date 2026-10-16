@@ -42,12 +42,17 @@ public sealed class ConduitServer : INetConduit, IAsyncDisposable
     }
     public TimeProvider TimeProvider => _timeProvider;
 
+    public async ValueTask<ConduitInfo> GetConduitInfoAsync()
+    {
+        return new ConduitInfo($"{ThisAssembly.AssemblyName}.{nameof(ConduitServer)}", new Version(ThisAssembly.AssemblyFileVersion));
+    }
+
     public async ValueTask<NetResponse> UnaryRequest(NetRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         if (request.Control == ControlCode.GetAppInfo)
         {
             var appInfo = await _appConduit.GetAppInfo();
-            return new NetResponse(ControlCode.GetAppInfo, appInfo.EncodeMsg());
+            return new NetResponse(ControlCode.GetAppInfo, appInfo.ToString().EncodeMsg());
         }
         else
         {

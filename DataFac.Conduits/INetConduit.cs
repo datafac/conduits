@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace DataFac.Conduits;
 
-public interface INetConduit
+public interface INetConduit : IConduitInfo
 {
     /// <summary>
     /// Handles a single request and returns a single result.

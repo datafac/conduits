@@ -51,6 +51,11 @@ public class ProtobufGrpcClient : INetConduit
         GC.SuppressFinalize(this);
     }
 
+    public async ValueTask<ConduitInfo> GetConduitInfoAsync()
+    {
+        return new ConduitInfo($"{ThisAssembly.AssemblyName}.{nameof(ProtobufGrpcClient)}", new Version(ThisAssembly.AssemblyFileVersion));
+    }
+
     public async ValueTask<NetResponse> UnaryRequest(NetRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         var callOptions = new CallOptions(null, deadlineUtc, cancellation);

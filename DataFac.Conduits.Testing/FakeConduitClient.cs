@@ -25,6 +25,11 @@ public class FakeConduitClient : INetConduit, IAsyncDisposable
         GC.SuppressFinalize(this);
     }
 
+    public async ValueTask<ConduitInfo> GetConduitInfoAsync()
+    {
+        return new ConduitInfo($"{ThisAssembly.AssemblyName}.{nameof(FakeConduitClient)}", new Version(ThisAssembly.AssemblyFileVersion));
+    }
+
     public IAsyncEnumerable<NetResponse> ServerStream(NetRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         if (_disposed) throw new ObjectDisposedException(nameof(FakeConduitServer));

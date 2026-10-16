@@ -23,6 +23,11 @@ public sealed class HttpConduitClient : INetConduit
         return Encoding.UTF8.GetBytes(message);
     }
 
+    public async ValueTask<ConduitInfo> GetConduitInfoAsync()
+    {
+        return new ConduitInfo($"{ThisAssembly.AssemblyName}.{nameof(HttpConduitClient)}", new Version(ThisAssembly.AssemblyFileVersion));
+    }
+
     public async ValueTask<NetResponse> UnaryRequest(NetRequest request, DateTime? deadline, CancellationToken cancellation = default)
     {
         var jsonRequest = new JsonRequest { DeadlineUtc = deadline?.Ticks, Payload = request.Payload.ToArray() };

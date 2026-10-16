@@ -50,7 +50,8 @@ public class CalculatorClient : IAsyncCalculator
 
     public async ValueTask<string> GetAppInfo()
     {
-        return await _userChannel.GetAppInfo().ConfigureAwait(false);
+        var appInfo= await _userChannel.GetAppInfo().ConfigureAwait(false);
+        return appInfo.ToString();
     }
 
     private async ValueTask<ResultBase?> UnaryCall(RequestBase request, CancellationToken cancellation)

@@ -10,7 +10,7 @@ public interface IAppConduit
     /// Returns information about the server application, such as its name, version, and other metadata.
     /// </summary>
     /// <returns></returns>
-    ValueTask<string> GetAppInfo();
+    ValueTask<AppInfo> GetAppInfo();
 
     /// <summary>
     /// Handles a single request and returns a single result.

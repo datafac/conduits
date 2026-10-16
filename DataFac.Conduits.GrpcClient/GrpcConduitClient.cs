@@ -40,6 +40,11 @@ public class GrpcConduitClient : INetConduit, IAsyncDisposable
         if (_disposed) ThrowDisposed();
     }
 
+    public async ValueTask<ConduitInfo> GetConduitInfoAsync()
+    {
+        return new ConduitInfo($"{ThisAssembly.AssemblyName}.{nameof(GrpcConduitClient)}", new Version(ThisAssembly.AssemblyFileVersion));
+    }
+
     public async ValueTask<NetResponse> UnaryRequest(NetRequest request, DateTime? deadlineUtc = null, CancellationToken cancellation = default)
     {
         CheckNotDisposed();

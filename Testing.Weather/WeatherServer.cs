@@ -20,15 +20,9 @@ public class WeatherServer : IAppConduit
         _handler = handler;
     }
 
-    public async ValueTask<string> GetAppInfo()
+    public async ValueTask<AppInfo> GetAppInfo()
     {
-        StringBuilder result = new StringBuilder();
-        result.Append("AppName=");
-        result.Append(ThisAssembly.AssemblyName);
-        result.Append(';');
-        result.Append("Version=");
-        result.Append(ThisAssembly.AssemblyFileVersion);
-        return result.ToString();
+        return new AppInfo($"{ThisAssembly.AssemblyName}.{nameof(WeatherServer)}", new Version(ThisAssembly.AssemblyFileVersion));
     }
 
     public async ValueTask<AppResponse> UnaryRequest(AppRequest appRequest, CancellationToken cancellation = default)
@@ -68,5 +62,4 @@ public class WeatherServer : IAppConduit
         var result = new AppResponse(_serializer.Serialize<ResultBase>(new ErrorResult { Code = ErrorCode.InvalidOp, Message = "Duplex streaming is not supported" }));
         yield return result;
     }
-
 }
