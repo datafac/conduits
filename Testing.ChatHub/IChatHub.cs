@@ -1,4 +1,5 @@
-﻿using Nerdbank.MessagePack;
+﻿using DataFac.Conduits;
+using Nerdbank.MessagePack;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,6 +11,13 @@ namespace Testing.ChatHub;
 /// </summary>
 public interface IChatHub : IAsyncDisposable
 {
+    /// <summary>
+    /// Returns app info.
+    /// </summary>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    ValueTask<AppInfo> GetAppInfo(CancellationToken cancellation = default);
+
     /// <summary>
     /// Request/response to get all undelivered messages.
     /// Todo replace this with subscriptions.

@@ -25,7 +25,7 @@ public class Calculator : IAsyncCalculator
         };
     }
 
-    public async ValueTask<AppInfo> GetAppInfo()
+    public async ValueTask<AppInfo> GetAppInfo(CancellationToken cancellation = default)
     {
         return new AppInfo($"{ThisAssembly.AssemblyName}.{nameof(Calculator)}", new Version(ThisAssembly.AssemblyFileVersion));
     }

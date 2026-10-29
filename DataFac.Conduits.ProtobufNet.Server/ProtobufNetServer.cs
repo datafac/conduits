@@ -21,6 +21,7 @@ internal static class PayloadExtensions
     public static NetRequest ToConduitRequest(this RequestBlob request)
     {
         return new NetRequest(
+            request.Route,
             (ControlCode)request.Control,
             new ReadOnlyMemory<byte>(request.Payload));
     }

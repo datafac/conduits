@@ -9,12 +9,13 @@ internal static class GrpcPayloadExtensions
     {
         return new GrpcPayload()
         {
+            Route = 0,
             Code = (int)response.Control,
             Data = UnsafeByteOperations.UnsafeWrap(response.Payload)
         };
     }
     public static NetRequest ToConduitRequest(this GrpcPayload request)
     {
-        return new NetRequest((ControlCode)request.Code, request.Data.Memory);
+        return new NetRequest(request.Route, (ControlCode)request.Code, request.Data.Memory);
     }
 }

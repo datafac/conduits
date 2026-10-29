@@ -13,15 +13,17 @@ namespace DataFac.Conduits;
 public sealed class ConduitClient : IAppConduit, IAsyncDisposable
 {
     private readonly INetConduit _netConduit;
+    private readonly int _route;
     private readonly bool _chainDispose;
 
     private readonly TimeProvider _timeProvider;
     public TimeProvider TimeProvider => _timeProvider;
 
-    public ConduitClient(INetConduit netConduit, bool chainDispose = false, TimeSpan? maxCallDuration = null, TimeProvider? timeProvider = null) // todo default false
+    public ConduitClient(INetConduit netConduit, bool chainDispose = false, int route = 0, TimeSpan? maxCallDuration = null, TimeProvider? timeProvider = null) // todo default false
     {
         _netConduit = netConduit;
         _chainDispose = chainDispose;
+        _route = route;
         _maxCallDuration = SanitiseMaxCallDuration(maxCallDuration);
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
@@ -89,7 +91,7 @@ public sealed class ConduitClient : IAppConduit, IAsyncDisposable
 
     public async ValueTask<AppInfo> GetAppInfo(CancellationToken cancellation = default)
     {
-        var response = await _netConduit.UnaryRequest(new NetRequest(ControlCode.GetAppInfo), null, cancellation).ConfigureAwait(false);
+        var response = await _netConduit.UnaryRequest(new NetRequest(_route, ControlCode.GetAppInfo), null, cancellation).ConfigureAwait(false);
         var result = HandleResponse(response);
         return AppInfo.ParseFrom(result.Payload.DecodeMsg());
     }
@@ -97,7 +99,7 @@ public sealed class ConduitClient : IAppConduit, IAsyncDisposable
     public async ValueTask<AppResponse> UnaryRequest(AppRequest request, CancellationToken cancellation = default)
     {
         DateTime? deadline = calculateDeadline();
-        var response = await _netConduit.UnaryRequest(new NetRequest(request.Payload), deadline).ConfigureAwait(false);
+        var response = await _netConduit.UnaryRequest(new NetRequest(_route, request.Payload), deadline).ConfigureAwait(false);
         var result = HandleResponse(response);
         return new AppResponse(result.Payload);
     }
@@ -105,7 +107,7 @@ public sealed class ConduitClient : IAppConduit, IAsyncDisposable
     public async IAsyncEnumerable<AppResponse> ServerStream(AppRequest request, [EnumeratorCancellation] CancellationToken cancellation = default)
     {
         DateTime? deadline = calculateDeadline();
-        await foreach (var response in _netConduit.ServerStream(new NetRequest(request.Payload), deadline, cancellation).ConfigureAwait(false))
+        await foreach (var response in _netConduit.ServerStream(new NetRequest(_route, request.Payload), deadline, cancellation).ConfigureAwait(false))
         {
             var result = HandleResponse(response);
             yield return new AppResponse(result.Payload);
@@ -120,7 +122,7 @@ public sealed class ConduitClient : IAppConduit, IAsyncDisposable
         {
             await foreach (var request in requests)
             {
-                yield return new NetRequest(request.Payload);
+                yield return new NetRequest(_route, request.Payload);
             }
         }
 
@@ -138,7 +140,7 @@ public sealed class ConduitClient : IAppConduit, IAsyncDisposable
         {
             await foreach (var request in requests)
             {
-                yield return new NetRequest(request.Payload);
+                yield return new NetRequest(_route, request.Payload);
             }
         }
 

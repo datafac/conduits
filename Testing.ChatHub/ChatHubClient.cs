@@ -11,21 +11,23 @@ public class ChatHubClient : IChatHub
 {
     private readonly MessagePackSerializer _serializer = new MessagePackSerializer();
 
-    private readonly IAppConduit _userChannel;
+    private readonly IAppConduit _appConduit;
 
-    public ChatHubClient(IAppConduit userChannel)
+    public ChatHubClient(IAppConduit appConduit)
     {
-        _userChannel = userChannel;
+        _appConduit = appConduit;
     }
 
     public async ValueTask DisposeAsync()
     {
-        if (_userChannel is IAsyncDisposable disposable)
+        if (_appConduit is IAsyncDisposable disposable)
         {
             await disposable.DisposeAsync();
         }
         GC.SuppressFinalize(this);
     }
+
+    public async ValueTask<AppInfo> GetAppInfo(CancellationToken cancellation = default) => await _appConduit.GetAppInfo(cancellation);
 
     private static ReplyBase HandleResult(ReplyBase? result)
     {
@@ -49,7 +51,7 @@ public class ChatHubClient : IChatHub
         where TReply : ReplyBase
     {
         var requestBytes = _serializer.Serialize<QueryBase>(request);
-        var response = await _userChannel.UnaryRequest(new AppRequest(requestBytes), cancellation).ConfigureAwait(false);
+        var response = await _appConduit.UnaryRequest(new AppRequest(requestBytes), cancellation).ConfigureAwait(false);
         var replyBase = _serializer.Deserialize<ReplyBase>(response.Payload);
         ReplyBase reply = HandleResult(replyBase);
         if (reply is TReply expected) return expected;

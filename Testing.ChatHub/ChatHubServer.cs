@@ -19,10 +19,7 @@ public class ChatHubServer : IAppConduit
         _handler = handler;
     }
 
-    public async ValueTask<AppInfo> GetAppInfo(CancellationToken cancellation = default)
-    {
-        return new AppInfo($"{ThisAssembly.AssemblyName}.{nameof(ChatHubServer)}", new Version(ThisAssembly.AssemblyFileVersion));
-    }
+    public async ValueTask<AppInfo> GetAppInfo(CancellationToken cancellation = default) => await _handler.GetAppInfo(cancellation);
 
     public async ValueTask<AppResponse> UnaryRequest(AppRequest appRequest, CancellationToken cancellation = default)
     {

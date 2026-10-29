@@ -16,6 +16,7 @@ internal static class PayloadExtensions
     {
         return new RequestBlob()
         {
+            Route = request.Route,
             Control = (int)request.Control,
             Payload = request.Payload.ToArray() // todo alloc!
         };

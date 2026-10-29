@@ -11,16 +11,16 @@ public class WeatherClient : IAsyncWeather
 {
     private readonly MessagePackSerializer _serializer = new MessagePackSerializer();
 
-    private readonly IAppConduit _userChannel;
+    private readonly IAppConduit _appConduit;
 
     public WeatherClient(IAppConduit userChannel)
     {
-        _userChannel = userChannel;
+        _appConduit = userChannel;
     }
 
     public async ValueTask DisposeAsync()
     {
-        if (_userChannel is IAsyncDisposable disposable)
+        if (_appConduit is IAsyncDisposable disposable)
         {
             await disposable.DisposeAsync();
         }
@@ -44,11 +44,13 @@ public class WeatherClient : IAsyncWeather
         };
     }
 
+    public async ValueTask<AppInfo> GetAppInfo(CancellationToken cancellation = default) => await _appConduit.GetAppInfo(cancellation);
+
     public async ValueTask<WeatherForecast> GetWeatherForecast(int rngSeed, int count, CancellationToken cancellation = default)
     {
         RequestBase request = new GetForecastRequest() { RngSeed = rngSeed, Count = count };
         ReadOnlyMemory<byte> requestBytes = _serializer.Serialize<RequestBase>(request);
-        var response = await _userChannel.UnaryRequest(new AppRequest(requestBytes), cancellation).ConfigureAwait(false);
+        var response = await _appConduit.UnaryRequest(new AppRequest(requestBytes), cancellation).ConfigureAwait(false);
         var result = HandleResult(_serializer.Deserialize<ResultBase>(response.Payload));
         return result as WeatherForecast ?? throw new Exception($"Unexpected result type: {result.GetType().Name}");
     }

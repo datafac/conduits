@@ -66,7 +66,7 @@ public class FakeServerStreamTests
         var ct = TestContext.Current.CancellationToken;
         var timeProvider = new FakeTimeProvider();
         await using var server = new FakeConduitServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator()), true), true);
-        await using var client = new CalculatorClient(new ConduitClient(new FakeConduitClient(server, timeProvider), false, TimeSpan.FromSeconds(5), timeProvider));
+        await using var client = new CalculatorClient(new ConduitClient(new FakeConduitClient(server, timeProvider), false, 0, TimeSpan.FromSeconds(5), timeProvider));
 
         // returning the entire stream would take ~10s, but we have a max call
         // duration of 5s, so this call should timeout after ~5s

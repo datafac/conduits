@@ -27,7 +27,7 @@ goto :eof
 
 :import csFromDir
     echo Importing from %1 ...
-    robocopy ..\rnd\%1 .\%1 *.cs /mir /xx /z
+    robocopy ..\rnd\%1 .\%1 *.cs *.proto /mir /xx /z
     set _rc=%errorlevel%
     echo     Returned: %_rc%
     goto :eof

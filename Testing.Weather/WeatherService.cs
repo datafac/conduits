@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DataFac.Conduits;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -11,6 +12,11 @@ public class WeatherService : IAsyncWeather
     private static readonly string[] summaries = ["Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"];
 
     public async ValueTask DisposeAsync() { }
+
+    public async ValueTask<AppInfo> GetAppInfo(CancellationToken cancellation = default)
+    {
+        return new AppInfo($"{ThisAssembly.AssemblyName}.{nameof(WeatherService)}", new Version(ThisAssembly.AssemblyFileVersion));
+    }
 
     private IEnumerable<WeatherData> GenerateWeather(int rngSeed, int count)
     {

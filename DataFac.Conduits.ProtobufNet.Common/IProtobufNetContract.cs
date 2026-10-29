@@ -31,6 +31,10 @@ public sealed class RequestBlob
     
     [ProtoMember(2)]
     public byte[] Payload { get; set; } = Array.Empty<byte>();
+
+    [ProtoMember(3)]
+    public int Route { get; set; }
+
 }
 
 [ProtoContract]

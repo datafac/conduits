@@ -145,7 +145,7 @@ public sealed class ConduitServer : INetConduit, IAsyncDisposable
             }
         }
 
-        await foreach (var response in _appConduit.DuplexStream(ToAppRequests(), cancellation))
+        await foreach (var response in _appConduit.DuplexStream(ToAppRequests(), cancellation)) 
         {
             if (altResponse.HasValue)
             {

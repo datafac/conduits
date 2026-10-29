@@ -13,16 +13,16 @@ public class CalculatorClient : IAsyncCalculator
 {
     private readonly MessagePackSerializer _serializer = new MessagePackSerializer();
 
-    private readonly IAppConduit _userChannel;
+    private readonly IAppConduit _appConduit;
 
     public CalculatorClient(IAppConduit userChannel)
     {
-        _userChannel = userChannel;
+        _appConduit = userChannel;
     }
 
     public async ValueTask DisposeAsync()
     {
-        if (_userChannel is IAsyncDisposable disposable)
+        if (_appConduit is IAsyncDisposable disposable)
         {
             await disposable.DisposeAsync();
         }
@@ -48,10 +48,12 @@ public class CalculatorClient : IAsyncCalculator
         };
     }
 
+    public async ValueTask<AppInfo> GetAppInfo(CancellationToken cancellation = default) => await _appConduit.GetAppInfo(cancellation);
+
     private async ValueTask<ResultBase?> UnaryCall(RequestBase request, CancellationToken cancellation)
     {
         var requestBytes = _serializer.Serialize<RequestBase>(request);
-        var response = await _userChannel.UnaryRequest(new AppRequest(requestBytes), cancellation).ConfigureAwait(false);
+        var response = await _appConduit.UnaryRequest(new AppRequest(requestBytes), cancellation).ConfigureAwait(false);
         return _serializer.Deserialize<ResultBase>(response.Payload);
     }
 
@@ -72,7 +74,7 @@ public class CalculatorClient : IAsyncCalculator
     private async IAsyncEnumerable<ResultBase> ServerStream(RequestBase request, [EnumeratorCancellation] CancellationToken cancellation)
     {
         ReadOnlyMemory<byte> requestBytes = _serializer.Serialize<RequestBase>(request);
-        await foreach (var response in _userChannel.ServerStream(new AppRequest(requestBytes), cancellation).ConfigureAwait(false))
+        await foreach (var response in _appConduit.ServerStream(new AppRequest(requestBytes), cancellation).ConfigureAwait(false))
         {
             yield return HandleResult(_serializer.Deserialize<ResultBase>(response.Payload));
         }

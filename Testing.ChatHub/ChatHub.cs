@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DataFac.Conduits;
+using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
@@ -11,6 +12,11 @@ public class ChatHub : IChatHub
     private readonly ConcurrentDictionary<Address, Mailbox> _messages = new ConcurrentDictionary<Address, Mailbox>();
 
     public async ValueTask DisposeAsync() { }
+
+    public async ValueTask<AppInfo> GetAppInfo(CancellationToken cancellation = default)
+    {
+        return new AppInfo($"{ThisAssembly.AssemblyName}.{nameof(ChatHub)}", new Version(ThisAssembly.AssemblyFileVersion));
+    }
 
     public async ValueTask<Envelope[]> GetAll(Address target, CancellationToken cancellation = default)
     {

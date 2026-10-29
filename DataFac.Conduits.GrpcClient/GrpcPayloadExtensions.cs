@@ -9,6 +9,7 @@ internal static class GrpcPayloadExtensions
     {
         return new GrpcPayload()
         {
+            Route = request.Route,
             Code = (int)request.Control,
             Data = UnsafeByteOperations.UnsafeWrap(request.Payload)
         };

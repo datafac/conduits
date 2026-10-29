@@ -30,7 +30,7 @@ public sealed class HttpConduitClient : INetConduit
 
     public async ValueTask<NetResponse> UnaryRequest(NetRequest request, DateTime? deadline, CancellationToken cancellation = default)
     {
-        var jsonRequest = new JsonRequest { DeadlineUtc = deadline?.Ticks, Payload = request.Payload.ToArray() };
+        var jsonRequest = new JsonRequest { Route = request.Route, DeadlineUtc = deadline?.Ticks, Payload = request.Payload.ToArray() };
         var httpResponse = await _httpClient.PostAsJsonAsync<JsonRequest>(EndpointPath.UnaryRequest, jsonRequest, cancellation);
         JsonResponse? jsonResponse = await httpResponse.Content.ReadFromJsonAsync<JsonResponse>(cancellation);
         if (jsonResponse is null) return new NetResponse(ControlCode.InvalidData, EncodeErrorMessage("Failed to deserialize response."));

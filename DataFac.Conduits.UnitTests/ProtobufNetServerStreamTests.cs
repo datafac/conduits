@@ -35,7 +35,7 @@ public class ProtobufNetServerStreamTests
         var ct = TestContext.Current.CancellationToken;
         var timeProvider = new FakeTimeProvider();
         await using var server = new ProtobufGrpcServer(new ConduitServer(timeProvider, new CalculatorServer(new Calculator()), true), true);
-        await using var client = new CalculatorClient(new ConduitClient(new ProtobufGrpcClient(host, server.BoundPort), true, TimeSpan.FromSeconds(5), timeProvider));
+        await using var client = new CalculatorClient(new ConduitClient(new ProtobufGrpcClient(host, server.BoundPort), true, 0, TimeSpan.FromSeconds(5), timeProvider));
 
         // returning the entire stream would take ~10s, but we have a max call
         // duration of 5s, so this call should timeout after ~5s
