@@ -1,5 +1,6 @@
 # Conduits
-Communication patterns abstractions and implementations.
+Communication patterns abstractions and implementations. Allows you to write your communication code
+independently of the underlying transport and serialization mechanisms.
 
 ## Patterns
 - Request/Response
