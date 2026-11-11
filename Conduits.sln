@@ -58,6 +58,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataFac.Conduits.HttpServer
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testing.ChatHub", "Testing.ChatHub\Testing.ChatHub.csproj", "{4295D827-7CDE-4E26-B0BC-F4BB3431DF24}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataFac.Conduits.HttpServer11", "DataFac.Conduits.HttpServer11\DataFac.Conduits.HttpServer11.csproj", "{97540451-1E60-467C-A791-57720E48BE25}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -152,6 +154,10 @@ Global
 		{4295D827-7CDE-4E26-B0BC-F4BB3431DF24}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4295D827-7CDE-4E26-B0BC-F4BB3431DF24}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4295D827-7CDE-4E26-B0BC-F4BB3431DF24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97540451-1E60-467C-A791-57720E48BE25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97540451-1E60-467C-A791-57720E48BE25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97540451-1E60-467C-A791-57720E48BE25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97540451-1E60-467C-A791-57720E48BE25}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
