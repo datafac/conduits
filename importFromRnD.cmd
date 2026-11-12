@@ -11,6 +11,7 @@ call :import DataFac.Conduits.GrpcServer
 call :import DataFac.Conduits.HttpCommon
 call :import DataFac.Conduits.HttpClient
 call :import DataFac.Conduits.HttpServer
+call :import DataFac.Conduits.HttpServer11
 
 call :import DataFac.Conduits.ProtobufNet.Common
 call :import DataFac.Conduits.ProtobufNet.Client
